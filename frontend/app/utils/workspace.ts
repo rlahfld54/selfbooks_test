@@ -4,6 +4,7 @@ export const menu = [
   { id: 'ledger', title: '전표조회', icon: 'document', group: '회계관리' },
   { id: 'sales', title: '매입매출관리', icon: 'bag' },
   { id: 'partners', title: '거래처관리', icon: 'users', group: '매입매출관리' },
+  { id: 'clients', title: '수임업체관리', icon: 'users', group: '매입매출관리' },
   { id: 'payroll', title: '인사급여', icon: 'users' },
   { id: 'tax', title: '세무신고', icon: 'calendar' },
   { id: 'reports', title: '보고서', icon: 'chart' },
