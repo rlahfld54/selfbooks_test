@@ -1,8 +1,9 @@
-<script setup lang="ts">
-import type { DemoRow } from '~/data/demo'
-const props = defineProps<{ items: DemoRow[] }>()
-defineEmits<{ select: [row: DemoRow] }>()
-const { query, results } = useSearch(() => props.items)
+<script setup lang="ts" generic="T extends SearchItem">
+import type { SearchItem } from '~/types/search'
+const props = defineProps<{ items: T[] }>()
+defineEmits<{ select: [row: T] }>()
+const query = defineModel<string>('query', { default: '' })
+const { results } = useSearch(() => props.items, query)
 </script>
 <template>
   <div class="search-panel">

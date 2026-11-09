@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import type { DemoRow } from '~/data/demo'
-const props = defineProps<{ open: boolean; items: DemoRow[] }>()
-const emit = defineEmits<{ close: []; select: [item: DemoRow] }>()
+<script setup lang="ts" generic="T extends SearchItem">
+import type { SearchItem } from '~/types/search'
+const props = defineProps<{ open: boolean; items: T[] }>()
+const emit = defineEmits<{ close: []; select: [item: T] }>()
 const { query, index, results, move } = useSearch(() => props.items)
 const listId = useId()
 watch(() => props.open, value => { if (value) { query.value = ''; index.value = 0 } })

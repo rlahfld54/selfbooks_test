@@ -1,12 +1,8 @@
 <script setup lang="ts">
-const text = ref("");
-const amount = ref("1500000");
-const number = ref("12");
-const checked = ref(false);
-const radio = ref("a");
-const select = ref("a");
-const start = ref("2026-11-01");
-const end = ref("2026-11-30");
+import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
+import { gallerySession } from './useGallerySession'
+const { activeTab } = useWorkspaceContext()
+const { text, amount, number, checked, radio, select, start, end } = toRefs(gallerySession(activeTab.value))
 const modal = ref(false);
 const confirm = ref(false);
 const toast = ref("");

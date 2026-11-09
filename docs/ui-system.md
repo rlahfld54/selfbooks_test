@@ -1,5 +1,7 @@
 # Accounting Pro 공통 UI 구현 기록
 
+아래 내용은 공통 UI v1의 초기 구현 기록이다. 현재 파일 위치와 업무 추가 절차는 [프런트엔드 아키텍처](frontend-architecture.md)를 따른다.
+
 ## 실행
 
 Node 24 이상 권장. frontend 디렉터리에서 실행한다.

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatAmount } from "~/utils/workspace";
+import { formatAmount } from "~/utils/formatAmount";
 defineOptions({ inheritAttrs: false });
 withDefaults(defineProps<{ modelValue?: string }>(), { modelValue: "" });
 const emit = defineEmits<{ "update:modelValue": [value: string] }>();

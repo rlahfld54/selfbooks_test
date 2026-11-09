@@ -1,5 +1,5 @@
-export function useSearch<T extends { id: string; name: string; code: string }>(items: () => T[]) {
- const query = ref('')
+export function useSearch<T extends { id: string; name: string; code: string }>(items: () => T[], query = ref('')) {
+
  const index = ref(0)
  const results = computed(() => items().filter(item => (item.name + ' ' + item.code).toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())))
  watch([query, results], () => { index.value = 0 })

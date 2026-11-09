@@ -43,6 +43,7 @@
 - 구현 완료 시 변경 파일, 테스트 결과, 남은 문제를 보고한다.
 
 ## 6. 문서 관리
+- Nuxt 개발 지침: docs/nuxt-guide.md. 프런트엔드 작성 전 확인하고, 새 Nuxt API 도입 시 설치 버전에 맞는 공식 문서를 확인한다.
 - 요구사항: docs/requirements.md
 - 아키텍처: docs/architecture.md
 - DB 설계: docs/database.md

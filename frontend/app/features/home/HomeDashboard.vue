@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TabId } from '~/utils/workspace'
+import type { TabId } from '~/utils/workspace-routes'
 defineProps<{ company: string }>()
 defineEmits<{ open: [id: TabId] }>()
 const stats = [

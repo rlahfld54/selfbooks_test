@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { formatAmount } from '~/utils/workspace'
+import { computed, reactive, toRefs, watch } from 'vue'
+import { formatAmount } from '~/utils/formatAmount'
+import { createTableViewState, type TableViewState } from '~/types/table'
 export interface Column {
   key: string
   label: string
@@ -18,6 +19,7 @@ const props = withDefaults(
     loading?: boolean
     pageSize?: number
     caption?: string
+    viewState?: TableViewState
   }>(),
   { rowKey: 'id', density: 'normal', pageSize: 5, caption: '조회 결과' },
 )
@@ -25,9 +27,7 @@ const emit = defineEmits<{
   select: [row: Record<string, unknown>]
   'update:density': [value: 'normal' | 'compact']
 }>()
-const sortKey = ref('')
-const ascending = ref(true)
-const page = ref(1)
+const { sortKey, ascending, page } = toRefs(props.viewState ?? reactive(createTableViewState()))
 const pageCount = computed(() => Math.max(1, Math.ceil(props.rows.length / props.pageSize)))
 const sorted = computed(() => {
   const column = props.columns.find((column) => column.key === sortKey.value)
