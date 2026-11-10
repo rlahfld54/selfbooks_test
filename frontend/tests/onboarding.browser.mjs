@@ -8,7 +8,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
   page.on('pageerror', e => errors.push(e.message))
   page.on('console', m => { if (/hydration/i.test(m.text()) && ['error','warning'].includes(m.type())) errors.push(m.text()) })
-  await page.goto(base)
+  await page.goto(base + '/dashboard')
   const wizard = page.locator('.ob-dialog')
   await wizard.waitFor({ state: 'visible' })
   await mkdir('tests/screenshots', { recursive: true })
@@ -77,7 +77,7 @@ try {
   await blocked.addInitScript(() => {
     Storage.prototype.setItem = () => { throw new DOMException('Blocked', 'SecurityError') }
   })
-  await blocked.goto(base)
+  await blocked.goto(base + '/dashboard')
   await blocked.locator('.ob-dialog').waitFor({ state: 'visible' })
   await blocked.getByRole('button', { name: '임시 저장', exact: true }).click()
   await blocked.getByText('브라우저 저장소를 사용할 수 없어 현재 화면에서만 유지됩니다.', { exact: true }).first().waitFor()

@@ -38,7 +38,9 @@ frontend/
 
 | URL | 화면 |
 | --- | --- |
-| `/` | 홈 |
+| `/` | 서비스 랜딩 (`public` 레이아웃) |
+| `/login`, `/register`, `/forgot-password` | Mock 로그인·가입·재설정 (`auth` 레이아웃) |
+| `/dashboard` | 기존 홈 대시보드 (`default` 레이아웃) |
 | `/journal` | 일반전표 입력 데모 |
 | `/clients` | 거래처관리 데모 |
 | `/client-directory` | Fastify의 개발용 수임업체 읽기 화면 |

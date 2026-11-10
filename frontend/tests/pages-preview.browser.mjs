@@ -51,7 +51,8 @@ try {
     await page.getByRole('heading', { name: title, exact: true }).waitFor()
   }
 
-  await visit('', '홈 대시보드')
+  await visit('dashboard/', '홈 대시보드')
+  await page.getByLabel('환경설정 닫기', { exact: true }).click()
   const icon = await page.locator('link[rel="icon"]').getAttribute('href')
   assert.equal(icon, new URL('favicon.ico', base).pathname)
   if (process.env.SELFBOOKS_TEST_URL) {

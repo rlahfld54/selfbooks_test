@@ -1,8 +1,11 @@
 import { ref, onMounted, watch } from 'vue'
 import { createOnboardingData } from './mocks'
 import { isOnboardingData, validateStep } from './validation'
+import { useMockAuth } from '~/features/auth/useMockAuth'
 export const ONBOARDING_KEY = 'accounting-pro:onboarding-demo:v1'
 export function useOnboarding() {
+  const { user, restore } = useMockAuth()
+  let storageKey = ONBOARDING_KEY
   const data = ref(createOnboardingData())
   const open = ref(false)
   const error = ref('')
@@ -10,12 +13,15 @@ export function useOnboarding() {
   const storageWarning = ref('')
   let ready = false
   function persist() {
-    try { localStorage.setItem(ONBOARDING_KEY, JSON.stringify(data.value)); storageWarning.value = '' }
+    try { localStorage.setItem(storageKey, JSON.stringify(data.value)); storageWarning.value = '' }
     catch { storageWarning.value = '브라우저 저장소를 사용할 수 없어 현재 화면에서만 유지됩니다.' }
   }
   onMounted(() => {
+    restore()
+    // Preserve the existing guest/admin demo; new users have their own setup state.
+    if (user.value && user.value.id !== 'demo-admin') storageKey = `${ONBOARDING_KEY}:${user.value.id}`
     try {
-      const raw = localStorage.getItem(ONBOARDING_KEY)
+      const raw = localStorage.getItem(storageKey)
       if (raw) { const parsed: unknown = JSON.parse(raw); if (isOnboardingData(parsed)) data.value = parsed; else storageWarning.value = '저장된 테스트 상태를 읽을 수 없어 기본값으로 시작합니다.' }
     } catch { storageWarning.value = '저장된 테스트 상태를 읽을 수 없어 기본값으로 시작합니다.' }
     ready = true

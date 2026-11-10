@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import HomeDashboard from '~/features/home/HomeDashboard.vue'
-import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import { tabInfo } from '~/utils/workspace-routes'
-definePageMeta({ workspaceTab: 'home' })
-const { company, navigate, resumeTab } = useWorkspaceContext()
+import LandingHeader from '~/features/landing/LandingHeader.vue'
+import HeroSection from '~/features/landing/HeroSection.vue'
+import FeatureSection from '~/features/landing/FeatureSection.vue'
+import WorkflowSection from '~/features/landing/WorkflowSection.vue'
+import LandingFooter from '~/features/landing/LandingFooter.vue'
+definePageMeta({ layout: 'public' })
+useHead({ title: 'Accounting Pro · 세무회계 업무의 새로운 시작' })
 </script>
-
 <template>
-  <div v-if="resumeTab" class="info-banner">
-    <span>마지막으로 열었던 업무: {{ tabInfo(resumeTab).title }}</span>
-    <UiButton @click="navigate(resumeTab, 'tab')">이어서 열기</UiButton>
-  </div>
-  <HomeDashboard :company="company" @open="navigate($event)" />
+  <LandingHeader />
+  <main><HeroSection /><FeatureSection /><WorkflowSection /></main>
+  <LandingFooter />
 </template>
