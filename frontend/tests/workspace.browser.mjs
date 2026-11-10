@@ -1,6 +1,7 @@
 // Run against a built or development server. Playwright is a test runner prerequisite.
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
+import { createOnboardingData } from '../app/features/onboarding/mocks.ts'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.SELFBOOKS_PLAYWRIGHT ?? 'playwright')
@@ -32,6 +33,11 @@ const timeout = 7000
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  // Workspace regression runs as an onboarded user; first-visit flows have a separate suite.
+  await context.addInitScript(data => {
+    const key = 'accounting-pro:onboarding-demo:v1'
+    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(data))
+  }, { ...createOnboardingData(), completed: true })
   const page = await context.newPage()
   page.setDefaultTimeout(timeout)
   track(page)

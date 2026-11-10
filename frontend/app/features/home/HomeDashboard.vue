@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TabId } from '~/utils/workspace-routes'
+import OnboardingWizard from '~/features/onboarding/OnboardingWizard.vue'
 defineProps<{ company: string }>()
 defineEmits<{ open: [id: TabId] }>()
 const stats = [
@@ -43,7 +44,7 @@ const recent = [
 <template>
   <div class="dashboard">
     <PageToolbar title="홈 대시보드" description="오늘의 업무 현황을 한눈에 확인하세요."
-      ><UiBadge tone="neutral">샘플 데이터</UiBadge
+      ><OnboardingWizard /><UiBadge tone="neutral">샘플 데이터</UiBadge
       ><span class="date-chip"
         ><UiIcon name="calendar" :size="16" />2026-11-09 월요일</span
       ></PageToolbar
