@@ -7,11 +7,14 @@
     "test": "tests"
   },
   "scripts": {
+    "db:check": "tsx src/check-db.ts --local-development",
     "test": "tsx --test tests/*.test.ts",
-    "dev": "tsx watch src/server.ts --local-development",
+    "dev": "node --watch --import tsx src/server.ts --local-development",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "db:migrate:sales": "tsx src/db/migrate-sales.ts --local-development",
+    "test:integration:sales": "tsx tests/sales.integration.ts --local-development"
   },
   "keywords": [],
   "author": "",

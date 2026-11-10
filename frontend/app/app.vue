@@ -1,3 +1,8 @@
+<script setup lang="ts">
+const { app: { baseURL } } = useRuntimeConfig()
+useHead({ link: [{ rel: 'icon', href: `${baseURL}favicon.ico` }] })
+</script>
+
 <template>
   <!-- NuxtLayout이란,, layouts/ 디렉토리에 정의된 레이아웃 파일(기본값은 default.vue)을 불러와 웹사이트의 공통 구조(예: 헤더, 푸터, 사이드바)를 렌더링합니다.
 

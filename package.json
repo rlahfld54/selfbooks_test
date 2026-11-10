@@ -1,0 +1,14 @@
+{
+  "name": "selfbooks",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others --names backend,frontend --prefix-colors cyan,magenta \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "setup": "npm --prefix backend ci && npm --prefix frontend ci",
+    "db:check": "npm --prefix backend run db:check"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}

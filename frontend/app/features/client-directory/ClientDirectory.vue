@@ -4,6 +4,7 @@ import { directorySession } from './composables/useDirectorySession'
 import { useDirectoryData } from './composables/useDirectoryData'
 
 const { activeTab, company, density, user } = useWorkspaceContext()
+const { pagesPreview } = useRuntimeConfig().public
 const session = directorySession(activeTab.value)
 const { selectedId } = toRefs(session)
 const { list: { data, status, error, refresh }, detail } = useDirectoryData(user + ':' + company.value, () => selectedId.value)
@@ -18,7 +19,7 @@ const columns = [
 <template>
   <PageToolbar title="수임업체관리" description="개발용 수임업체의 목록과 상세 정보를 조회합니다.">
     <template #eyebrow>WORKSPACE</template>
-    <UiBadge tone="neutral">로컬 개발</UiBadge>
+    <UiBadge tone="neutral">{{ pagesPreview ? '샘플 데이터' : '로컬 개발' }}</UiBadge>
   </PageToolbar>
   <UiCard title="수임업체 목록">
     <div class="search-toolbar">

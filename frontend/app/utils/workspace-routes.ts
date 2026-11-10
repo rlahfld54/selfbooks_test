@@ -1,6 +1,7 @@
 export const menu = [
   { id: 'home', path: '/', title: '홈', icon: 'home' },
   { id: 'voucher', path: '/journal', title: '일반전표입력', icon: 'document' },
+  { id: 'sales-journal', path: '/sales-journal', title: '매입매출전표입력', icon: 'document' },
   { id: 'ledger', path: '/ledger', title: '전표조회', icon: 'document' },
   { id: 'sales', path: '/sales', title: '매입매출관리', icon: 'bag' },
   { id: 'partners', path: '/clients', title: '거래처관리', icon: 'users' },

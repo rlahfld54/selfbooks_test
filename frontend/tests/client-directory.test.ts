@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createApiClient, ApiRequestError } from '../app/services/api-client.ts'
-import { createClientDirectoryService } from '../app/features/client-directory/services/clientDirectory.ts'
+import { createClientDirectoryService, previewClientDirectory } from '../app/features/client-directory/services/clientDirectory.ts'
 
 test('directory service uses the injected API for list and encoded detail paths', async () => {
   const calls: string[] = []
@@ -28,4 +28,12 @@ test('directory service preserves API failures and cancellation reasons', async 
   const reason = new Error('Page left')
   controller.abort(reason)
   await assert.rejects(service.list(controller.signal), error => error === reason)
+})
+
+test('preview directory provides matching sample details and handles missing or aborted requests', async () => {
+  const { data: [sample] } = await previewClientDirectory.list()
+  assert.deepEqual(await previewClientDirectory.get(sample.id), { data: sample })
+  assert.deepEqual(await previewClientDirectory.get('missing'), { data: null })
+  const signal = AbortSignal.abort(new Error('Page left'))
+  await assert.rejects(previewClientDirectory.list(signal), error => error === signal.reason)
 })

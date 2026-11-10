@@ -46,7 +46,7 @@ const backgroundInert = computed(() => overlayPanel.value || mobileOpen.value)
         <WorkspaceDetail :key="generation + ':' + state.active" />
       </div>
       <footer class="app-footer" :inert="backgroundInert">
-        <span><i />{{ state.active === 'clients' ? '로컬 개발 · Fastify 읽기 전용' : '샘플 모드 · 실제 데이터와 연결되지 않음' }}</span>
+        <span><i />{{ state.active === 'sales-journal' ? '로컬 개발 · 해솔문구 전표 DB 연결' : state.active === 'clients' ? '로컬 개발 · Fastify 읽기 전용' : '샘플 모드 · 실제 데이터와 연결되지 않음' }}</span>
         <span>Accounting Pro <span class="footer-version">v1.0</span></span>
       </footer>
     </div>

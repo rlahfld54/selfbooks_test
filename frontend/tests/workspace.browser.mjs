@@ -19,6 +19,7 @@ const track = page => {
 async function visit(page, path, title) {
   const response = await page.goto(base + path)
   assert.equal(response.status(), 200)
+  await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
   await page.getByRole('heading', { name: title, exact: true }).waitFor()
 }
 async function active(page, path, id) {

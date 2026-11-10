@@ -3,19 +3,20 @@
 
 ## 로컬 실행
 
-두 터미널에서 각각 실행합니다.
+프로젝트 루트에서 한 번에 실행합니다. 종료는 같은 터미널에서 `Ctrl+C`를 누릅니다.
 
 ```sh
-cd backend
-npm ci
 npm run dev
 ```
 
+새로 내려받은 환경에서만 먼저 의존성을 설치합니다.
+
 ```sh
-cd frontend
 npm ci
-npm run dev
+npm run setup
 ```
+
+`concurrently`가 두 서버의 로그를 `[backend]`, `[frontend]`로 구분하고 한 프로세스가 종료되면 다른 프로세스도 종료합니다. 개별 실행은 `npm run dev:backend`, `npm run dev:frontend`, Supabase 연결 확인은 `npm run db:check`를 사용합니다. Postman 설치는 필요하지 않습니다.
 
 Nuxt는 `http://localhost:3000`, Fastify API는 `http://localhost:4000/api`에서 접속할 수 있습니다. Nuxt에서 **매입매출관리 → 수임업체관리**를 열면 개발용 목록을 볼 수 있습니다.
 

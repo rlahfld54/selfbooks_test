@@ -12,6 +12,7 @@ async function main() {
     ...(pool ? { pool } : {}),
     ...(config.fixtures ? { fixtures: config.fixtures } : {}),
     logger: true,
+    salesDevelopment: config.development,
   })
   try {
     await app.listen({ host: '127.0.0.1', port: config.port })

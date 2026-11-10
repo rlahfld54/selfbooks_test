@@ -1,0 +1,22 @@
+# Vue와 다르게 라우팅을 따로 설정하지 않는다.
+nuxt는 폴더와 파일 이름으로 라우팅이 된다.
+
+조금만 더 정밀하게 표현하자면, 컴포넌트의 내부 이름이라기보다는 pages/ 폴더 안에 위치한 ‘파일명’과 ‘폴더명’이 그대로 URL 주소(라우터 경로)가 되는 구조입니다.
+다만 Nuxt가 파일명을 주소로 변환할 때 사용하는 몇 가지 직관적인 규칙이 있습니다. 이것만 기억하시면 Nuxt 라우팅은 마스터하신 마찬가집니다.
+
+📁 Nuxt 파일명이 URL이 되는 규칙 요약
+
+• index.vue는 기본 주소
+	• pages/index.vue ➔ /
+	• pages/blog/index.vue ➔ /blog
+• 일반 파일명은 그대로 주소
+	• pages/about.vue ➔ /about
+	• pages/contact.vue ➔ /contact
+• 대괄호 [ ]는 가변적인 값 (파라미터)
+	• pages/product/[id].vue ➔ /product/1, /product/apple 등 변하는 주소 매핑
+
+💡 주의할 점 (Vue 개발자가 자주 헷갈리는 부분)
+
+Vue에서는 파일명이 MyProfile.vue든 UserDetail.vue든 상관없이 라우터 코드에서 path: '/profile'이라고 내 마음대로 별명을 붙일 수 있었습니다.
+하지만 Nuxt에서는 주소를 바꾸고 싶다면 반드시 파일명이나 폴더명을 변경해야 합니다. (예: 주소를 /profile로 쓰고 싶다면 무조건 profile.vue로 파일 이름을 지어야 함)
+정말 직관적으로 "내가 만든 파일 구조가 곧 사이트 지도가 된다"고 생각하시면 됩니다!

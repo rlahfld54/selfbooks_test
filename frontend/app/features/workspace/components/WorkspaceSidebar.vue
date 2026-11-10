@@ -42,7 +42,7 @@ async function open(id: TabId) {
         </button>
         <div v-if="groups.accounting || collapsed" class="subnav">
           <button
-            v-for="id in ['voucher', 'ledger'] as const"
+            v-for="id in ['voucher', 'sales-journal', 'ledger'] as const"
             :key="id"
             :class="{ active: state.active === id }"
             :title="tabInfo(id).title"
@@ -52,7 +52,7 @@ async function open(id: TabId) {
               tabInfo(id).title
             }}</span
             ><span v-if="collapsed" class="mini-label">{{
-              id === 'voucher' ? '입력' : '조회'
+              id === 'voucher' ? '입력' : id === 'sales-journal' ? '매입출' : '조회'
             }}</span>
           </button>
         </div>

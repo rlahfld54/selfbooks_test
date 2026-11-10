@@ -4,8 +4,12 @@ import { localAccess } from './plugins/local-access.js'
 import { healthRoutes } from './routes/health.js'
 import { directoryRoutes } from './routes/directory.js'
 import { createDirectory, DirectoryUnavailable, type FixtureScope } from './services/directory.js'
+import { salesRoutes } from './routes/sales.js'
+import { createSalesRepository } from './services/sales-repository.js'
+import { createSalesContext } from './services/sales-context.js'
+import { SalesError } from './services/sales-validation.js'
 
-export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixtures?: FixtureScope; logger?: boolean }) {
+export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixtures?: FixtureScope; logger?: boolean; salesDevelopment?: boolean }) {
   const app = Fastify({ logger: options.logger ?? false, trustProxy: false })
   const { pool } = options
   if (pool) {
@@ -19,6 +23,8 @@ export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixture
     reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'Route not found' } }),
   )
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof SalesError) return reply.code(error.statusCode).send({ error: { code: error.code, message: error.message } })
+    if (error instanceof Error && 'code' in error && error.code === '23505') return reply.code(409).send({ error: { code: 'DUPLICATE', message: '이미 저장된 전표입니다. 다시 조회해 주세요.' } })
     if (error instanceof DirectoryUnavailable) {
       return reply.code(503).send({ error: { code: 'DIRECTORY_UNAVAILABLE', message: 'Development directory unavailable' } })
     }
@@ -34,6 +40,8 @@ export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixture
     await localAccess(local, options.frontendOrigin)
     await healthRoutes(local, pool ? () => pool.query('SELECT 1') : undefined)
     await directoryRoutes(local, pool && options.fixtures ? createDirectory(pool, options.fixtures) : undefined)
+    const context = options.fixtures ? createSalesContext(options.fixtures) : undefined
+    await salesRoutes(local, pool && context && options.salesDevelopment && process.env.NODE_ENV !== 'production' ? createSalesRepository(pool, context) : undefined)
   })
   return app
 }

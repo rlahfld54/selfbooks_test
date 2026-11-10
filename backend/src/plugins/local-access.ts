@@ -18,5 +18,11 @@ export async function localAccess(app: FastifyInstance, frontendOrigin: string) 
     reply.header('Cache-Control', 'no-store')
   })
 
-  await app.register(cors, { origin: frontendOrigin, methods: ['GET'] })
+  app.addHook('onRequest', async (request, reply) => {
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) &&
+        (request.headers.origin !== frontendOrigin || !request.headers['content-type']?.startsWith('application/json'))) {
+      return reply.code(403).send({ error: { code: 'FORBIDDEN', message: 'Same-origin JSON requests required' } })
+    }
+  })
+  await app.register(cors, { origin: frontendOrigin, methods: ['GET', 'POST', 'PUT', 'DELETE'] })
 }

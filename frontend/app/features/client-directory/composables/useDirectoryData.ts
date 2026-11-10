@@ -1,10 +1,12 @@
 import type { ApiResponse } from '~/services/api-client'
-import { createClientDirectoryService } from '../services/clientDirectory'
+import { createClientDirectoryService, previewClientDirectory } from '../services/clientDirectory'
 import type { ClientRecord } from '../types/client'
 
 export function useDirectoryData(scope: string, selectedId: () => string) {
   // Resolve Nuxt runtime config synchronously in setup; services stay context-free.
-  const service = createClientDirectoryService(useBackendApi())
+  const service = useRuntimeConfig().public.pagesPreview
+    ? previewClientDirectory
+    : createClientDirectoryService(useBackendApi())
   const key = 'client-directory:' + scope
   // Refetch on entry; the demo company is a cache namespace, never an authorization scope.
   const options = { server: false, getCachedData: () => undefined } as const
