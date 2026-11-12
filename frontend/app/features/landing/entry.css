@@ -1,9 +1,9 @@
 /* Public entry pages use the existing primary token without changing workspace styles. */
 .entry-shell {
-  --entry-navy: #111c35;
-  --entry-text: #142744;
-  --entry-muted: #64748b;
-  --entry-border: #e2e8f0;
+  --entry-navy: var(--aat-color-deep-blue);
+  --entry-text: var(--aat-color-text);
+  --entry-muted: var(--aat-color-text-secondary);
+  --entry-border: var(--aat-color-border);
   background: #fff;
   color: var(--entry-text);
   min-height: 100dvh;
@@ -143,7 +143,7 @@
 .landing-footer > small { width: 100%; font-size: 10px; color: #a6afbc; }
 /* Split auth layout, deliberately independent of workspace selectors. */
 .auth-shell { display: grid; grid-template-columns: 1fr 1fr; }
-.auth-story { background: linear-gradient(145deg, #2755c3 0%, #2c62d7 48%, #204daa 100%); color: white; padding: 39px 48px 28px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.auth-story { background: var(--aat-brand-gradient); color: white; padding: 39px 48px 28px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 .auth-story::before { content: ''; position: absolute; width: 650px; height: 650px; border: 1px solid #ffffff09; border-radius: 50%; bottom: -200px; right: -270px; box-shadow: 0 0 0 80px #ffffff03, 0 0 0 160px #ffffff02; pointer-events: none; }
 .auth-story .product-brand { color: #fff; position: relative; }
 .auth-story .product-brand-mark i { background: #dbe9ff; }

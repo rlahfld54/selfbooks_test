@@ -1,0 +1,34 @@
+/* Shared AAT states; feature-specific geometry stays in feature stylesheets. */
+.button {
+  transition: background var(--aat-motion-fast), border-color var(--aat-motion-fast);
+}
+.button.small { height: var(--aat-control-sm); font-size: var(--aat-font-xs); }
+.button.outline { color: var(--primary); border-color: var(--primary); }
+.button.primary:active:not(:disabled) { background: var(--aat-color-primary-active); }
+.button.secondary:active:not(:disabled), .button.outline:hover:not(:disabled) { background: var(--primary-light); }
+.button:disabled { opacity: .5; }
+.input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: var(--aat-focus-ring);
+}
+.input[aria-invalid='true']:focus-visible { outline-color: var(--danger); }
+.input:disabled { background: var(--aat-color-disabled); color: var(--secondary); }
+textarea.input { height: auto; min-height: 96px; padding: var(--aat-space-3); resize: vertical; }
+.card { box-shadow: var(--aat-shadow-card); }
+.aat-code, .aat-date { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aat-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aat-brand { display: inline-flex; align-items: center; gap: var(--aat-space-2); max-width: 100%; }
+.aat-logo-horizontal { display: block; width: 190px; height: auto; }
+.aat-logo-symbol { display: block; width: 40px; height: 40px; flex-shrink: 0; }
+.aat-brand-wordmark { font-size: 26px; font-weight: var(--aat-weight-bold); letter-spacing: -.04em; line-height: 1.2; }
+.aat-brand-inverse { color: var(--aat-color-on-primary); }
+.brand:has(.aat-brand) { padding-inline: var(--aat-space-4); }
+.collapsed .brand:has(.aat-brand) { padding-inline: var(--aat-space-3); }
+.feedback-state .aat-logo-symbol { width: 32px; height: 32px; }
+.auth-story .aat-logo-horizontal { background: var(--surface); border-radius: var(--aat-radius-sm); padding: var(--aat-space-2); }
+.aat-brand-caption { display: block; font-size: 10px; font-weight: var(--aat-weight-medium); letter-spacing: .02em; }
+.sidebar :focus-visible { outline-color: var(--aat-color-cyan); }
+@media (prefers-reduced-motion: reduce) {
+  :root { --aat-motion-fast: 0ms; --aat-motion-normal: 0ms; }
+}

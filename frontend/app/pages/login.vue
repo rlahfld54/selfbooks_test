@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import LoginForm from '~/features/auth/LoginForm.vue'
 definePageMeta({ layout: 'auth' })
-useHead({ title: '로그인 · Accounting Pro' })
+useHead({ title: '로그인 · AAT' })
 </script>
 <template><LoginForm /></template>

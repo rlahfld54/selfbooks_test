@@ -75,14 +75,17 @@ try {
 
   await page.locator('#tab-voucher').click()
   await active(page, '/journal', 'voucher')
-  const memo = page.locator('#voucher-memo')
+  const memoCell = page.locator('[data-cell="0:7"]')
+  const memo = {
+    fill: async value => { await memoCell.click(); await page.getByRole('textbox', { name: '적요', exact: true }).fill(value); await page.keyboard.press('Enter') },
+    inputValue: async () => memoCell.innerText(),
+    waitFor: async () => memoCell.waitFor(),
+  }
   await memo.fill('session only draft')
-  await page.locator('#voucher-partner').press('F2')
-  const popup = page.getByRole('dialog', { name: '거래처 검색' })
-  await popup.getByRole('combobox').fill('행복상사')
-  await popup.getByRole('combobox').press('Enter')
-  await popup.waitFor({ state: 'hidden' })
-  assert.match(await page.locator('#voucher-partner').inputValue(), /행복상사/)
+  await page.locator('[data-cell="0:5"]').click()
+  await page.getByRole('combobox', { name: '거래처코드', exact: true }).fill('C002')
+  await page.keyboard.press('Enter')
+  assert.match(await page.locator('[data-cell="0:6"]').innerText(), /푸른유통/)
   await page.locator('#tab-partners').click()
   await active(page, '/clients', 'partners')
   assert.equal(await search.inputValue(), '미래산업')
@@ -124,7 +127,7 @@ try {
   await page.locator('#tab-voucher').waitFor({ state: 'detached' })
   await page.getByRole('button', { name: '일반전표입력', exact }).first().click()
   await active(page, '/journal', 'voucher')
-  assert.equal(await memo.inputValue(), '')
+  assert.equal(await memo.inputValue(), '사무용품 구입')
   console.log('PASS cancellation, native beforeunload and discard')
 
   await memo.fill('discard on company switch')
@@ -138,16 +141,16 @@ try {
   await companyDialog.getByRole('button', { name: '회사 전환', exact }).click()
   await active(page, '/dashboard', 'home')
   assert.equal(await company.inputValue(), 'demo-woori')
-  assert.equal(await page.getByRole('tab').count(), 1)
+  assert.equal(await page.locator('[role=tab][id^=tab-]').count(), 1)
   await company.selectOption('demo-happy')
   await active(page, '/journal', 'voucher')
   await memo.waitFor()
-  assert.equal(await memo.inputValue(), '')
+  assert.equal(await memo.inputValue(), '사무용품 구입')
   await page.getByRole('combobox', { name: '테이블 밀도' }).selectOption('compact')
   await page.reload()
   await active(page, '/journal', 'voucher')
   await page.locator('#tab-partners').waitFor()
-  assert.equal(await memo.inputValue(), '')
+  assert.equal(await memo.inputValue(), '사무용품 구입')
   assert.equal(await page.getByRole('combobox', { name: '테이블 밀도' }).inputValue(), 'compact')
   const persisted = await page.evaluate(() => JSON.stringify(localStorage))
   assert.doesNotMatch(persisted, /session only draft|discard on company switch|미래산업/)
@@ -188,8 +191,8 @@ try {
   await mobile.getByRole('button', { name: '메뉴 열기' }).click()
   await mobile.getByRole('button', { name: '일반전표입력', exact }).click()
   await active(mobile, '/journal', 'voucher')
-  await mobile.getByRole('button', { name: '상세 패널', exact }).click()
-  const overlay = mobile.getByRole('dialog', { name: '거래처 상세' })
+  await mobile.getByRole('button', { name: '인사이트 열기', exact }).click()
+  const overlay = mobile.getByRole('dialog', { name: '전표 인사이트' })
   await overlay.waitFor()
   assert.equal(Math.round((await overlay.boundingBox()).width), 390)
   assert.equal(await mobile.locator('#main-content').getAttribute('inert'), '')
@@ -199,7 +202,7 @@ try {
   console.log('PASS 390px mobile layout, overlay, keyboard and hydration')
 
   for (const [path, title] of [
-    ['/ledger', '전표조회'], ['/sales', '매입매출관리'], ['/payroll', '인사급여'],
+    ['/ledger', '전표조회'], ['/sales', '매입매출전표 입력 · Mock'], ['/payroll', '인사급여'],
     ['/tax', '세무신고'], ['/reports', '보고서'], ['/settings', '환경설정'],
   ]) await visit(page, path, title)
   await visit(page, '/components', '공통 UI 컴포넌트')

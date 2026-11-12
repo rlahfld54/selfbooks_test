@@ -4,9 +4,9 @@ defineProps<{ compact?: boolean }>()
 </script>
 
 <template>
-  <div class="product-preview" :class="{ compact }" role="img" aria-label="Accounting Pro 대시보드 미리보기. 모든 수치와 거래처는 가상 데이터입니다.">
+  <div class="product-preview" :class="{ compact }" role="img" aria-label="AAT 대시보드 미리보기. 모든 수치와 거래처는 가상 데이터입니다.">
     <aside class="preview-sidebar" aria-hidden="true">
-      <div class="preview-logo">▥ <strong>Accounting Pro</strong></div>
+      <div class="preview-logo">▥ <strong>AAT</strong></div>
       <small>WORKSPACE</small>
       <span class="selected"><UiIcon name="home" :size="14" />대시보드</span>
       <span><UiIcon name="users" :size="14" />거래처 관리</span>

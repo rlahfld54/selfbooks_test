@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">AAT symbol</title>
+  <desc id="desc">Blue and teal ribbon forming an A above three rising accounting data bars.</desc>
+  <defs>
+    <linearGradient id="aat-left" x1="0" y1="1" x2="0.85" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#0759E5"/><stop offset="0.52" stop-color="#0A82F6"/><stop offset="1" stop-color="#10D7E5"/>
+    </linearGradient>
+    <linearGradient id="aat-right" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#0874B8"/><stop offset="0.52" stop-color="#0BAFC2"/><stop offset="1" stop-color="#22D9B4"/>
+    </linearGradient>
+    <linearGradient id="aat-core" x1="0" y1="1" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#003B8E"/><stop offset="1" stop-color="#0759AC"/>
+    </linearGradient>
+  </defs>
+  <!-- Dark inner data foundation. -->
+  <path d="M153 366 284 174 401 371Q393 396 362 390H165Q143 390 153 366Z" fill="url(#aat-core)"/>
+  <!-- Left folded ribbon of the A. -->
+  <path d="M66 352 202 115Q224 76 260 77Q296 76 314 106L337 144Q315 127 296 145L173 357Q136 415 88 394Q47 377 66 352Z" fill="url(#aat-left)"/>
+  <!-- Right folded ribbon of the A. -->
+  <path d="M254 85Q285 64 314 95Q325 107 339 130L451 342Q474 379 449 396Q423 415 398 393L276 177Q260 145 240 155Q250 118 254 85Z" fill="url(#aat-right)"/>
+  <!-- White aperture around the center of the mark. -->
+  <path d="M256 211 217 277 298 242Z" fill="#fff"/>
+  <!-- Three ascending data bars. -->
+  <path d="M190 330H220V386H190Z M240 307H270V386H240Z M290 281H320V386H290Z" fill="#fff"/>
+</svg>

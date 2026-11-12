@@ -21,7 +21,7 @@ async function submit() {
 }
 </script>
 <template>
-  <div class="auth-form-heading"><span class="section-kicker">START YOUR WORKSPACE</span><h1>Accounting Pro를<br />시작해 보세요.</h1><p>간단한 정보 입력으로<br />세무회계 업무 환경을 준비할 수 있습니다.</p></div>
+  <div class="auth-form-heading"><span class="section-kicker">START YOUR WORKSPACE</span><h1>AAT를<br />시작해 보세요.</h1><p>간단한 정보 입력으로<br />세무회계 업무 환경을 준비할 수 있습니다.</p></div>
   <p v-if="warning" class="entry-notice" role="status">{{ warning }}</p>
   <form class="entry-form register-form" @submit.prevent="submit">
     <div><label class="entry-field" for="register-name">이름</label><input id="register-name" v-model="input.name" autocomplete="name" required maxlength="60" placeholder="이름을 입력해 주세요" /></div>

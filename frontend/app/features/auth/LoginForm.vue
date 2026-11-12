@@ -23,7 +23,7 @@ async function submit() {
 }
 </script>
 <template>
-  <div class="auth-form-heading"><span class="section-kicker">WELCOME BACK</span><h1>다시 오신 것을 환영합니다.</h1><p>Accounting Pro에 로그인하고<br />업무를 이어서 진행하세요.</p></div>
+  <div class="auth-form-heading"><span class="section-kicker">WELCOME BACK</span><h1>다시 오신 것을 환영합니다.</h1><p>AAT에 로그인하고<br />업무를 이어서 진행하세요.</p></div>
   <p v-if="registrationNotice" class="entry-success" role="status">{{ registrationNotice }}</p>
   <p v-if="warning" class="entry-notice" role="status">{{ warning }}</p>
   <form class="entry-form" @submit.prevent="submit">

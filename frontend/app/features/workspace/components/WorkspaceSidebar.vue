@@ -9,12 +9,7 @@ async function open(id: TabId) {
 }
 </script>
 <template>
-      <a class="brand" :href="tabInfo('home').path" aria-label="Accounting Pro 홈" @click.prevent="open('home')"
-        ><span class="brand-mark"><i /><i /><i /></span
-        ><span class="sidebar-label"
-          >Accounting<span>Pro<span class="brand-period">.</span></span></span
-        ></a
-      >
+      <a class="brand" :href="tabInfo('home').path" aria-label="AAT 홈" @click.prevent="open('home')"><AatBrand :compact="collapsed" inverse /></a>
       <div class="sidebar-section-label sidebar-label">WORKSPACE</div>
       <nav>
         <button class="nav-item mobile-close" @click="emit('close')">
@@ -79,7 +74,7 @@ async function open(id: TabId) {
             @click="open(id)"
           >
             <span class="subnav-dot" /><span class="sidebar-label">{{
-              id === 'sales' ? '매입매출 조회' : id === 'clients' ? '수임업체관리' : '거래처관리'
+              id === 'sales' ? '매입매출 입력 · Mock' : id === 'clients' ? '수임업체관리' : '거래처관리'
             }}</span
             ><span v-if="collapsed" class="mini-label">{{
               id === 'sales' ? '매출' : id === 'clients' ? '수임업체' : '거래처'

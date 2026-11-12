@@ -1,0 +1,37 @@
+.voucher-screen { min-width:0; }
+.voucher-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:6px; font-size:12px; }
+.voucher-toolbar input { border:1px solid var(--border); border-radius:4px; padding:6px; max-width:145px; background:var(--surface); color:var(--text); }
+.voucher-help { font-size:12px; color:var(--secondary); margin:10px 0; }
+.voucher-grid-wrap { overflow:auto; max-height:430px; min-height:280px; border:1px solid var(--border); background:var(--surface); }
+.voucher-grid { border-collapse:separate; border-spacing:0; width:100%; table-layout:fixed; font-size:12px; }
+.voucher-grid-wrap>.voucher-grid { width:max-content; min-width:100%; }
+.voucher-grid th { position:sticky; top:0; z-index:2; background:#edf2f8; color:#475569; height:34px; text-align:left; padding:0 8px; border-bottom:1px solid var(--border); }
+.voucher-grid td { height:32px; padding:0 8px; border-bottom:1px solid #e7ebf1; border-right:1px solid #e7ebf1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.voucher-compact .voucher-grid td { height:27px; }
+.voucher-grid tr:nth-child(even) td { background:#fafbfd; }
+.voucher-grid tr.selected td { background:var(--primary-light); }
+.voucher-grid td:focus,.voucher-grid td.editing { outline:2px solid var(--primary); outline-offset:-2px; }
+.voucher-grid .numeric { text-align:right; font-variant-numeric:tabular-nums; }
+.voucher-grid .readonly { color:var(--secondary); }
+.cell-editor { width:100%; min-width:0; border:0; padding:0; background:white; color:var(--text); height:28px; font:inherit; outline:0; }
+.numeric .cell-editor { text-align:right; }
+.voucher-error { position:sticky; top:0; z-index:4; color:var(--danger); background:#fff1f2; padding:8px; }
+.voucher-section-title { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 0; font-size:12px; }
+.voucher-detail { height:190px; overflow:auto; border:1px solid var(--border); background:var(--surface); padding:8px; }
+.voucher-detail .voucher-grid { min-width:650px; }
+.voucher-summary { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:22px; padding:12px; font-size:12px; background:#f6f8fb; }
+.good { color:var(--success); }.bad { color:var(--danger); }.warn { color:var(--warning); }
+.voucher-screen>.muted { font-size:11px; margin-top:12px; }
+.voucher-insight-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:20px; }
+.voucher-insight-tabs button { background:#f5f7fa; border:1px solid var(--border); padding:9px; border-radius:5px; font-size:12px; color:var(--secondary); }
+.voucher-insight-tabs [aria-selected=true] { color:var(--primary); background:var(--primary-light); border-color:var(--primary); }
+.voucher-insight h3 { margin:16px 0 10px; }.voucher-insight p { font-size:12px; line-height:1.8; }
+.voucher-insight dl { display:grid; grid-template-columns:105px 1fr; gap:16px 8px; margin:22px 0; font-size:12px; }.voucher-insight dt { color:var(--secondary); }.voucher-insight dd { margin:0; overflow-wrap:anywhere; }
+.voucher-check { display:flex; justify-content:space-between; width:100%; gap:8px; padding:14px 0; border:0; border-bottom:1px solid var(--border); background:transparent; text-align:left; font-size:12px; }
+.voucher-evidence { padding:16px; border:1px solid var(--border); border-radius:6px; background:#fafbfd; margin-top:14px; }
+.voucher-empty { padding:35px 10px; color:var(--secondary); text-align:center; font-size:13px; }
+.voucher-history-row { display:flex; flex-direction:column; width:100%; gap:7px; padding:13px 0; border:0; border-bottom:1px solid var(--border); background:transparent; text-align:left; font-size:12px; }.voucher-history-row span { color:var(--secondary); }
+.voucher-confirm { position:fixed; z-index:90; top:35%; left:50%; transform:translateX(-50%); width:min(440px,90vw); padding:24px; border:1px solid var(--border); background:white; box-shadow:0 12px 100px #0005; border-radius:12px; }
+@media(max-width:1280px) { .voucher-screen .page-toolbar { flex-wrap:wrap; } }
+@media(min-width:1024px) and (max-width:1280px) { .workspace-body:has(.voucher-screen) .detail-panel { width:300px!important; } }
+@media(max-width:640px) { .voucher-edit-action { display:none!important; }.voucher-help { font-size:0; }.voucher-help::after { content:'모바일 조회 모드 · 가로로 스크롤하여 모든 컬럼을 확인하세요.'; font-size:12px; }.voucher-grid-wrap { min-height:240px; } }

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import JournalView from '~/features/journal/JournalView.vue'
+import VoucherView from '~/features/vouchers/VoucherView.vue'
 definePageMeta({ workspaceTab: 'voucher' })
 </script>
 
 <template>
-  <JournalView />
+  <VoucherView mode="general" />
 </template>

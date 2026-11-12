@@ -1,28 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
 :root {
-  --primary: #2457c5;
-  --primary-hover: #1d46a3;
-  --primary-light: #eaf1ff;
-  --background: #f5f7fa;
-  --surface: #fff;
-  --text: #1e293b;
-  --secondary: #64748b;
-  --border: #dce2ea;
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger: #dc2626;
-  --sidebar: #21468c;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  font-family: Pretendard, 'Noto Sans KR', sans-serif;
+  font-family: var(--aat-font-family);
   color: var(--text);
   background: var(--background);
   font-size: 14px;
@@ -132,8 +110,8 @@ small,
   overflow: hidden;
 }
 .sidebar {
-  width: 220px;
-  flex: 0 0 220px;
+  width: var(--aat-sidebar-width);
+  flex: 0 0 var(--aat-sidebar-width);
   background: var(--sidebar);
   color: #dbe6fc;
   display: flex;
@@ -293,8 +271,8 @@ small,
   padding: 18px 0 6px;
 }
 .collapsed .sidebar {
-  width: 64px;
-  flex-basis: 64px;
+  width: var(--aat-sidebar-collapsed);
+  flex-basis: var(--aat-sidebar-collapsed);
 }
 .collapsed .sidebar-label {
   display: none;
@@ -345,7 +323,7 @@ small,
   flex-direction: column;
 }
 .app-header {
-  height: 56px;
+  height: var(--aat-header-height);
   flex-shrink: 0;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -417,7 +395,7 @@ small,
   border-radius: 50%;
 }
 .tab-bar {
-  height: 40px;
+  height: var(--aat-tabs-height);
   flex-shrink: 0;
   display: flex;
   overflow-x: auto;
@@ -539,7 +517,7 @@ small,
   border-color: var(--danger);
 }
 .button.danger:hover:not(:disabled) {
-  background: #b91c1c;
+  background: var(--aat-color-danger-hover);
 }
 .button.ghost {
   border-color: transparent;
@@ -548,7 +526,7 @@ small,
   padding: 0 8px;
 }
 .button.large {
-  height: 40px;
+  height: var(--aat-control-lg);
 }
 .input {
   width: 100%;
@@ -1132,18 +1110,18 @@ thead th {
   position: sticky;
   top: 0;
   z-index: 1;
-  height: 36px;
-  background: #f4f7fc;
-  color: #536782;
+  height: var(--aat-table-header-height);
+  background: var(--aat-color-background);
+  color: var(--aat-color-text);
   font-weight: 500;
   border-bottom: 1px solid var(--border);
   text-align: left;
-  padding: 0 12px;
+  padding: 0 var(--aat-table-cell-padding);
 }
 tbody td {
-  height: 42px;
-  padding: 0 12px;
-  border-bottom: 1px solid #edf0f5;
+  height: var(--aat-table-row-height);
+  padding: 0 var(--aat-table-cell-padding);
+  border-bottom: 1px solid var(--border);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1155,13 +1133,13 @@ tbody tr {
   cursor: pointer;
 }
 tbody tr:hover {
-  background: #f8faff;
+  background: var(--aat-color-hover);
 }
 tbody tr.selected {
   background: var(--primary-light);
 }
 table.compact td {
-  height: 32px;
+  height: var(--aat-table-compact-height);
 }
 .sort-button {
   border: 0;
@@ -1251,12 +1229,12 @@ table.compact td {
   border: 1px solid var(--border);
   padding: 0;
   border-radius: var(--radius-lg);
-  width: 480px;
+  width: var(--aat-modal-md);
   max-width: calc(100vw - 32px);
   max-height: 80dvh;
   color: var(--text);
   background: var(--surface);
-  box-shadow: 0 20px 80px #18345c26;
+  box-shadow: var(--aat-shadow-modal);
 }
 .modal[open] {
   display: flex;
@@ -1266,13 +1244,13 @@ table.compact td {
   background: #14243f66;
 }
 .modal.confirm {
-  width: 420px;
+  width: var(--aat-modal-sm);
 }
 .modal.search {
-  width: 640px;
+  width: var(--aat-modal-search);
 }
 .modal.large {
-  width: 800px;
+  width: var(--aat-modal-lg);
 }
 .modal-heading {
   display: flex;
@@ -1356,8 +1334,8 @@ table.compact td {
 }
 .detail-panel {
   flex-shrink: 0;
-  max-width: 480px;
-  min-width: 320px;
+  max-width: var(--aat-panel-max);
+  min-width: var(--aat-panel-min);
   border-left: 1px solid var(--border);
   background: white;
   display: flex;

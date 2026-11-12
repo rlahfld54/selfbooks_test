@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import WorkspacePreview from '~/features/previews/WorkspacePreview.vue'
+import VoucherView from '~/features/vouchers/VoucherView.vue'
 definePageMeta({ workspaceTab: 'sales' })
 </script>
 
 <template>
-  <WorkspacePreview />
+  <VoucherView mode="sales" />
 </template>
