@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { createOnboardingData } from '../app/features/onboarding/mocks.ts'
+import { mockAuthenticatedContext } from './auth.browser-support.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.SELFBOOKS_PLAYWRIGHT ?? 'playwright')
@@ -11,20 +12,23 @@ const browser = await chromium.launch({
   headless: true,
 })
 const errors = []
-const track = page => {
-  page.on('pageerror', error => errors.push(error.message))
-  page.on('console', message => {
-    if (/hydration/i.test(message.text()) && ['error', 'warning'].includes(message.type())) errors.push(message.text())
+const track = (page) => {
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (message) => {
+    if (/hydration/i.test(message.text()) && ['error', 'warning'].includes(message.type()))
+      errors.push(message.text())
   })
 }
 async function visit(page, path, title) {
   const response = await page.goto(base + path)
   assert.equal(response.status(), 200)
-  await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
+  await page.waitForFunction(
+    () => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false,
+  )
   await page.getByRole('heading', { name: title, exact: true }).waitFor()
 }
 async function active(page, path, id) {
-  await page.waitForURL(url => url.pathname === path)
+  await page.waitForURL((url) => url.pathname === path)
   await page.locator('#tab-' + id + '[aria-selected="true"]').waitFor()
   await page.locator('#page-' + id).waitFor()
 }
@@ -33,11 +37,15 @@ const timeout = 7000
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+  await mockAuthenticatedContext(context)
   // Workspace regression runs as an onboarded user; first-visit flows have a separate suite.
-  await context.addInitScript(data => {
-    const key = 'accounting-pro:onboarding-demo:v1'
-    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(data))
-  }, { ...createOnboardingData(), completed: true })
+  await context.addInitScript(
+    (data) => {
+      const key = 'accounting-pro:onboarding-demo:v1'
+      if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(data))
+    },
+    { ...createOnboardingData(), completed: true },
+  )
   const page = await context.newPage()
   page.setDefaultTimeout(timeout)
   track(page)
@@ -51,10 +59,21 @@ try {
   assert.equal((await page.locator('.app-header').boundingBox()).height, 56)
   console.log('PASS direct routes')
 
+  const basics = page.getByRole('button', { name: '기초정보관리', exact })
+  assert.equal(await basics.getAttribute('aria-expanded'), 'false')
+  assert.equal(await page.getByRole('button', { name: '회사등록', exact }).count(), 0)
+  await basics.click()
+  await page.getByRole('button', { name: '환경등록', exact }).click()
+  await active(page, '/settings', 'settings')
+  await page.getByRole('heading', { name: '부가세설정', exact }).waitFor()
+  await page.getByRole('textbox', { name: '의제매입세액공제', exact }).waitFor()
+  await page.getByRole('heading', { name: '자동화규칙', exact }).waitFor()
+  await page.getByRole('textbox', { name: '분류 규칙', exact }).waitFor()
+
   await page.getByRole('button', { name: '일반전표입력', exact }).first().click()
   await active(page, '/journal', 'voucher')
   await page.getByRole('heading', { name: '일반전표입력', exact }).waitFor()
-  await page.getByRole('button', { name: '거래처관리', exact }).click()
+  await page.getByRole('button', { name: '거래처등록', exact }).click()
   await active(page, '/clients', 'partners')
   await page.goBack()
   await active(page, '/journal', 'voucher')
@@ -77,7 +96,11 @@ try {
   await active(page, '/journal', 'voucher')
   const memoCell = page.locator('[data-cell="0:7"]')
   const memo = {
-    fill: async value => { await memoCell.click(); await page.getByRole('textbox', { name: '적요', exact: true }).fill(value); await page.keyboard.press('Enter') },
+    fill: async (value) => {
+      await memoCell.click()
+      await page.getByRole('textbox', { name: '적요', exact: true }).fill(value)
+      await page.keyboard.press('Enter')
+    },
     inputValue: async () => memoCell.innerText(),
     waitFor: async () => memoCell.waitFor(),
   }
@@ -94,7 +117,7 @@ try {
   assert.equal(await memo.inputValue(), 'session only draft')
   console.log('PASS per-tab input, panel and search')
 
-  await page.getByRole('button', { name: '거래처관리', exact }).click()
+  await page.getByRole('button', { name: '거래처등록', exact }).click()
   const leave = page.getByRole('dialog', { name: '다른 페이지로 이동할까요?' })
   await leave.getByRole('button', { name: '취소', exact }).click()
   await active(page, '/journal', 'voucher')
@@ -103,7 +126,7 @@ try {
   await page.goBack()
   await leave.getByRole('button', { name: '취소', exact }).click()
   await active(page, '/journal', 'voucher')
-  await page.getByRole('button', { name: '거래처관리', exact }).click()
+  await page.getByRole('button', { name: '거래처등록', exact }).click()
   await leave.getByRole('button', { name: '페이지 이동', exact }).click()
   await active(page, '/clients', 'partners')
   const closeJournal = page.getByRole('button', { name: '일반전표입력 탭 닫기' })
@@ -161,14 +184,27 @@ try {
 
   let listCalls = 0
   let unavailable = true
-  const record = { id: 'fixture-1', officeId: 'office', name: '회귀 테스트 수임업체', taxpayerKind: '법인', status: '활성' }
+  const record = {
+    id: 'fixture-1',
+    officeId: 'office',
+    name: '회귀 테스트 수임업체',
+    taxpayerKind: '법인',
+    status: '활성',
+  }
   const headers = { 'access-control-allow-origin': new URL(base).origin }
-  await page.route('**/api/clients', route => {
+  await page.route('**/api/clients', (route) => {
     listCalls++
-    return route.fulfill({ status: unavailable ? 503 : 200, headers,
-      json: unavailable ? { error: { code: 'DIRECTORY_UNAVAILABLE', message: 'Unavailable' } } : { data: [record] } })
+    return route.fulfill({
+      status: unavailable ? 503 : 200,
+      headers,
+      json: unavailable
+        ? { error: { code: 'DIRECTORY_UNAVAILABLE', message: 'Unavailable' } }
+        : { data: [record] },
+    })
   })
-  await page.route('**/api/clients/fixture-1', route => route.fulfill({ headers, json: { data: record } }))
+  await page.route('**/api/clients/fixture-1', (route) =>
+    route.fulfill({ headers, json: { data: record } }),
+  )
   await visit(page, '/client-directory', '수임업체관리')
   await page.getByText('수임업체 목록을 불러오지 못했습니다.').waitFor()
   unavailable = false
@@ -202,9 +238,14 @@ try {
   console.log('PASS 390px mobile layout, overlay, keyboard and hydration')
 
   for (const [path, title] of [
-    ['/ledger', '전표조회'], ['/sales', '매입매출전표 입력 · Mock'], ['/payroll', '인사급여'],
-    ['/tax', '세무신고'], ['/reports', '보고서'], ['/settings', '환경설정'],
-  ]) await visit(page, path, title)
+    ['/ledger', '전표조회 및 검증'],
+    ['/sales', '매입매출전표 입력 · Mock'],
+    ['/payroll', '인사급여'],
+    ['/tax', '부가가치세'],
+    ['/reports', '장부 및 재무제표'],
+    ['/settings', '환경등록'],
+  ])
+    await visit(page, path, title)
   await visit(page, '/components', '공통 UI 컴포넌트')
   await page.locator('#gallery-text').fill('갤러리 입력')
   await page.locator('#tab-home').click()

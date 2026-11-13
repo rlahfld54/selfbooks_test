@@ -15,6 +15,7 @@ const backgroundInert = computed(() => overlayPanel.value || mobileOpen.value)
 </script>
 
 <template>
+  <ClientOnly>
   <div class="app-shell" :class="{ collapsed, 'mobile-menu-open': mobileOpen }">
     <a href="#main-content" class="skip-link" :inert="backgroundInert">본문으로 이동</a>
     <button v-if="mobileOpen" class="mobile-backdrop" aria-label="메뉴 닫기" @click="mobileOpen = false" />
@@ -47,9 +48,10 @@ const backgroundInert = computed(() => overlayPanel.value || mobileOpen.value)
       </div>
       <footer class="app-footer" :inert="backgroundInert">
         <span><i />{{ state.active === 'sales-journal' ? '로컬 개발 · 해솔문구 전표 DB 연결' : state.active === 'clients' ? '로컬 개발 · Fastify 읽기 전용' : '샘플 모드 · 실제 데이터와 연결되지 않음' }}</span>
-        <span>AAT <span class="footer-version">v1.0</span></span>
+        <span>Accounting Pro <span class="footer-version">v1.0</span></span>
       </footer>
     </div>
     <WorkspaceConfirmation />
   </div>
+  </ClientOnly>
 </template>

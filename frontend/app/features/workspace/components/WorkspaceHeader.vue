@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { companies } from '~/features/workspace/stores/workspace'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import { useMockAuth } from '~/features/auth/useMockAuth'
+import { useAuth } from '~/features/auth/useAuth'
 defineProps<{ title: string; inert: boolean }>()
 const emit = defineEmits<{ 'toggle-menu': [] }>()
 const { company, requestCompany } = useWorkspaceContext()
 const notifications = ref(false)
-const { user, logout } = useMockAuth()
+const { user, logout } = useAuth()
 const router = useRouter()
 async function signOut() {
-  // Existing workspace guard confirms unsaved changes before clearing the demo session.
+  // Confirm unsaved changes before clearing the authenticated session.
   const failure = await router.push('/login')
-  if (!failure) logout()
+  if (!failure) await logout()
 }
 </script>
 <template>
@@ -39,7 +39,7 @@ async function signOut() {
             ><span class="notification-icon"><UiIcon name="bell" /><i /></span
           ></UiButton>
           <div class="user-avatar">{{ user?.name.slice(0, 1) || '관' }}</div>
-          <span class="user-label">{{ user?.name || '관리자' }} <small>데모 계정</small></span>
+          <span class="user-label">{{ user?.name || '관리자' }} <small>{{ user ? '관리자' : '미리보기' }}</small></span>
           <UiButton variant="ghost" @click="signOut">로그아웃</UiButton>
         </div>
       </header>

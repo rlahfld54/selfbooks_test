@@ -1,4 +1,5 @@
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
+import { useAuth } from '~/features/auth/useAuth'
 import { salesJournalSession } from './useSalesJournalSession'
 import { previewSalesJournal } from '../services/previewSalesJournal'
 import {
@@ -15,12 +16,13 @@ export function useSalesJournal() {
   const tab = activeTab.value,
     session = salesJournalSession(tab)
   const { apiBase, pagesPreview } = useRuntimeConfig().public
-  const service = pagesPreview ? null : createSalesJournalService((path, options) =>
+  const auth = useAuth()
+  const service = pagesPreview ? null : createSalesJournalService(async (path, options) =>
     $fetch(path, {
       baseURL: apiBase,
       ...options,
       ...(options?.method === 'DELETE' ? { body: {} } : {}),
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...await auth.headers() },
       retry: 0,
       timeout: 15000,
     }),

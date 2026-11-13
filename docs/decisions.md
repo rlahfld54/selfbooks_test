@@ -1,5 +1,12 @@
 # UI 설계 결정
 
+## 2026-11-13 실제 인증
+
+- Nuxt 4.6.4 + @supabase/supabase-js 2.119.0. 클라이언트 플러그인에 SDK 인스턴스를 두고 useAuth에서 인증 상태와 Fastify 토큰 전달을 처리한다.
+- 브라우저 세션을 사용하는 작업 공간은 ClientOnly로 렌더하여 서버의 게스트 UI와 인증된 클라이언트 UI가 충돌하지 않게 한다. 글로벌 라우트 middleware는 화면 이동만 보호하고 서버 API는 별도로 검증한다.
+- 공개 키는 환경변수로 구성한다. 기존 계정과 사무소 소속을 재사용하며 권한 자동 부여는 하지 않는다.
+- 공식 근거: https://supabase.com/docs/reference/javascript/auth-signinwithpassword , https://supabase.com/docs/reference/javascript/auth-getuser , https://github.com/nuxt/nuxt/blob/main/docs/4.api/3.utils/define-nuxt-route-middleware.md . 설치 버전의 타입 검사도 수행한다.
+
 ## 2026-11-09
 
 - 작업 공간 전용 컴포넌트·탐색·설정·모바일 동작·store는 `features/workspace/`에 모은다. 공통 UI와 앱 조립 계층을 구분하고 레이아웃의 명시적 import로 연결한다. `useWorkspaceProvider`는 레이아웃마다 상태를 제공하고 업무 화면은 `useWorkspaceContext`로 접근한다. 기존 URL·탭·저장 형식은 유지한다.

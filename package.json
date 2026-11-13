@@ -9,6 +9,7 @@
     "db:check": "npm --prefix backend run db:check"
   },
   "devDependencies": {
+    "@nuxtjs/supabase": "^2.1.0",
     "concurrently": "^10.0.7"
   }
 }

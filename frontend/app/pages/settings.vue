@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import WorkspacePreview from '~/features/previews/WorkspacePreview.vue'
+import EnvironmentPreview from '~/features/previews/EnvironmentPreview.vue'
 definePageMeta({ workspaceTab: 'settings' })
 </script>
 
 <template>
-  <WorkspacePreview />
+  <EnvironmentPreview />
 </template>

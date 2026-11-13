@@ -10,8 +10,7 @@ export const companies = [
 export const isDemoCompany = (id: unknown): id is string => companies.some(company => company.value === id)
 
 // One store per layout instance; never shared between SSR requests.
-export function createWorkspaceStore(initialTab: TabId) {
-  const user = 'demo-admin'
+export function createWorkspaceStore(initialTab: TabId, user = 'demo-admin') {
   const company = ref(companies[0]!.value)
   const generation = ref(0)
   const state = reactive(freshWorkspace())

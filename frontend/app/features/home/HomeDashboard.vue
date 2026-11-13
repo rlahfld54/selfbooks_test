@@ -49,6 +49,18 @@ const recent = [
         ><UiIcon name="calendar" :size="16" />2026-11-09 월요일</span
       ></PageToolbar
     >
+    <UiCard title="신규 수임처 설정 안내" class="section-gap">
+      <p class="muted">신규 회사의 최초 설정 순서입니다. 이후에는 필요한 업무로 바로 이동하세요. 실제 설정 완료 상태는 아직 연결되지 않았습니다.</p>
+      <nav class="section-switcher" aria-label="신규 수임처 설정 순서">
+        <UiButton @click="$emit('open', 'company')">1. 회사등록</UiButton>
+        <UiButton @click="$emit('open', 'settings')">2. 환경등록</UiButton>
+        <UiButton @click="$emit('open', 'accounts')">3. 계정과목·적요</UiButton>
+        <UiButton @click="$emit('open', 'partners')">4. 거래처</UiButton>
+        <UiButton @click="$emit('open', 'opening-balances')">기초잔액</UiButton>
+        <UiButton @click="$emit('open', 'voucher')">5. 일반전표</UiButton>
+        <UiButton @click="$emit('open', 'sales-journal')">매입매출전표</UiButton>
+      </nav>
+    </UiCard>
     <section class="welcome-banner">
       <div>
         <div class="eyebrow">YOUR SMART ACCOUNTING PARTNER</div>

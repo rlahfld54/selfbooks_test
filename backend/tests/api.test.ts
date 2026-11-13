@@ -26,7 +26,7 @@ function setup(t: TestContext, blocked = false) {
   const pool = Object.assign(new EventEmitter(), {
     connect: async () => ({ query, release }), query, end,
   }) as unknown as Pool
-  const app = buildApp({ frontendOrigin, fixtures, pool })
+  const app = buildApp({ frontendOrigin, fixtures, pool, authenticate: async () => ({ id: 'test-user', name: 'Test', email: 'test@example.test', officeId, role: 'ADMIN' }) })
   return { app, query, release, end }
 }
 
@@ -85,7 +85,7 @@ test('a policy that would be bypassed prevents fixture reads', async (t) => {
 })
 
 test('missing database configuration returns a generic 503', async (t) => {
-  const app = buildApp({ frontendOrigin })
+  const app = buildApp({ frontendOrigin, authenticate: async () => ({ id: 'test-user', name: 'Test', email: 'test@example.test', officeId, role: 'ADMIN' }) })
   t.after(() => app.close())
   const response = await app.inject({ url: '/api/health/db', headers })
   assert.equal(response.statusCode, 503)

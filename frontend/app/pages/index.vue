@@ -5,7 +5,7 @@ import FeatureSection from '~/features/landing/FeatureSection.vue'
 import WorkflowSection from '~/features/landing/WorkflowSection.vue'
 import LandingFooter from '~/features/landing/LandingFooter.vue'
 definePageMeta({ layout: 'public' })
-useHead({ title: 'AAT · 세무회계 업무의 새로운 시작' })
+useHead({ title: 'Accounting Pro · 세무회계 업무의 새로운 시작' })
 </script>
 <template>
   <LandingHeader />

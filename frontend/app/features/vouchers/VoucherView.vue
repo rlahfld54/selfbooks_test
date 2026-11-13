@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import WorkspaceVoucherNavigation from '~/features/workspace/components/WorkspaceVoucherNavigation.vue'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { voucherSession } from './session'
 import { blankRow, saveMockRows } from './mockData'
@@ -19,7 +20,7 @@ const preferencesReady = ref(false)
 const preferenceKey = `accounting-pro:vouchers:${user}:${props.mode}`
 onMounted(() => {
   if (!session.initialized) {
-    tab.panelWidth = 340; tab.panel = window.innerWidth > 1280
+    tab.panelWidth = Math.max(300, Math.min(480, Math.round((window.innerWidth - 220) * 0.24))); tab.panel = window.innerWidth > 1280
     try {
       const saved = JSON.parse(localStorage.getItem(preferenceKey) || '{}')
       if (typeof saved.width === 'number' && Number.isFinite(saved.width)) tab.panelWidth = Math.min(480, Math.max(300, saved.width))
@@ -53,6 +54,7 @@ watch(() => session.focusRequest, () => { if (selected.value) { session.from = '
 <template>
   <div class="voucher-screen" :class="{ 'voucher-compact': density === 'compact' }">
     <PageToolbar :title="mode === 'general' ? '일반전표입력' : '매입매출전표 입력 · Mock'" description="연속 입력과 전표 인사이트를 한 화면에서 확인하세요."><template #eyebrow>ACCOUNTING / VOUCHERS</template><UiBadge tone="neutral">Mock 프로토타입</UiBadge><UiButton @click="tab.panel = !tab.panel">{{ tab.panel ? '인사이트 닫기' : '인사이트 열기' }}</UiButton><UiButton variant="primary" @click="save">Mock 저장</UiButton></PageToolbar>
+    <WorkspaceVoucherNavigation />
     <div class="voucher-toolbar"><span>{{ company === 'demo-happy' ? '(주)행복상사' : '(주)우리상사' }} · 2026 회계연도</span><label>조회기간 <input v-model="session.from" type="date" aria-label="조회 시작일"></label><span>~</span><input v-model="session.to" type="date" aria-label="조회 종료일"><UiButton class="voucher-edit-action" @click="add">+ 행 추가</UiButton><UiButton class="voucher-edit-action" :disabled="!session.checked.length" @click="deleting = true">선택 삭제 ({{ session.checked.length }})</UiButton><UiBadge v-if="tab.dirty" tone="warning">미저장 변경</UiBadge></div>
     <div class="voucher-section-title"><p class="voucher-help">셀 클릭 / F2 편집 · Enter / Tab 이동 · 방향키 탐색 · Esc 취소 · 코드 입력란에서 계정·거래처 검색</p><label>밀도 <select v-model="density" aria-label="테이블 밀도"><option value="normal">기본</option><option value="compact">좁게</option></select></label></div>
     <p v-if="notice" role="status" class="good">{{ notice }}</p>

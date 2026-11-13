@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import WorkspaceVoucherNavigation from '~/features/workspace/components/WorkspaceVoucherNavigation.vue'
+const detailOpen = ref(true)
 import { formatAmount } from '~/utils/formatAmount'
 import { payments, sumAmounts, transactionTypes } from './services/salesJournal'
 import SalesAmountInput from './SalesAmountInput.vue'
@@ -60,7 +62,7 @@ function confirmPending() {
       title="매입매출전표입력"
       description="거래 내역부터 분개까지, 한 화면에서 입력하세요."
     >
-      <template #eyebrow>ACCOUNTING · 회계관리</template>
+      <template #eyebrow>전표관리</template>
       <UiBadge tone="primary">{{ pagesPreview ? '샘플 데이터' : meta?.company ?? 'DB 연결' }}</UiBadge>
       <UiButton :disabled="busy || loading || !meta" @click="protect(reset)"
         ><UiIcon name="plus" :size="16" />신규 전표</UiButton
@@ -71,7 +73,11 @@ function confirmPending() {
       <UiButton variant="primary" :disabled="pagesPreview || busy || loading || !meta || locked" @click="save"
         >저장</UiButton
       >
+      <UiButton :aria-expanded="detailOpen" aria-controls="sales-detail" @click="detailOpen = !detailOpen">
+        {{ detailOpen ? '상세 패널 접기' : '상세 패널 열기' }}
+      </UiButton>
     </PageToolbar>
+    <WorkspaceVoucherNavigation />
     <div class="context-notice">
       <UiIcon name="document" :size="17" />
       <span v-if="pagesPreview">공개 미리보기입니다. 샘플 전표를 조회하고 입력 화면을 체험할 수 있습니다. 저장과 삭제는 비활성화되어 있습니다.</span>
@@ -85,7 +91,7 @@ function confirmPending() {
     </div>
     <p v-if="loading" role="status">전표와 기초정보를 불러오는 중입니다…</p>
     <p v-if="notice" class="result-notice" role="status">{{ notice }}</p>
-    <div class="sales-layout" :inert="busy || loading">
+    <div class="sales-layout" :class="{ 'sales-layout-wide': !detailOpen }" :inert="busy || loading">
       <div class="sales-main">
         <section class="sales-card" aria-label="전표 조회">
           <div class="type-tabs" aria-label="거래유형 필터">
@@ -408,7 +414,7 @@ function confirmPending() {
           </form>
         </section>
       </div>
-      <aside class="sales-aside" aria-label="입력 도움말">
+      <aside v-show="detailOpen" id="sales-detail" class="sales-aside" aria-label="입력 도움말">
         <section class="sales-card">
           <h2><UiIcon name="help" :size="18" /> 입력 안내</h2>
           <p>상단에서 전표를 조회하고 아래 입력 영역에서 신규 등록 또는 수정을 진행하세요.</p>
@@ -516,7 +522,7 @@ function confirmPending() {
 }
 .sales-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 24%);
   gap: 20px;
   align-items: start;
 }
@@ -822,10 +828,8 @@ function confirmPending() {
   background: #f8fafc;
   margin-right: 5px;
 }
-@media (min-width: 1600px) {
-  .sales-layout {
-    grid-template-columns: minmax(0, 1fr) 250px;
-  }
+.sales-layout.sales-layout-wide {
+  grid-template-columns: minmax(0, 1fr);
 }
 @media (max-width: 1250px) {
   .sales-layout {

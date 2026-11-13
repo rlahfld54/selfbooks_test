@@ -1,10 +1,10 @@
 import { ref, onMounted, watch } from 'vue'
 import { createOnboardingData } from './mocks'
 import { isOnboardingData, validateStep } from './validation'
-import { useMockAuth } from '~/features/auth/useMockAuth'
+import { useAuth } from '~/features/auth/useAuth'
 export const ONBOARDING_KEY = 'accounting-pro:onboarding-demo:v1'
 export function useOnboarding() {
-  const { user, restore } = useMockAuth()
+  const { user } = useAuth()
   let storageKey = ONBOARDING_KEY
   const data = ref(createOnboardingData())
   const open = ref(false)
@@ -17,7 +17,6 @@ export function useOnboarding() {
     catch { storageWarning.value = '브라우저 저장소를 사용할 수 없어 현재 화면에서만 유지됩니다.' }
   }
   onMounted(() => {
-    restore()
     // Preserve the existing guest/admin demo; new users have their own setup state.
     if (user.value && user.value.id !== 'demo-admin') storageKey = `${ONBOARDING_KEY}:${user.value.id}`
     try {

@@ -21,7 +21,7 @@ textarea.input { height: auto; min-height: 96px; padding: var(--aat-space-3); re
 .aat-brand { display: inline-flex; align-items: center; gap: var(--aat-space-2); max-width: 100%; }
 .aat-logo-horizontal { display: block; width: 190px; height: auto; }
 .aat-logo-symbol { display: block; width: 40px; height: 40px; flex-shrink: 0; }
-.aat-brand-wordmark { font-size: 26px; font-weight: var(--aat-weight-bold); letter-spacing: -.04em; line-height: 1.2; }
+.aat-brand-wordmark { font-size: 18px; font-weight: var(--aat-weight-bold); letter-spacing: -.04em; line-height: 1.2; }
 .aat-brand-inverse { color: var(--aat-color-on-primary); }
 .brand:has(.aat-brand) { padding-inline: var(--aat-space-4); }
 .collapsed .brand:has(.aat-brand) { padding-inline: var(--aat-space-3); }
@@ -31,4 +31,11 @@ textarea.input { height: auto; min-height: 96px; padding: var(--aat-space-3); re
 .sidebar :focus-visible { outline-color: var(--aat-color-cyan); }
 @media (prefers-reduced-motion: reduce) {
   :root { --aat-motion-fast: 0ms; --aat-motion-normal: 0ms; }
+}
+
+.section-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aat-space-2);
+  margin-bottom: var(--aat-space-3);
 }

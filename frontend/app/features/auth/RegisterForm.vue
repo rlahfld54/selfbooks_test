@@ -3,7 +3,6 @@ import { reactive, ref } from 'vue'
 import PasswordField from './PasswordField.vue'
 import { useMockAuth } from './useMockAuth'
 import type { RegisterInput } from './types'
-const router = useRouter()
 const { register, warning } = useMockAuth()
 const input = reactive<RegisterInput>({ name: '', email: '', password: '', confirmation: '', accepted: false })
 const error = ref('')
@@ -15,7 +14,7 @@ async function submit() {
   error.value = ''
   try {
     error.value = await register(input)
-    if (!error.value) { input.password = ''; input.confirmation = ''; await router.push('/login') }
+    if (!error.value) { input.password = ''; input.confirmation = ''; warning.value = '화면 체험용 가입입니다. 실제 로그인 계정은 관리자에게 요청해 주세요.' }
   } catch { error.value = '데모 계정을 준비하지 못했습니다. 브라우저 환경을 확인한 후 다시 시도해 주세요.' }
   finally { busy.value = false }
 }

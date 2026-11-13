@@ -38,5 +38,7 @@ export function loadConfig() {
     caPath: caPath ? resolve(projectRoot, caPath) : undefined,
     frontendOrigin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
     fixtures: fixtureScope(),
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY,
   }
 }

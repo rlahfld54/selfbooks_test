@@ -27,3 +27,10 @@ logs/
 Thumbs.db
 .idea/
 .fleet/
+
+
+/docs/*
+
+/backend/migrations/*
+/backend/tests/*
+/backend/migrations/*

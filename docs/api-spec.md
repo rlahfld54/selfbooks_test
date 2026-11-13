@@ -1,5 +1,20 @@
 # 로컬 개발 API
 
+## Supabase 인증 적용 (2026-11-13, 이전 인증 설명보다 우선)
+
+- GET /api/auth/me → `{ data: { id, name, email, officeId, role } }`.
+- `/api/health`와 CORS preflight를 제외한 등록된 API는 `Authorization: Bearer <access_token>`이 필요하다.
+- 토큰 누락·만료는 401, 활성 관리자 소속 없음은 403, 인증 설정/연결 실패는 503이다.
+- SUPABASE_URL 및 SUPABASE_PUBLISHABLE_KEY를 루트 .env에 설정한다. service_role 키는 사용하지 않는다.
+- 회사·사무소 범위는 서버 설정을 유지하고, 실제 전표 생성·수정 사용자에는 검증된 Auth UUID를 사용한다.
+
+## 사무소 정보 표시 (2026-11-13)
+
+`GET /api/office-registration`은 서버 `DEV_FIXTURE_OFFICE_ID`의 사무소 상세 정보를 반환한다.
+로컬 개발 모드에서만 제공하며 요청에서 사무소 ID를 받지 않는다. `clients` 테이블에 의존하지 않는다.
+DB 누락/정책 우회는 503, 지정 사무소 없음은 404다. `/company`에서 표시하며 수정/검토 저장은 아직 탭 메모리다.
+새 DB의 사무소 ID로 서버 설정을 갱신했다. 실제 인증 연결은 후속 작업이다.
+
 기본 주소는 `http://localhost:4000/api`입니다. 아래 디렉터리·상태 라우트는 GET이며 성공 응답은 `{"data": ...}`, 오류 응답은 `{"error":{"code":"...","message":"..."}}` 형식입니다.
 
 | 경로               | 성공 응답                                                                        |
