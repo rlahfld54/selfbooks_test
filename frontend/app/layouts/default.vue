@@ -6,17 +6,20 @@ import WorkspaceDetail from '~/features/workspace/components/WorkspaceDetail.vue
 import WorkspaceConfirmation from '~/features/workspace/components/WorkspaceConfirmation.vue'
 import { useWorkspaceProvider } from '~/features/workspace/composables/useWorkspaceProvider'
 import { useMobileWorkspace } from '~/features/workspace/composables/useMobileWorkspace'
+import { useAuth } from '~/features/auth/useAuth'
 import { tabInfo } from '~/utils/workspace-routes'
 
 const { generation, state, activeTab, collapsed, storageAvailable } = useWorkspaceProvider()
 const { mobileOpen, narrow, sidebar } = useMobileWorkspace()
+const { user } = useAuth()
+const { pagesPreview } = useRuntimeConfig().public
 const overlayPanel = computed(() => narrow.value && activeTab.value.panel)
 const backgroundInert = computed(() => overlayPanel.value || mobileOpen.value)
 </script>
 
 <template>
   <ClientOnly>
-  <div class="app-shell" :class="{ collapsed, 'mobile-menu-open': mobileOpen }">
+  <div v-if="user || pagesPreview" class="app-shell" :class="{ collapsed, 'mobile-menu-open': mobileOpen }">
     <a href="#main-content" class="skip-link" :inert="backgroundInert">본문으로 이동</a>
     <button v-if="mobileOpen" class="mobile-backdrop" aria-label="메뉴 닫기" @click="mobileOpen = false" />
     <aside ref="sidebar" class="sidebar" aria-label="주 메뉴" :inert="overlayPanel">

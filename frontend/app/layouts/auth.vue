@@ -2,6 +2,7 @@
 import ProductBrand from '~/features/landing/ProductBrand.vue'
 import DashboardPreview from '~/features/landing/DashboardPreview.vue'
 import '~/features/landing/entry.css'
+const route = useRoute()
 </script>
 <template>
   <div class="entry-shell auth-shell">
@@ -25,7 +26,7 @@ import '~/features/landing/entry.css'
     <main class="auth-main">
       <NuxtLink to="/" class="auth-back">← 서비스 홈으로</NuxtLink>
       <div class="auth-form-wrap"><slot /></div>
-      <p class="auth-bottom-note">UI 데모 · 실제 인증 및 회원정보 서버 저장은 진행하지 않습니다.</p>
+      <p v-if="['/register', '/forgot-password'].includes(route.path)" class="auth-bottom-note">UI 데모 · 실제 인증 및 회원정보 서버 저장은 진행하지 않습니다.</p>
     </main>
   </div>
 </template>

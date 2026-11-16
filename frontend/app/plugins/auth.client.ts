@@ -13,7 +13,7 @@ export default defineNuxtPlugin(() => {
   }
   const authClient = config.supabaseUrl && config.supabasePublishableKey
     ? createClient(config.supabaseUrl, config.supabasePublishableKey, {
-      auth: { storage, storageKey: 'selfbooks:auth', detectSessionInUrl: false },
+      auth: { storage, storageKey: 'selfbooks:auth', flowType: 'pkce', detectSessionInUrl: false },
     }) : null
   const user = useState('auth-user', () => null)
   authClient?.auth.onAuthStateChange((event) => {

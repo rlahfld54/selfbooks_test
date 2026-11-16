@@ -29,6 +29,15 @@ Nuxt는 `http://localhost:3000`, Fastify API는 `http://localhost:4000/api`에�
 
 Fastify는 로컬 개발 모드에서 루프백에 바인딩합니다. 터널이나 역방향 프록시로 공개하지 마세요. 실제 서비스에서는 사용자 인증, 사무소 단위 권한 검증, RLS가 적용되는 최소 권한 DB 역할이 필요합니다.
 
+## SNS 간편 로그인 설정
+
+1. Supabase **Authentication → URL Configuration → Redirect URLs**에 `http://localhost:3000/auth/callback`을 추가합니다. 다른 주소나 포트로 실행하면 그 주소의 `/auth/callback`을 등록합니다. [Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls)
+2. 제공사 개발자 콘솔에서 웹 로그인 앱을 등록합니다. 각 앱의 콜백에는 Supabase의 해당 제공사 설정 화면에 표시되는 **Callback URL**을 사용합니다. Client ID와 Secret은 Supabase **Authentication → Sign In / Providers**에서 입력합니다.
+   - **카카오**는 카카오 로그인을 활성화하고 REST API 키와 카카오 로그인 Client Secret을 Supabase의 Kakao 항목에 입력합니다. 앱이 이메일을 제공할 수 없다면 Kakao 항목에서 이메일 없는 로그인을 허용하고 기존 관리자 계정에 직접 연결합니다. [Kakao 설정](https://supabase.com/docs/guides/auth/social-sign-in/auth-kakao)
+   - **네이버**는 Custom OIDC에 식별자 `custom:naver`, Issuer `https://nid.naver.com`, scope `openid`로 등록합니다. **Email optional**을 활성화하고 기존 관리자 계정에 먼저 직접 연결합니다. 네이버 개발 단계에서는 등록된 테스트 계정으로 확인합니다. [Supabase Custom OIDC](https://supabase.com/docs/guides/auth/custom-oauth-providers) · [네이버 OIDC 개발 가이드](https://developers.naver.com/docs/login/devguide/devguide.md)
+   - **Google**은 Google Cloud의 웹 애플리케이션 OAuth Client ID와 Secret을 Supabase의 Google 항목에 입력합니다. Google OAuth 앱이 테스트 상태라면 사용할 계정을 테스트 사용자에 등록합니다. [Google 설정](https://supabase.com/docs/guides/auth/social-sign-in/auth-google)
+3. 기존 관리자만 로그인하는 테스트 프로젝트에서는 **Allow manual linking**을 켜고 **Allow new users to sign up**을 끕니다. 이메일·비밀번호로 먼저 로그인한 뒤 업무 화면 우측 상단 프로필 아이콘의 **SNS 계정 연결**을 엽니다. 연결을 마치면 로그아웃 후 `/login`에서 해당 SNS 버튼으로 로그인합니다. Fastify는 등록된 활성 관리자와 사무소 소속을 확인합니다. [Supabase Auth 일반 설정](https://supabase.com/docs/guides/auth/general-configuration)
+
 API 명세는 [docs/api-spec.md](docs/api-spec.md), 확인한 DB 관계는 [docs/database.md](docs/database.md)를 참고하세요.
 
 양쪽 디렉터리에서 `npm test`, `npm run typecheck`, `npm run build`를 실행할 수 있습니다.

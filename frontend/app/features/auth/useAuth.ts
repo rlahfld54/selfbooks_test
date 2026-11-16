@@ -1,10 +1,12 @@
 interface AuthUser { id: string; name: string; email: string; officeId: string; role: string }
+export type SocialProvider = 'kakao' | 'custom:naver' | 'google'
 
 export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const warning = useState('auth-warning', () => '')
   const { $authClient } = useNuxtApp()
   const { apiBase } = useRuntimeConfig().public
+  const router = useRouter()
 
   async function headers(): Promise<Record<string, string>> {
     if (!$authClient) return {}
@@ -31,17 +33,42 @@ export function useAuth() {
     localStorage.setItem('selfbooks:remember', String(remember))
     const { error } = await $authClient.auth.signInWithPassword({ email: email.trim(), password })
     if (error) return error.code === 'email_not_confirmed' ? '이메일 인증을 완료해 주세요.' : '이메일 또는 비밀번호를 확인해 주세요. 연결 상태도 확인해 주세요.'
+    return verifyAccess()
+  }
+
+  async function verifyAccess() {
     await restore()
-    if (!user.value) {
-      await $authClient.auth.signOut({ scope: 'local' })
-      return warning.value || '계정의 업무 접근 권한을 확인해 주세요.'
+    if (user.value) return ''
+    await $authClient?.auth.signOut({ scope: 'local' })
+    return warning.value || '계정의 업무 접근 권한을 확인해 주세요.'
+  }
+
+  async function startSocialAuth(provider: SocialProvider, remember?: boolean) {
+    if (!$authClient) return 'Supabase 연결 설정을 확인해 주세요.'
+    const redirectTo = new URL(router.resolve('/auth/callback').href, window.location.origin).href
+    const credentials = { provider, options: { redirectTo } }
+    if (remember !== undefined) {
+      localStorage.setItem('selfbooks:remember', String(remember))
+      const { error } = await $authClient.auth.signInWithOAuth(credentials)
+      return error ? '간편 로그인을 시작하지 못했습니다. 다시 시도해 주세요.' : ''
     }
-    return ''
+    if (!user.value) return '계정을 연결하려면 먼저 로그인해 주세요.'
+    const { error } = await $authClient.auth.linkIdentity(credentials)
+    if (error?.code === 'identity_already_exists') return '이미 연결된 SNS 계정입니다.'
+    return error ? 'SNS 계정을 연결하지 못했습니다. 계정 연결 설정을 확인해 주세요.' : ''
+  }
+
+  async function finishSocialAuth(code: string) {
+    if (!$authClient) return 'Supabase 연결 설정을 확인해 주세요.'
+    warning.value = ''
+    const { error } = await $authClient.auth.exchangeCodeForSession(code)
+    if (error) return '인증 요청이 만료됐거나 유효하지 않습니다. 다시 시도해 주세요.'
+    return verifyAccess()
   }
   async function logout() {
     const result = await $authClient?.auth.signOut({ scope: 'local' })
     user.value = null
     warning.value = result?.error ? '로그아웃을 완료하지 못했습니다. 다시 시도해 주세요.' : ''
   }
-  return { user, warning, headers, restore, login, logout }
+  return { user, warning, headers, restore, login, logout, startSocialAuth, finishSocialAuth }
 }

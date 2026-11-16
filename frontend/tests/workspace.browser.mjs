@@ -35,8 +35,9 @@ async function active(page, path, id) {
 const exact = true
 const timeout = 7000
 
-try {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+async function createWorkspaceContext(viewport) {
+  const context = await browser.newContext({ viewport })
+  await context.route('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@*/**', route => route.abort())
   await mockAuthenticatedContext(context)
   // Workspace regression runs as an onboarded user; first-visit flows have a separate suite.
   await context.addInitScript(
@@ -46,6 +47,11 @@ try {
     },
     { ...createOnboardingData(), completed: true },
   )
+  return context
+}
+
+try {
+  const context = await createWorkspaceContext({ width: 1440, height: 900 })
   const page = await context.newPage()
   page.setDefaultTimeout(timeout)
   track(page)
@@ -220,7 +226,8 @@ try {
   assert.ok(listCalls >= 3)
   console.log('PASS Fastify contract fixture, retry, detail and refetch')
 
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  const mobileContext = await createWorkspaceContext({ width: 390, height: 844 })
+  const mobile = await mobileContext.newPage()
   mobile.setDefaultTimeout(timeout)
   track(mobile)
   await visit(mobile, '/clients', '거래처관리')
