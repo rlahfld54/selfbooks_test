@@ -7,7 +7,7 @@ import { useWorkspacePreferences } from './useWorkspacePreferences'
 type Confirmation = { kind: 'close' | 'company' | 'navigate'; resolve: (accepted: boolean) => void }
 const routeTab = (route: RouteLocationNormalized) => route.meta.workspaceTab
 
-export function useWorkspaceNavigation(store: WorkspaceStore) {
+export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => boolean) {
   const router = useRouter()
   const pending = shallowRef<Confirmation>()
   const resumeTab = ref<TabId>()
@@ -86,6 +86,7 @@ export function useWorkspaceNavigation(store: WorkspaceStore) {
     preferences.ready.value = true
     preferences.persist()
     removeGuard = router.beforeEach((to, from) => {
+      if (to.path === '/login' && !canAccess()) return true
       if (permit?.path === to.fullPath && !permit.accepted) {
         permit.accepted = to
         return true

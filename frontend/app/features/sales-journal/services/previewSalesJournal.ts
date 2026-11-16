@@ -1,7 +1,8 @@
 import type { SalesMeta, SalesRecord } from './salesJournal.ts'
 
 export const previewSalesJournal = {
-  async metadata(): Promise<{ data: SalesMeta }> {
+  async metadata(signal?: AbortSignal): Promise<{ data: SalesMeta }> {
+    signal?.throwIfAborted()
     return {
       data: {
         company: '샘플 회계회사',
@@ -17,7 +18,8 @@ export const previewSalesJournal = {
       },
     }
   },
-  async list(): Promise<{ data: SalesRecord[] }> {
+  async list(signal?: AbortSignal): Promise<{ data: SalesRecord[] }> {
+    signal?.throwIfAborted()
     return {
       data: [{
         id: 'preview-sale',

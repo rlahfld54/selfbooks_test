@@ -19,6 +19,9 @@ try {
     }
   })
   let validPassword = false, authorized = true
+  let authUnavailable = false
+  let authChecks = 0
+  let officeStatus = 403
   const oauthProviders = []
   let codeExchanges = 0
   let linkedProvider = ''
@@ -59,7 +62,12 @@ try {
     await route.fulfill(validPassword ? { json: testSession() } : { status: 400, json: { code: 'invalid_credentials', msg: 'Invalid login credentials' } })
   })
   await context.route('**/auth/v1/logout**', route => route.fulfill({ status: 204 }))
-  await context.route('**/api/auth/me', route => route.fulfill(authorized ? { json: { data: testUser } } : { status: 403, json: { error: { message: '활성 관리자 계정과 사무소 소속 등록을 확인해 주세요.' } } }))
+  await context.route('**/api/auth/me', route => {
+    authChecks++
+    if (authUnavailable) return route.fulfill({ status: 503, json: {} })
+    return route.fulfill(authorized ? { json: { data: testUser } } : { status: 403, json: { error: { message: '활성 관리자 계정과 사무소 소속 등록을 확인해 주세요.' } } })
+  })
+  await context.route('**/api/office-registration', route => route.fulfill({ status: officeStatus, json: {} }))
   await page.goto(base + '/dashboard')
   await page.waitForURL('**/login')
   assert.equal(await page.getByText('테스트 계정 입력').count(), 0)
@@ -71,12 +79,31 @@ try {
   await page.getByRole('button', { name: '로그인', exact: true }).click()
   await page.getByRole('alert').filter({ hasText: '소속 등록' }).waitFor()
   authorized = true
+  const checksBeforeLogin = authChecks
   await page.getByRole('button', { name: '로그인', exact: true }).click()
-  await page.waitForURL('**/dashboard')
+  await page.getByRole('heading', { name: '홈 대시보드', exact: true }).waitFor()
+  assert.equal(authChecks, checksBeforeLogin + 1)
   assert.ok(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')))
   assert.equal(await page.evaluate(() => localStorage.getItem('selfbooks:auth')), null)
+  authUnavailable = true
   await page.reload()
+  await page.getByRole('alert').filter({ hasText: '로그인 상태를 확인하지 못했습니다' }).waitFor()
+  await page.waitForURL('**/dashboard')
+  assert.ok(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')))
+  authUnavailable = false
+  await page.getByRole('button', { name: '다시 시도', exact: true }).click()
   await page.getByRole('button', { name: '로그아웃', exact: true }).waitFor()
+  const checksAfterRestore = authChecks
+  await page.getByRole('button', { name: '기초정보관리', exact: true }).click()
+  await page.getByRole('button', { name: '회사등록', exact: true }).click()
+  await page.getByRole('alert').filter({ hasText: '이 업무에 접근할 권한이 없습니다.' }).waitFor()
+  officeStatus = 503
+  await page.getByRole('button', { name: '다시 조회', exact: true }).click()
+  await page.getByRole('alert').filter({ hasText: '잠시 후 다시 시도해 주세요.' }).waitFor()
+  await page.locator('#tab-home').click()
+  await page.getByRole('heading', { name: '홈 대시보드', exact: true }).waitFor()
+  assert.equal(authChecks, checksAfterRestore)
+  assert.ok(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')))
   await page.getByRole('button', { name: '로그아웃', exact: true }).click()
   await page.waitForURL('**/login')
   await page.waitForFunction(() => !sessionStorage.getItem('selfbooks:auth'))
@@ -108,7 +135,7 @@ try {
   authorized = false
   await page.getByRole('button', { name: '네이버 로그인' }).click()
   await page.getByRole('alert').filter({ hasText: '소속 등록' }).waitFor()
-  assert.equal(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')), null)
+  assert.ok(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')))
   await page.getByRole('link', { name: '로그인 화면으로' }).click()
 
   authorized = true
@@ -125,6 +152,17 @@ try {
   await page.waitForURL('**/dashboard')
   assert.equal(linkedProvider, 'custom:naver')
   assert.equal(codeExchanges, 3)
+
+  await page.setViewportSize({ width: 1440, height: 900 })
+  officeStatus = 401
+  const companyButton = page.getByRole('button', { name: '회사등록', exact: true })
+  if (await companyButton.count() === 0) {
+    await page.getByRole('button', { name: '기초정보관리', exact: true }).click()
+  }
+  await companyButton.click()
+  await page.waitForURL('**/login')
+  await page.getByRole('status').filter({ hasText: '로그인이 만료되었습니다' }).waitFor()
+  assert.equal(await page.evaluate(() => localStorage.getItem('selfbooks:auth')), null)
 
   assert.deepEqual(errors, [])
   console.log('PASS password login, mobile SNS buttons, OAuth cancellation, membership denial, PKCE login, account linking, remember, hydration')

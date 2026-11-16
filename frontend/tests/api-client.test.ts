@@ -25,3 +25,17 @@ test('HTTP failures retain backend status and code; aborts retain their original
   controller.abort()
   await assert.rejects(request('/clients', controller.signal), { name: 'AbortError' })
 })
+
+test('write options reach the transport and statusCode 403 is reported as a permission error', async () => {
+  const body = { name: 'sample' }
+  const request = createApiClient(async (_path, options) => {
+    assert.equal(options.method, 'POST')
+    assert.equal(options.body, body)
+    assert.equal(options.timeout, 15000)
+    throw { statusCode: 403 }
+  }, 'http://localhost:4000/api', 'same-origin', 15000)
+  await assert.rejects(request('/sales-journal', { method: 'POST', body }), {
+    status: 403,
+    message: '이 업무에 접근할 권한이 없습니다.',
+  })
+})

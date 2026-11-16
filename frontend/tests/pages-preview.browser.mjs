@@ -68,6 +68,9 @@ try {
   await page.getByRole('row', { name: /샘플 문구점/ }).click()
   await page.locator('dd').filter({ hasText: '샘플 문구점' }).waitFor()
 
+  await visit('company/', '회사등록')
+  await page.getByText(/사무소 정보: 샘플 세무회계사무소/).waitFor()
+
   await visit('sales-journal/', '매입매출전표입력')
   await page.getByRole('row', { name: /사무용품/ }).click()
   assert.equal(await page.getByPlaceholder('전표에 남길 내용을 입력하세요').inputValue(), '공개 미리보기용 샘플 전표')

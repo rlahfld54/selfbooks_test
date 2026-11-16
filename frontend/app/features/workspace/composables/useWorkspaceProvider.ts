@@ -7,8 +7,9 @@ import { useAuth } from '~/features/auth/useAuth'
 // Called once by the layout: each layout/SSR request owns its workspace.
 export function useWorkspaceProvider() {
   const { user } = useAuth()
+  const { pagesPreview } = useRuntimeConfig().public
   const store = createWorkspaceStore(useRoute().meta.workspaceTab ?? 'home', user.value?.id ?? 'demo-admin')
-  const navigation = useWorkspaceNavigation(store)
+  const navigation = useWorkspaceNavigation(store, () => pagesPreview || Boolean(user.value))
   const workspace = { ...store, ...navigation }
   provide(workspaceKey, workspace)
   return workspace

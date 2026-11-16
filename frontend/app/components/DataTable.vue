@@ -19,9 +19,10 @@ const props = withDefaults(
     loading?: boolean
     pageSize?: number
     caption?: string
+    sample?: boolean
     viewState?: TableViewState
   }>(),
-  { rowKey: 'id', density: 'normal', pageSize: 5, caption: '조회 결과' },
+  { rowKey: 'id', density: 'normal', pageSize: 5, caption: '조회 결과', sample: true },
 )
 const emit = defineEmits<{
   select: [row: Record<string, unknown>]
@@ -63,7 +64,7 @@ function sort(key: string) {
 <template>
   <div class="data-table">
     <div class="table-controls">
-      <span>{{ rows.length }}개 항목 <span class="muted">· 읽기 전용 샘플</span></span
+      <span>{{ rows.length }}개 항목 <span v-if="sample" class="muted">· 읽기 전용 샘플</span></span
       ><UiSelect
         aria-label="테이블 밀도"
         :model-value="density"

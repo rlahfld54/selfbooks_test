@@ -1,5 +1,6 @@
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import { useAuth } from '~/features/auth/useAuth'
+import { useBackendApi } from '~/composables/useBackendApi'
+import { ApiRequestError } from '~/services/api-client'
 import { salesJournalSession } from './useSalesJournalSession'
 import { previewSalesJournal } from '../services/previewSalesJournal'
 import {
@@ -15,21 +16,27 @@ export function useSalesJournal() {
   const { activeTab, setDirty } = useWorkspaceContext()
   const tab = activeTab.value,
     session = salesJournalSession(tab)
-  const { apiBase, pagesPreview } = useRuntimeConfig().public
-  const auth = useAuth()
-  const service = pagesPreview ? null : createSalesJournalService(async (path, options) =>
-    $fetch(path, {
-      baseURL: apiBase,
-      ...options,
-      ...(options?.method === 'DELETE' ? { body: {} } : {}),
-      headers: { 'Content-Type': 'application/json', ...await auth.headers() },
-      retry: 0,
-      timeout: 15000,
-    }),
+  const { pagesPreview } = useRuntimeConfig().public
+  const service = pagesPreview ? null : createSalesJournalService(useBackendApi(15000))
+  const source = service ?? previewSalesJournal
+  const query = useAsyncData(
+    'sales-journal:' + useId(),
+    async (_nuxt, { signal }) => {
+      const controller = new AbortController()
+      const requestSignal = AbortSignal.any([signal, controller.signal])
+      try {
+        const [metadata, records] = await Promise.all([source.metadata(requestSignal), source.list(requestSignal)])
+        return { metadata: metadata.data, records: records.data }
+      } finally {
+        controller.abort()
+      }
+    },
+    { server: false, lazy: true, dedupe: 'cancel', getCachedData: () => undefined },
   )
+  onBeforeUnmount(query.clear)
   const meta = ref<SalesMeta>()
   const busy = ref(false),
-    loading = ref(true),
+    loading = computed(() => query.status.value === 'idle' || query.status.value === 'pending'),
     error = ref(''),
     notice = ref(''),
     filterError = ref('')
@@ -84,10 +91,9 @@ export function useSalesJournal() {
     ),
   )
   function message(failure: unknown) {
-    return (
-      (failure as { data?: { error?: { message?: string } } })?.data?.error?.message ??
-      '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'
-    )
+    return failure instanceof ApiRequestError
+      ? failure.message
+      : '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'
   }
   function edit() {
     setDirty(tab)
@@ -136,35 +142,34 @@ export function useSalesJournal() {
       setDirty(tab, false)
     })
   }
-  async function load() {
-    loading.value = true
-    error.value = ''
-    try {
-      const source = service ?? previewSalesJournal
-      const [metadata, records] = await Promise.all([source.metadata(), source.list()])
-      meta.value = metadata.data
-      session.rows = records.data
-      if (session.selected && !tab.dirty) {
-        const selected = records.data.find((row) => row.id === session.selected)
-        if (selected) session.draft = copyDraft(selected)
-        else reset()
-      }
-      if (!session.initialized) {
-        reset()
-        session.filter = {
-          from: meta.value.periods.at(-1)?.start ?? '',
-          to: meta.value.periods[0]?.end ?? '',
-          type: '',
-          query: '',
-        }
-        session.applied = { ...session.filter }
-        session.initialized = true
-      }
-    } catch (failure) {
-      error.value = message(failure)
-    } finally {
-      loading.value = false
+  watch(query.data, (data) => {
+    if (!data) return
+    meta.value = data.metadata
+    session.rows = [...data.records]
+    if (session.selected && !tab.dirty) {
+      const selected = data.records.find((row) => row.id === session.selected)
+      if (selected) session.draft = copyDraft(selected)
+      else reset()
     }
+    if (!session.initialized) {
+      reset()
+      session.filter = {
+        from: data.metadata.periods.at(-1)?.start ?? '',
+        to: data.metadata.periods[0]?.end ?? '',
+        type: '',
+        query: '',
+      }
+      session.applied = { ...session.filter }
+      session.initialized = true
+    }
+  })
+  watch(query.error, (failure) => {
+    if (failure) error.value = failure.message
+  })
+  async function load() {
+    if (busy.value) return
+    error.value = ''
+    await query.refresh()
   }
   function applyFilter() {
     if (!session.filter.from || !session.filter.to || session.filter.from > session.filter.to) {
@@ -211,7 +216,7 @@ export function useSalesJournal() {
     }
   }
   async function remove() {
-    if (!service || busy.value) return
+    if (!service || busy.value || loading.value) return
     deleting.value = false
     busy.value = true
     error.value = ''
@@ -226,7 +231,6 @@ export function useSalesJournal() {
       busy.value = false
     }
   }
-  onMounted(load)
   return {
     pagesPreview,
     tab,

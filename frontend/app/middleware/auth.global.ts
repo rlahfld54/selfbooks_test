@@ -7,8 +7,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const nuxtApp = useNuxtApp()
   const router = useRouter()
   const auth = useAuth()
-  await auth.restore()
-  if (auth.user.value) return
+  if (!auth.user.value && !auth.restoreIssue.value) await auth.restore()
+  if (auth.user.value || auth.restoreIssue.value) return
 
   if (nuxtApp.isHydrating && nuxtApp.payload.serverRendered) {
     nuxtApp.hooks.hookOnce('app:suspense:resolve', () => {

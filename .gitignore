@@ -30,7 +30,11 @@ Thumbs.db
 
 
 /docs/*
+!/docs/partner-import.md
 
 /backend/migrations/*
 /backend/tests/*
 /backend/migrations/*
+!/backend/migrations/007_tax_office_partners.sql
+!/backend/tests/partners.test.ts
+!/backend/tests/partners.integration.ts

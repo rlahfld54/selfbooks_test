@@ -29,7 +29,7 @@ const columns = [
       </div>
     </div>
     <LoadingState v-if="status === 'pending' || status === 'idle'" />
-    <ErrorState v-else-if="error" message="수임업체 목록을 불러오지 못했습니다." @retry="refresh()" />
+    <ErrorState v-else-if="error" :message="error.message" @retry="refresh()" />
     <DataTable
       v-else
       :columns="columns"
@@ -43,7 +43,7 @@ const columns = [
   </UiCard>
   <UiCard v-if="selectedId" class="section-gap" title="수임업체 상세">
     <LoadingState v-if="detail.status.value === 'pending'" />
-    <ErrorState v-else-if="detail.error.value" message="수임업체 상세 정보를 불러오지 못했습니다." @retry="detail.refresh()" />
+    <ErrorState v-else-if="detail.error.value" :message="detail.error.value.message" @retry="detail.refresh()" />
     <dl v-else-if="detail.data.value?.data?.id === selectedId">
       <dt>수임업체명</dt><dd>{{ detail.data.value.data.name }}</dd>
       <dt>납세자 유형</dt><dd>{{ detail.data.value.data.taxpayerKind }}</dd>

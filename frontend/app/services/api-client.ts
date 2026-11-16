@@ -1,8 +1,12 @@
 export type ApiResponse<T> = { data: T }
-type Transport = <T>(path: string, options: {
+export type ApiRequestOptions = {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  body?: object
+  signal?: AbortSignal
+}
+type Transport = <T>(path: string, options: ApiRequestOptions & {
   baseURL: string
   credentials: RequestCredentials
-  signal?: AbortSignal
   retry: number
   timeout: number
 }) => Promise<T>
@@ -18,18 +22,30 @@ export class ApiRequestError extends Error {
   }
 }
 
-export function createApiClient(transport: Transport, baseURL: string, credentials: RequestCredentials = 'same-origin') {
-  return async function request<T>(path: string, signal?: AbortSignal) {
+export function createApiClient(
+  transport: Transport,
+  baseURL: string,
+  credentials: RequestCredentials = 'same-origin',
+  timeout = 7000,
+) {
+  return async function request<T>(path: string, input?: AbortSignal | ApiRequestOptions) {
+    const options = input instanceof AbortSignal ? { signal: input } : input
+    const signal = options?.signal
     try {
-      return await transport<ApiResponse<T>>(path, { baseURL, credentials, signal, retry: 0, timeout: 7000 })
+      signal?.throwIfAborted()
+      return await transport<ApiResponse<T>>(path, { ...options, baseURL, credentials, retry: 0, timeout })
     } catch (error) {
       if (signal?.aborted) throw signal.reason
-      const failure = error as { status?: number; data?: { error?: { code?: unknown; message?: unknown } } } | null
+      if (error instanceof ApiRequestError) throw error
+      const failure = error as { status?: number; statusCode?: number; data?: { error?: { code?: unknown; message?: unknown } } } | null
       const body = failure?.data?.error
+      const status = failure?.status ?? failure?.statusCode
       throw new ApiRequestError(
-        failure?.status,
+        status,
         typeof body?.code === 'string' ? body.code : 'REQUEST_FAILED',
-        typeof body?.message === 'string' ? body.message : 'API request failed',
+        typeof body?.message === 'string' ? body.message : status === 403
+          ? '이 업무에 접근할 권한이 없습니다.'
+          : '서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
         error,
       )
     }

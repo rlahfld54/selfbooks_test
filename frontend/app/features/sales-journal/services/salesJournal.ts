@@ -1,3 +1,5 @@
+import type { ApiRequestOptions } from '../../../services/api-client.ts'
+
 export interface JournalLine {
   side: 'debit' | 'credit'
   account: string
@@ -101,12 +103,12 @@ export function filterRecords(rows: SalesRecord[], filter: SalesFilter) {
 }
 export type SalesTransport = <T>(
   path: string,
-  options?: { method?: 'GET' | 'POST' | 'PUT' | 'DELETE'; body?: SalesDraft },
+  options?: ApiRequestOptions,
 ) => Promise<{ data: T }>
 export function createSalesJournalService(request: SalesTransport) {
   return {
-    metadata: () => request<SalesMeta>('/sales-journal/meta'),
-    list: () => request<SalesRecord[]>('/sales-journal'),
+    metadata: (signal?: AbortSignal) => request<SalesMeta>('/sales-journal/meta', { signal }),
+    list: (signal?: AbortSignal) => request<SalesRecord[]>('/sales-journal', { signal }),
     save: (draft: SalesDraft) =>
       request<SalesRecord>(
         draft.version ? `/sales-journal/${encodeURIComponent(draft.id)}` : '/sales-journal',
@@ -115,7 +117,7 @@ export function createSalesJournalService(request: SalesTransport) {
     remove: (row: SalesDraft) =>
       request<{ id: string }>(
         `/sales-journal/${encodeURIComponent(row.id)}?version=${row.version}`,
-        { method: 'DELETE' },
+        { method: 'DELETE', body: {} },
       ),
   }
 }

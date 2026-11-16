@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useBackendApi } from '~/composables/useBackendApi'
-import { applyOfficeRegistration, type OfficeRegistration } from './officeRegistrationData'
+import { applyOfficeRegistration, previewOfficeRegistration, type OfficeRegistration } from './officeRegistrationData'
+import { ApiRequestError } from '~/services/api-client'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { companyRegistrationSession } from './registrationSession'
 import RegistrationReviewForm from './RegistrationReviewForm.vue'
 import { editRegistrationField, confirmRegistrationSection } from './registrationReview'
 const { activeTab, navigate, setDirty } = useWorkspaceContext()
 const session = companyRegistrationSession(activeTab.value)
+const { pagesPreview } = useRuntimeConfig().public
 const request = useBackendApi()
 const loading = ref(false)
 const error = ref('')
@@ -17,13 +19,17 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const { data } = await request<OfficeRegistration>('/office-registration', controller.signal)
+    const data = pagesPreview
+      ? previewOfficeRegistration
+      : (await request<OfficeRegistration>('/office-registration', controller.signal)).data
     if (controller.signal.aborted) return
     applyOfficeRegistration(session, data)
     session.officeName = data.name ?? ''
     session.loaded = true
-  } catch {
-    if (!controller.signal.aborted) error.value = '사무소 정보를 불러오지 못했습니다. 백엔드 실행 상태와 서버의 사무소 ID 설정을 확인해 주세요.'
+  } catch (failure) {
+    if (!controller.signal.aborted) {
+      error.value = failure instanceof ApiRequestError ? failure.message : '사무소 정보를 불러오지 못했습니다. 다시 조회해 주세요.'
+    }
   } finally { loading.value = false }
 }
 onMounted(load)
@@ -51,10 +57,10 @@ function confirm(section: string, value: boolean) {
       <UiBadge tone="neutral">정보 검토 및 수정</UiBadge>
       <UiButton @click="navigate('clients')">수임업체 목록 조회</UiButton>
     </PageToolbar>
-    <p class="info-banner">사무소 정보: {{ session.officeName || '조회 중' }} · 서버에 지정된 사무소의 DB 정보를 표시합니다.</p>
+    <p class="info-banner">사무소 정보: {{ session.officeName || '조회 중' }} · {{ pagesPreview ? '공개 미리보기용 샘플' : '서버에 지정된 사무소의 DB 정보' }}</p>
     <p v-if="loading" role="status">사무소 정보를 불러오는 중입니다.</p>
     <div v-if="error" role="alert"><p>{{ error }}</p><UiButton @click="load">다시 조회</UiButton></div>
-    <RegistrationReviewForm v-if="session.loaded" prefix="company-field" :sections="sections" :review="session" source-notice="DB에 저장된 사무소 정보를 불러왔습니다. 화면에서 수정한 내용과 검토 체크는 열린 탭에서만 유지되며 DB에 저장되지 않습니다." @edit="edit" @confirm="confirm" />
+    <RegistrationReviewForm v-if="session.loaded" prefix="company-field" :sections="sections" :review="session" :source-notice="pagesPreview ? '화면에서 수정한 내용과 검토 체크는 열린 탭에 유지됩니다.' : 'DB에 저장된 사무소 정보를 불러왔습니다. 화면에서 수정한 내용과 검토 체크는 열린 탭에서만 유지되며 DB에 저장되지 않습니다.'" @edit="edit" @confirm="confirm" />
     <div class="section-switcher section-gap" aria-label="최초 설정 안내">
       <span>다음 설정</span><UiButton @click="navigate('settings')">환경등록</UiButton><UiButton @click="navigate('accounts')">계정과목 및 적요관리</UiButton>
     </div>

@@ -39,6 +39,11 @@ async function createWorkspaceContext(viewport) {
   const context = await browser.newContext({ viewport })
   await context.route('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@*/**', route => route.abort())
   await mockAuthenticatedContext(context)
+  await context.route('**/api/partners', route => route.fulfill({ json: { data: [{
+    id: 'workspace-partner', name: '(주)미래산업', code: '1003', registration: '0123456789', contact: '',
+    status: '거래 중', amount: '', date: '—', sourceLine: 0, importIssues: [],
+    information: { name: '(주)미래산업', registration: '0123456789', code: '1003' },
+  }] } }))
   // Workspace regression runs as an onboarded user; first-visit flows have a separate suite.
   await context.addInitScript(
     (data) => {

@@ -1,6 +1,15 @@
 import type { RegistrationReview } from './registrationReview'
 
 export type OfficeRegistration = Record<string, string | null>
+
+export const previewOfficeRegistration: OfficeRegistration = {
+  name: '샘플 세무회계사무소',
+  representative_name: '김가람',
+  business_type: '서비스업',
+  business_item: '세무회계',
+  business_memo: '공개 미리보기용 샘플 정보입니다.',
+}
+
 export function applyOfficeRegistration(state: RegistrationReview, office: OfficeRegistration) {
   const fields: Record<string, string> = {
     회사명: 'name', 사업자등록번호: 'business_registration_number', 법인등록번호: 'corporate_registration_number',

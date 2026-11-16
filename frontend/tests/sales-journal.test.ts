@@ -54,6 +54,22 @@ test('filter combines inclusive dates, type and text', () => {
     0,
   )
 })
+
+test('metadata and list forward the same abort signal to both requests', async () => {
+  const controller = new AbortController()
+  const paths: string[] = []
+  const request: SalesTransport = async (path, options) => {
+    paths.push(path)
+    assert.equal(options?.signal, controller.signal)
+    options?.signal?.throwIfAborted()
+    throw new Error('Expected a cancelled signal')
+  }
+  const service = createSalesJournalService(request)
+  controller.abort()
+  await assert.rejects(service.metadata(controller.signal), { name: 'AbortError' })
+  await assert.rejects(service.list(controller.signal), { name: 'AbortError' })
+  assert.deepEqual(paths, ['/sales-journal/meta', '/sales-journal'])
+})
 test('integer totals retain precision and incomplete inputs are safe', () => {
   assert.equal(sumAmounts(['900719925474099312345', '55']), '900719925474099312400')
   assert.equal(sumAmounts(['', '-', '0']), '0')

@@ -1,31 +1,85 @@
+import type { NuxtApp } from '#app'
+import { ApiRequestError, createApiClient } from '~/services/api-client'
+
 interface AuthUser { id: string; name: string; email: string; officeId: string; role: string }
 export type SocialProvider = 'kakao' | 'custom:naver' | 'google'
+const restores = new WeakMap<NuxtApp, { revision: number; promise: Promise<void> }>()
 
 export function useAuth() {
   const user = useState<AuthUser | null>('auth-user', () => null)
   const warning = useState('auth-warning', () => '')
-  const { $authClient } = useNuxtApp()
-  const { apiBase } = useRuntimeConfig().public
+  const restoreIssue = useState('auth-restore-issue', () => '')
+  const verifying = useState('auth-verifying', () => false)
+  const revision = useState('auth-revision', () => 0)
+  const nuxtApp = useNuxtApp()
+  const { $authClient } = nuxtApp
+  const { apiBase, pagesPreview } = useRuntimeConfig().public
   const router = useRouter()
 
   async function headers(): Promise<Record<string, string>> {
     if (!$authClient) return {}
     const { data, error } = await $authClient.auth.getSession()
-    if (error || !data.session) { user.value = null; return {} }
+    if (error) throw error
+    if (!data.session) return {}
     return { Authorization: `Bearer ${data.session.access_token}` }
   }
-  async function restore() {
-    if (!import.meta.client) return
-    const authHeaders = await headers()
-    if (!authHeaders.Authorization) { user.value = null; return }
+  async function checkAccess(started: number) {
     try {
-      const result = await $fetch<{ data: AuthUser }>('/auth/me', { baseURL: apiBase, headers: authHeaders, retry: 0, timeout: 10000 })
+      const authHeaders = await headers()
+      if (started !== revision.value) return
+      if (!authHeaders.Authorization) {
+        user.value = null
+        restoreIssue.value = ''
+        return
+      }
+      const request = createApiClient(
+        (path, options) => $fetch(path, { ...options, headers: authHeaders }),
+        apiBase, 'same-origin', 10000,
+      )
+      const result = await request<AuthUser>('/auth/me')
+      if (started !== revision.value) return
       user.value = result.data
+      restoreIssue.value = ''
       warning.value = ''
     } catch (error) {
-      user.value = null
-      warning.value = (error as { data?: { error?: { message?: string } } }).data?.error?.message || '서버 연결을 확인한 뒤 다시 로그인해 주세요.'
+      if (started !== revision.value) return
+      if (error instanceof ApiRequestError && error.status === 401) {
+        warning.value = error.message
+        restoreIssue.value = ''
+        user.value = null
+        await $authClient?.auth.signOut({ scope: 'local' }).catch(() => undefined)
+        return
+      }
+      restoreIssue.value = error instanceof ApiRequestError && error.status === 403
+        ? error.message
+        : '로그인 상태를 확인하지 못했습니다. 서버 연결을 확인한 뒤 다시 시도해 주세요.'
     }
+  }
+  function restore() {
+    if (!import.meta.client || pagesPreview) return
+    const started = revision.value
+    const pending = restores.get(nuxtApp)
+    if (pending?.revision === started) return pending.promise
+    verifying.value = true
+    const promise = checkAccess(started).finally(() => {
+      if (restores.get(nuxtApp)?.promise !== promise) return
+      restores.delete(nuxtApp)
+      verifying.value = false
+    })
+    restores.set(nuxtApp, { revision: started, promise })
+    return promise
+  }
+
+  async function expireSession(authorization: string | undefined, started: number) {
+    if (!import.meta.client || started !== revision.value) return
+    const current = await headers().catch(() => null)
+    if (!current || (current.Authorization && current.Authorization !== authorization) || started !== revision.value) return
+    revision.value++
+    user.value = null
+    restoreIssue.value = ''
+    warning.value = '로그인이 만료되었습니다. 다시 로그인해 주세요.'
+    try { await $authClient?.auth.signOut({ scope: 'local' }) }
+    finally { await router.replace('/login') }
   }
   async function login(email: string, password: string, remember: boolean) {
     if (!$authClient) return 'Supabase 연결 설정을 확인해 주세요.'
@@ -37,10 +91,11 @@ export function useAuth() {
   }
 
   async function verifyAccess() {
+    revision.value++
+    user.value = null
     await restore()
     if (user.value) return ''
-    await $authClient?.auth.signOut({ scope: 'local' })
-    return warning.value || '계정의 업무 접근 권한을 확인해 주세요.'
+    return restoreIssue.value || warning.value || '계정의 업무 접근 권한을 확인해 주세요.'
   }
 
   async function startSocialAuth(provider: SocialProvider, remember?: boolean) {
@@ -66,9 +121,11 @@ export function useAuth() {
     return verifyAccess()
   }
   async function logout() {
+    revision.value++
+    restoreIssue.value = ''
     const result = await $authClient?.auth.signOut({ scope: 'local' })
     user.value = null
     warning.value = result?.error ? '로그아웃을 완료하지 못했습니다. 다시 시도해 주세요.' : ''
   }
-  return { user, warning, headers, restore, login, logout, startSocialAuth, finishSocialAuth }
+  return { user, warning, restoreIssue, verifying, revision, headers, restore, expireSession, login, logout, startSocialAuth, finishSocialAuth }
 }
