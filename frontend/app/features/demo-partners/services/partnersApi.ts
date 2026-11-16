@@ -1,4 +1,26 @@
 import type { ImportedPartner } from './partnerImport.ts'
+import { isCorporationNumber } from '../../../utils/number-validation.ts'
+import { isEmail } from '../../../utils/email-validation.ts'
+import { isBusinessNumber, isPhoneNumber, isMobileNumber } from '../../../utils/number-validation.ts'
+
+export function partnerNumberIssues(information: Record<string, string>): Record<string, string> {
+  const issues: Record<string, string> = {}
+  if (!isCorporationNumber(information.corporationNumber, { required: false })) issues.corporationNumber = '법인등록번호 형식 확인 (숫자 13자리 또는 000000-0000000)'
+  if (!isEmail(information.email, { required: false })) issues.email = '이메일 형식 확인 (예: name@example.com)'
+  if (!isBusinessNumber(information.registration)) issues.registration = '사업자등록번호 형식 확인 (숫자 10자리 또는 000-00-00000)'
+  if (!isPhoneNumber(information.phone, { required: false })) issues.phone = '전화번호 형식 확인 (예: 02-1234-5678, 010-1234-5678, 1588-1234)'
+  if (!isMobileNumber(information.mobile, { required: false })) issues.mobile = '휴대전화번호 형식 확인 (010-0000-0000 또는 숫자 11자리)'
+  return issues
+}
+
+/** 공통 테이블 슬롯의 unknown 값을 문자열 오류 메시지로 좁힌다. */
+export function partnerCellIssue(row: Record<string, unknown>, key: string): string | undefined {
+  const issues = row.numberIssues
+  if (!issues || typeof issues !== 'object' || Array.isArray(issues)) return undefined
+  if (!Object.prototype.hasOwnProperty.call(issues, key)) return undefined
+  const message = (issues as Record<string, unknown>)[key]
+  return typeof message === 'string' ? message : undefined
+}
 
 export type PartnersTransport = <T>(
   path: string,
@@ -46,5 +68,6 @@ export function partnerTableRow(row: ImportedPartner) {
       partnerColumns.map((column) => [column.key, row.information[column.key] || '—']),
     ),
     id: row.id,
+    numberIssues: partnerNumberIssues(row.information),
   }
 }

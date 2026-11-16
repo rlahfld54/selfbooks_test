@@ -1,9 +1,17 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createPartnersService, partnerColumns, partnerTableRow } from '../app/features/demo-partners/services/partnersApi.ts'
+import { createPartnersService, partnerColumns, partnerTableRow, partnerCellIssue } from '../app/features/demo-partners/services/partnersApi.ts'
 import { preparePartners } from '../app/features/demo-partners/services/partnerImport.ts'
 
 const rows = () => preparePartners({ headers: [], unknown: [], rows: [{ line: 2, values: { name: '테스트', registration: '0123456789', postalCode: '00123', phone: '010-0000-0000' }, errors: [], warnings: [] }] }, [])
+test('cell issue safely narrows generic table rows to string messages', () => {
+  assert.equal(partnerCellIssue({ numberIssues: { email: '이메일 형식 확인' } }, 'email'), '이메일 형식 확인')
+  assert.equal(partnerCellIssue({}, 'email'), undefined)
+  for (const numberIssues of [null, 'bad', [], {}, { email: 123 }]) {
+    assert.equal(partnerCellIssue({ numberIssues }, 'email'), undefined)
+  }
+  assert.equal(partnerCellIssue({ numberIssues: {} }, 'toString'), undefined)
+})
 test('table exposes exactly the requested 15 columns and preserves leading zeros', () => {
   assert.equal(partnerColumns.length, 15)
   const row = partnerTableRow(rows()[0]!)

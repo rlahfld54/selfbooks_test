@@ -6,9 +6,29 @@ import { demoPartnerDetailSession } from './composables/useDemoPartnerDetail'
 import { partnerListSession } from './composables/usePartnerListSession'
 import PartnerImportDialog from './components/PartnerImportDialog.vue'
 import type { ImportedPartner } from './services/partnerImport'
-import { createPartnersService, partnerColumns, partnerTableRow } from './services/partnersApi'
+import {
+  createPartnersService,
+  partnerColumns,
+  partnerTableRow,
+  partnerCellIssue,
+} from './services/partnersApi'
 import { useBackendApi } from '~/composables/useBackendApi'
 import { ApiRequestError } from '~/services/api-client'
+import {
+  formatBusinessNumber,
+  formatCorporationNumber,
+  formatPhoneNumber,
+  formatMobileNumber,
+} from '~/utils/number-validation'
+import { formatEmail } from '~/utils/email-validation'
+
+const cellFormatters = {
+  registration: formatBusinessNumber,
+  corporationNumber: formatCorporationNumber,
+  phone: formatPhoneNumber,
+  mobile: formatMobileNumber,
+  email: formatEmail,
+}
 
 const props = defineProps<{ mode: 'partners' | 'ledger' }>()
 const { company, activeTab, density, setDirty } = useWorkspaceContext()
@@ -38,7 +58,7 @@ async function load() {
   error.value = ''
   try {
     session.imported = (await service.list()).data
-    console.log('데이터 = ', session.imported);
+    console.log('데이터 = ', session.imported)
     session.loaded = true
   } catch (failure) {
     error.value = message(failure)
@@ -149,6 +169,20 @@ function selectRow(row: Record<string, unknown>) {
         @select="selectRow"
         @update:density="density = $event"
       >
+        <template
+          v-for="key in ['registration', 'corporationNumber', 'phone', 'mobile', 'email']"
+          :key="key"
+          #[`cell-${key}`]="{ row, value }"
+        >
+          <span>{{ cellFormatters[key](String(value ?? '')) }}</span>
+          <span
+            v-if="partnerCellIssue(row, key)"
+            class="number-issue"
+            :title="partnerCellIssue(row, key)"
+          >
+            {{ partnerCellIssue(row, key) }}
+          </span>
+        </template>
         <template #cell-status="{ value }">
           <UiBadge :tone="value === '확인요망' ? 'warning' : 'success'">{{ value }}</UiBadge>
         </template>
@@ -167,6 +201,13 @@ function selectRow(row: Record<string, unknown>) {
 </template>
 
 <style scoped>
+.number-issue {
+  display: block;
+  color: var(--danger);
+  font-size: 12px;
+  white-space: normal;
+  max-width: 280px;
+}
 :deep(.table-scroll table) {
   min-width: 100%;
   width: max-content;
