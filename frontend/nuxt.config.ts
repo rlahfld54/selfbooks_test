@@ -1,22 +1,53 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  modules: ['@nuxt/eslint'],
+  // Nuxt 호환성 기준일
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-  devServer: { host: 'localhost', port: 3000 },
-  runtimeConfig: { public: { apiBase: 'http://localhost:4000/api', pagesPreview: false, supabaseUrl: '', supabasePublishableKey: '' } },
-  css: [
-    '~/assets/css/tokens.css',
-    '~/assets/main.css',
-    '~/assets/css/components.css',
-    '~/assets/css/common.css',
-  ],
+
+  // 개발 도구와 로컬 개발 서버
+  devtools: {
+    enabled: true,
+  },
+
+  devServer: {
+    host: 'localhost',
+    port: 3000,
+  },
+
+  // 전역 스타일
+  css: ['~/assets/main.css'],
+
+  eslint: {
+    config: {
+      stylistic: {
+        semi: false,
+        quotes: 'single',
+        commaDangle: 'always-multiline',
+      },
+    },
+  },
+
+  // API, GitHub Pages 미리보기, Supabase 로그인
+  runtimeConfig: {
+    public: {
+      apiBase: 'http://localhost:4000/api',
+      pagesPreview: false,
+      supabaseUrl: '',
+      supabasePublishableKey: '',
+    },
+  },
+
+  // 페이지 기본 정보
   app: {
-    // Nuxt resolves app.baseURL from NUXT_APP_BASE_URL, defaulting to '/'.
     head: {
-      title: 'Accounting Pro',
-      htmlAttrs: { lang: 'ko' },
+      title: 'AAT | 세무회계 관리 시스템',
+      htmlAttrs: {
+        lang: 'ko',
+      },
       meta: [
-        { name: 'description', content: 'AAT · AI Accounting Tax 공통 UI 데모 — 샘플 데이터' },
+        {
+          name: 'description',
+          content: 'AAT 세무회계 통합 관리 시스템',
+        },
       ],
     },
   },
