@@ -19,7 +19,7 @@ async function open(id: TabId) {
 <template>
   <div class="reference-workspace app">
     <aside class="sidebar" :class="{ 'mobile-open': mobileOpen }">
-      <div class="brand"><div class="brand-icon">A</div><div><b>AAT <span>Accounting Pro</span></b><small>AI ACCOUNTING &amp; TAX</small></div></div>
+      <div class="brand"><AatBrand /></div>
       <div class="workspace-select"><button class="org-switch" @click="open('organization')"><span class="circle">원</span><span><strong>회계법인 원지</strong><small>관리자 워크스페이스</small></span><span class="chev">⌄</span></button></div>
       <nav class="nav" aria-label="업무 메뉴">
         <template v-for="group in groups" :key="group.title">
@@ -37,4 +37,3 @@ async function open(id: TabId) {
     <WorkspaceConfirmation />
   </div>
 </template>
-<style src="~/features/management/reference-workspace.css"></style>

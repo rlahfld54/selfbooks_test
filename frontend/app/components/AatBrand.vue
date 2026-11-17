@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import horizontalLogo from '~/assets/aat-logo-horizontal.svg'
 import symbolLogo from '~/assets/aat-symbol.svg'
-withDefaults(defineProps<{ compact?: boolean; inverse?: boolean }>(), { compact: false, inverse: false })
+defineProps<{ compact?: boolean }>()
 </script>
 <template>
-  <span class="aat-brand" :class="{ 'aat-brand-inverse': inverse, 'aat-brand-compact': compact }">
-    <img :src="symbolLogo" alt="" class="aat-logo-symbol" />
-    <span :class="compact ? 'sr-only' : 'aat-brand-wordmark'">Accounting Pro</span>
+  <span class="aat-brand">
+    <img v-if="compact" :src="symbolLogo" alt="AAT" class="aat-logo-symbol" />
+    <img v-else :src="horizontalLogo" alt="AAT · AI Accounting Tax" class="aat-logo-horizontal" />
   </span>
 </template>

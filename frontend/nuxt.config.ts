@@ -4,7 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   devServer: { host: 'localhost', port: 3000 },
   runtimeConfig: { public: { apiBase: 'http://localhost:4000/api', pagesPreview: false, supabaseUrl: '', supabasePublishableKey: '' } },
-  css: ['~/assets/css/tokens.css', '~/assets/main.css', '~/assets/css/components.css'],
+  css: [
+    '~/assets/css/tokens.css',
+    '~/assets/main.css',
+    '~/assets/css/components.css',
+    '~/assets/css/common.css',
+  ],
   app: {
     // Nuxt resolves app.baseURL from NUXT_APP_BASE_URL, defaulting to '/'.
     head: {
