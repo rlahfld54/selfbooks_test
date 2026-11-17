@@ -1,0 +1,114 @@
+<script setup lang="ts">
+import ManagementBadge from '../ManagementBadge.vue'
+import ManagementDialog from '../ManagementDialog.vue'
+
+import type { Client } from '../data'
+import type { ManagementDestination } from '../view-types'
+defineProps<{ client: Client }>()
+const emit = defineEmits<{
+  close: []
+  assign: []
+  navigate: [destination: ManagementDestination]
+}>()
+</script>
+
+<template>
+  <ManagementDialog
+    :label="client.name"
+    drawer
+    @close="emit('close')"
+  >
+    <template #heading>
+      <div>
+        <span class="eyebrow">CLIENT DETAILS · {{ client.id }}</span>
+        <h2>{{ client.name }}</h2>
+        <div class="drawer-badges">
+          <ManagementBadge :value="client.type" /><ManagementBadge
+            :value="client.status"
+          />
+        </div>
+      </div>
+    </template>
+    <section class="drawer-section">
+      <h3>업체 기본정보</h3>
+      <div class="info-row">
+        <span class="label">사업자등록번호</span>
+        <span class="value">{{ client.biz }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">대표자명</span>
+        <span class="value">{{ client.ceo }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">사업장 주소</span>
+        <span class="value">{{ client.address }}</span>
+      </div>
+    </section>
+    <section class="drawer-section">
+      <div class="section-heading drawer-section-heading">
+        <h3>수임 정보</h3>
+        <button class="small-link" @click="emit('assign')">담당자 변경 →</button>
+      </div>
+      <div class="info-row">
+        <span class="label">수임 상태</span><ManagementBadge :value="client.status" />
+      </div>
+      <div class="info-row">
+        <span class="label">수임 시작일</span>
+        <span class="value">{{ client.start || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">수임 종료일</span>
+        <span class="value">{{ client.end || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">주담당자</span>
+        <span class="value">{{ client.primary || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">보조담당자</span>
+        <span class="value">{{ client.secondary.join(', ') || '—' }}</span>
+      </div>
+    </section>
+    <section class="drawer-section review-progress">
+      <h3>설정 진행 상태</h3>
+      <div class="progress-item">
+        <div class="title"><strong>회사정보 검토</strong><ManagementBadge :value="client.company" /></div>
+        <div class="progress-bar" aria-hidden="true">
+          <div
+            class="progress-fill"
+            :class="{ complete: client.company === '검토 완료', ongoing: client.company === '검토 중' }"
+            ></div>
+        </div>
+      </div>
+      <div class="progress-item">
+        <div class="title"><strong>환경정보 검토</strong><ManagementBadge :value="client.environment" /></div>
+        <div class="progress-bar" aria-hidden="true">
+          <div
+            class="progress-fill"
+            :class="{ complete: client.environment === '검토 완료', ongoing: client.environment === '검토 중' }"
+            ></div>
+        </div>
+      </div>
+      <div class="progress-item">
+        <div class="title"><strong>적요 및 계정과목 등록</strong><ManagementBadge :value="client.chart" /></div>
+        <div class="progress-bar" aria-hidden="true">
+          <div
+            class="progress-fill"
+            :class="{ complete: client.chart === '검토 완료', ongoing: client.chart === '검토 중' }"
+            ></div>
+        </div>
+      </div>
+    </section>
+    <section class="drawer-section">
+      <h3>업무 바로가기</h3>
+      <button class="link-line" @click="emit('navigate', 'company')">회사등록 화면으로 이동 <span>↗</span></button>
+      <button class="link-line" @click="emit('navigate', 'settings')">환경등록 화면으로 이동 <span>↗</span></button>
+      <button class="link-line" @click="emit('navigate', 'voucher')">전표입력 화면으로 이동 <span>↗</span></button>
+      <button class="link-line" @click="emit('navigate', 'accounts')">계정과목 화면으로 이동 <span>↗</span></button>
+    </section>
+    <template #footer>
+      <button class="btn" @click="emit('assign')">담당자 지정</button>
+      <button class="btn primary" @click="emit('navigate', 'company')">회사정보 검토 →</button>
+    </template>
+  </ManagementDialog>
+</template>

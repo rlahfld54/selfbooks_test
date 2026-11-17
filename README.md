@@ -25,7 +25,9 @@ Nuxt는 `http://localhost:3000`, Fastify API는 `http://localhost:4000/api`에�
 - 프로젝트 루트 `.env`에 Supabase Connect 화면의 Session pooler 주소를 `DIRECT_URL`로 설정합니다. 비밀번호 자리의 예시 대괄호는 제거하고 예약 문자는 URL 인코딩합니다. `DIRECT_URL`이 없으면 `DATABASE_URL`을 사용합니다.
 - Supabase Dashboard의 Database Settings → SSL Configuration에서 CA를 내려받아 PEM 파일 경로를 `DB_SSL_CA_PATH`에 지정합니다. 상대 경로의 기준은 프로젝트 루트입니다. Fastify의 DB 연결은 CA 체인과 호스트명을 검증합니다. [Supabase PostgreSQL SSL 설정](https://supabase.com/docs/guides/platform/ssl-enforcement)
 - `DEV_FIXTURE_OFFICE_ID`와 쉼표로 구분한 `DEV_FIXTURE_CLIENT_IDS`에는 확인된 합성 테스트 레코드의 UUID만 지정합니다. 두 설정을 비우면 디렉터리 API가 503을 반환합니다.
-- 포트가 충돌하면 `BACKEND_PORT` 또는 Nuxt의 `--port` 옵션을 조정하고 각각 `frontend/.env`의 `NUXT_PUBLIC_API_BASE`, 루트 `.env`의 `FRONTEND_ORIGIN`을 함께 맞춥니다. 브라우저 설정에는 Fastify API 주소만 들어갑니다.
+- Fastify의 Supabase 인증 설정은 루트 `.env`의 `SUPABASE_URL`과 `SUPABASE_PUBLISHABLE_KEY`에 둡니다. 설정 항목은 루트 `.env.example`에서 확인할 수 있습니다.
+- Nuxt의 공개 설정은 `frontend/nuxt.config.ts`의 `runtimeConfig.public`에 둡니다. 브라우저 로그인에 쓰는 `supabaseUrl`과 `supabasePublishableKey`는 Fastify와 동일한 Supabase 프로젝트의 값을 사용합니다.
+- Fastify 포트를 바꾸면 루트 `.env`의 `BACKEND_PORT`와 Nuxt의 `runtimeConfig.public.apiBase`를 맞춥니다. Nuxt 포트를 바꾸면 루트 `.env`의 `FRONTEND_ORIGIN`도 새 주소로 변경합니다.
 
 Fastify는 로컬 개발 모드에서 루프백에 바인딩합니다. 터널이나 역방향 프록시로 공개하지 마세요. 실제 서비스에서는 사용자 인증, 사무소 단위 권한 검증, RLS가 적용되는 최소 권한 DB 역할이 필요합니다.
 

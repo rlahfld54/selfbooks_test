@@ -1,5 +1,20 @@
 # SelfBooks 프런트엔드 아키텍처
 
+## 관리 화면 컴포넌트 구조 (2026-11-17)
+
+`features/management/ManagementView.vue`는 조회, 작업 공간 상태, 검색 조건(`filters`), 저장 및 화면 연결을 담당한다. 표시 데이터는 `rows` 객체로 전달한다.
+
+- `components/ManagementProfilePanel.vue`, `ManagementOrganizationForm.vue`: 개인·조직 정보 표시와 편집 입력.
+- `ManagementClientList.vue`, `ManagementStaffList.vue`: 업체·직원 목록과 검색 입력.
+- `ManagementClientDrawer.vue`, `ManagementStaffDrawer.vue`: 선택한 업체·직원의 상세 패널.
+- `ManagementBranches.vue`, `ManagementPermissions.vue`: 지점 목록과 권한 안내.
+- `ManagementActionDialog.vue`: 등록·초대·담당자 지정·보안 시뮬레이션 팝업.
+- `ManagementEditActions.vue`: 개인·조직 폼이 재사용하는 저장·취소 버튼.
+
+자식은 필요한 필드만 타입으로 선언한 props를 받고, 입력·선택·저장·취소를 typed emit으로 전달한다. props 내부 데이터를 직접 수정하거나 API를 호출하지 않는다. 고정 필드는 HTML로 직접 작성하고 실제 목록만 반복한다. 기존 `ManagementBadge`, `ManagementDialog`, `utils/formatAmount`를 재사용한다. 공유 옵션과 데이터 계약은 `options.ts`, `view-types.ts`에 둔다.
+
+`tests/management.browser.mjs`에 검색·빈 결과·등록 오류·등록 성공·상세 선택·편집 취소·저장·프로필 조회 실패와 재시도의 회귀 시나리오를 작성했다. 일반 개발 서버를 대상으로 인증 및 조회 API를 모킹한다. 테스트·타입 검사·빌드·브라우저/E2E: **미실행 — 사용자 요청 시 실행**.
+
 Nuxt API 사용과 공식 자료 확인 기준은 [Nuxt 개발 지침](nuxt-guide.md)을 따른다. 기능 서비스는 API 클라이언트를 주입받으며, Nuxt runtimeConfig와 조회 수명은 composable에서 관리한다.
 
 Nuxt 4.6.4의 파일 기반 라우팅과 레이아웃을 사용한다. 업무 페이지는 URL을 가지며, 탭은 해당 페이지를 다시 열기 위한 작업 목록이다. Vue Composition API를 유지하며 별도 상태 라이브러리는 사용하지 않는다.

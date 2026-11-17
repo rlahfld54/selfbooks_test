@@ -1,6 +1,6 @@
 import type { Pool } from 'pg'
 
-export interface AuthContext { id: string; name: string; email: string; officeId: string; role: string }
+export interface AuthContext { id: string; name: string; email: string; officeId: string; role: string; userCode?: string | null; loginId?: string | null; phone?: string | null; departmentName?: string | null; jobTitle?: string | null; joinedAt?: string | null }
 export class AuthError extends Error {
   constructor(public statusCode: number, public code: string, message: string) { super(message) }
 }
@@ -19,7 +19,11 @@ export function createAuthenticator(pool: Pool, officeId: string, url: string, k
     const identity = await response.json() as { id?: string }
     if (!identity.id || !/^[0-9a-f-]{36}$/i.test(identity.id)) throw new AuthError(401, 'UNAUTHENTICATED', '인증 정보를 확인할 수 없습니다.')
     const result = await pool.query<AuthContext>(`
-      SELECT u.id, u.name, u.email, m.office_id AS "officeId", m.role
+      SELECT u.id, u.name, u.email, m.office_id AS "officeId", m.role,
+        u.user_code AS "userCode", u.login_id AS "loginId",
+        COALESCE(NULLIF(u.mobile_phone, ''), u.phone) AS phone,
+        m.department_name AS "departmentName", m.job_title AS "jobTitle",
+        m.joined_at AS "joinedAt"
       FROM public.users u JOIN public.office_members m ON m.user_id = u.id
       WHERE u.id = $1 AND m.office_id = $2 AND u.status = 'ACTIVE'
         AND u.deleted_at IS NULL AND (u.locked_until IS NULL OR u.locked_until <= now())

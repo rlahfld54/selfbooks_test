@@ -1,0 +1,5 @@
+export const teams = ['세무1팀', '세무2팀', '관리팀']
+export const clientTypes = ['개인', '법인']
+export const clientStatuses = ['수임 중', '수임 종료', '등록 대기']
+export const staffStatuses = ['활성', '초대 대기', '비활성']
+export const reviewStatuses = ['검토 전', '검토 중', '검토 완료']

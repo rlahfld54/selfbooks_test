@@ -31,8 +31,8 @@ export default defineNuxtConfig({
     public: {
       apiBase: 'http://localhost:4000/api',
       pagesPreview: false,
-      supabaseUrl: '',
-      supabasePublishableKey: '',
+      supabaseUrl: 'https://zxgcmeahprzuomgthqyg.supabase.co',
+      supabasePublishableKey: 'sb_publishable_5xzGIKZDx7B-G_8QvKxoDA_m8ZUYjIj',
     },
   },
 

@@ -5,7 +5,7 @@ import SocialAuthButtons from './SocialAuthButtons.vue'
 import { useAuth, type SocialProvider } from './useAuth'
 const router = useRouter()
 const { login, startSocialAuth, warning } = useAuth()
-const email = ref('')
+const identifier = ref('')
 const password = ref('')
 const remember = ref(false)
 const error = ref('')
@@ -18,7 +18,7 @@ async function submit() {
   error.value = ''
   socialError.value = ''
   try {
-    error.value = await login(email.value, password.value, remember.value)
+    error.value = await login(identifier.value, password.value, remember.value)
     if (!error.value) { password.value = ''; await router.push('/dashboard') }
   } catch { error.value = '로그인 처리 중 문제가 발생했습니다. 브라우저 저장소와 연결 상태를 확인해 주세요.' }
   finally { busy.value = false }
@@ -43,7 +43,7 @@ async function submitSocial(provider: SocialProvider) {
   <div class="auth-form-heading"><span class="section-kicker">WELCOME BACK</span><h1>다시 오신 것을 환영합니다.</h1><p>AAT에 로그인하고<br />업무를 이어서 진행하세요.</p></div>
   <p v-if="warning" class="entry-notice" role="status">{{ warning }}</p>
   <form class="entry-form" @submit.prevent="submit">
-    <div><label class="entry-field" for="login-email">이메일</label><input id="login-email" v-model="email" type="email" required autocomplete="username" placeholder="name@company.com" /></div>
+    <div><label class="entry-field" for="login-identifier">아이디 또는 이메일</label><input id="login-identifier" v-model="identifier" type="text" maxlength="254" autocapitalize="none" :spellcheck="false" required autocomplete="username" placeholder="아이디 또는 이메일을 입력하세요" /></div>
     <div><PasswordField id="login-password" v-model="password" label="비밀번호" /></div>
     <div class="auth-form-options"><label><input v-model="remember" :disabled="busy || socialBusy" type="checkbox" />로그인 상태 유지</label><NuxtLink to="/forgot-password">비밀번호 찾기</NuxtLink></div>
     <p v-if="error" class="entry-error" role="alert">{{ error }}</p>

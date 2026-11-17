@@ -44,3 +44,27 @@ DB 누락/정책 우회는 503, 지정 사무소 없음은 404다. `/company`에
 POST/PUT 본문: `id`(신규 UUID, 재시도 시 동일 값), `version`(신규 0), `date`, `periodId`, `partnerId`, `type`(11/51), `item`, `supply`, `vat`, `payment`(외상/현금/예금/카드/기타), `memo`, `zeroVatConfirmed`, `lines` 배열. 각 분개는 `side`(debit/credit), `account`(계정 UUID), `amount`(정수 문자열), `memo`를 받는다. 회사/사용자/사업장/상태 필드는 받지 않는다.
 
 서버가 차대 일치, 과세 유형 세액 0원 확인, 회사별 마스터 소속, 날짜와 열린 회계기간을 검증한다. 저장 결과에는 전표번호, 상태, 버전, `needsReview`, `zeroVatConfirmed`가 포함된다. 충돌/확정/마감은 409, 잘못된 입력은 400, 범위 밖 전표는 404, 설정 미비는 503이다. 전표번호는 회계기간 내 유일한 `PS-UUID`이며 일련번호 정책은 후속 확정 사항이다.
+
+## 마이페이지 프로필 필드 확장
+- GET /api/auth/me에 userCode, loginId, phone, departmentName, jobTitle, joinedAt을 추가한다.
+- users.user_code/login_id, office_members.department_name/job_title/joined_at을 매핑한다.
+- phone은 비어 있지 않은 users.mobile_phone을 우선하고 users.phone으로 대체한다.
+- 화면 사용자 ID는 users.id에 해당하는 인증 UUID인 id를 사용한다. userCode는 선택적 관리 코드이며 사용자 식별자 표시에 사용하지 않는다.
+- 기존 OWNER/ADMIN 인증 조건과 서버 지정 사무소 범위는 유지한다.
+- 사용자 제공 스키마 기준으로 연결했으며 DB 변경과 INSERT 실행은 하지 않았다.
+- 테스트·타입 검사·빌드·DB 통합·브라우저 검증: 미실행 — 사용자 요청 시 실행.
+
+## POST /api/auth/login
+기존 Bearer 필수 정책의 예외인 로그인 엔드포인트다. 로컬 Host/IP와 허용 Origin의 JSON POST 제한은 유지한다.
+
+요청: { "identifier": "onegi 또는 이메일", "password": "비밀번호" }
+성공: { "data": { "access_token": "...", "refresh_token": "..." } }
+
+- 서버가 public.users의 login_id 정확 일치 또는 email 대소문자 무관 일치로 활성·미삭제·잠금 해제 계정을 조회한다. 복수 매칭이면 거부한다.
+- 조회된 이메일로 Supabase /auth/v1/token?grant_type=password에 인증하고 Auth UUID와 users.id의 일치 및 기존 OWNER/ADMIN 소속을 재확인한다.
+- 이메일 조회 전용 API는 제공하지 않는다. 비밀번호·토큰을 로그나 DB에 저장하지 않는다. 응답은 no-store다.
+- 입력 오류 400, 계정/비밀번호 불일치 401, 관리자 소속 없음 403, 로그인 시도 제한 429, 인증 연결/설정 실패 503.
+- 로컬 서버 인스턴스당 분당 30회 제한이며 재시작 시 초기화된다. 운영 분산 제한 구현은 이번 범위 밖이다.
+- 브라우저는 Supabase auth.setSession으로 세션을 적용하고 기존 /auth/me 확인을 수행한다.
+- 참고: https://supabase.com/docs/reference/javascript/auth-setsession
+- 기존 SNS 전용 계정에 비밀번호를 자동 설정하지 않는다.

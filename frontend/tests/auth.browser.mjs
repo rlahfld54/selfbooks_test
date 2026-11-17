@@ -61,6 +61,14 @@ try {
     assert.equal(route.request().postDataJSON().email, 'test@example.test')
     await route.fulfill(validPassword ? { json: testSession() } : { status: 400, json: { code: 'invalid_credentials', msg: 'Invalid login credentials' } })
   })
+  await context.route('**/api/auth/login', async route => {
+    assert.ok(['onegi', 'test@example.test'].includes(route.request().postDataJSON().identifier))
+    if (!validPassword) return route.fulfill({ status: 401, json: { error: { message: '아이디 또는 이메일과 비밀번호를 확인해 주세요.' } } })
+    if (!authorized) return route.fulfill({ status: 403, json: { error: { message: '활성 관리자 계정과 사무소 소속 등록을 확인해 주세요.' } } })
+    const { access_token, refresh_token } = testSession()
+    await route.fulfill({ json: { data: { access_token, refresh_token } } })
+  })
+  await context.route('**/auth/v1/user', route => route.fulfill({ json: testSession().user }))
   await context.route('**/auth/v1/logout**', route => route.fulfill({ status: 204 }))
   await context.route('**/api/auth/me', route => {
     authChecks++
@@ -71,14 +79,15 @@ try {
   await page.goto(base + '/dashboard')
   await page.waitForURL('**/login')
   assert.equal(await page.getByText('테스트 계정 입력').count(), 0)
-  await page.getByLabel('이메일', { exact: true }).fill('test@example.test')
+  await page.getByLabel('아이디 또는 이메일', { exact: true }).fill('test@example.test')
   await page.getByLabel('비밀번호', { exact: true }).fill('not-a-real-password')
   await page.getByRole('button', { name: '로그인', exact: true }).click()
-  await page.getByRole('alert').filter({ hasText: '이메일 또는 비밀번호' }).waitFor()
+  await page.getByRole('alert').filter({ hasText: '아이디 또는 이메일과 비밀번호' }).waitFor()
   validPassword = true; authorized = false
   await page.getByRole('button', { name: '로그인', exact: true }).click()
   await page.getByRole('alert').filter({ hasText: '소속 등록' }).waitFor()
   authorized = true
+  await page.getByLabel('아이디 또는 이메일', { exact: true }).fill('onegi')
   const checksBeforeLogin = authChecks
   await page.getByRole('button', { name: '로그인', exact: true }).click()
   await page.getByRole('heading', { name: '홈 대시보드', exact: true }).waitFor()
@@ -107,7 +116,7 @@ try {
   await page.getByRole('button', { name: '로그아웃', exact: true }).click()
   await page.waitForURL('**/login')
   await page.waitForFunction(() => !sessionStorage.getItem('selfbooks:auth'))
-  await page.getByLabel('이메일', { exact: true }).fill('test@example.test')
+  await page.getByLabel('아이디 또는 이메일', { exact: true }).fill('test@example.test')
   await page.getByLabel('비밀번호', { exact: true }).fill('not-a-real-password')
   await page.getByLabel('로그인 상태 유지').check()
   await page.getByRole('button', { name: '로그인', exact: true }).click()
@@ -139,6 +148,7 @@ try {
   await page.getByRole('link', { name: '로그인 화면으로' }).click()
 
   authorized = true
+  await page.getByLabel('아이디 또는 이메일', { exact: true }).fill('onegi')
   await page.getByLabel('로그인 상태 유지').check()
   await page.getByRole('button', { name: 'Google 로그인' }).click()
   await page.waitForURL('**/dashboard')

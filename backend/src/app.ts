@@ -1,4 +1,6 @@
 import Fastify from 'fastify'
+import { passwordLoginRoutes } from './routes/password-login.js'
+import type { PasswordLogin } from './services/password-login.js'
 import type { Pool } from 'pg'
 import { localAccess } from './plugins/local-access.js'
 import { healthRoutes } from './routes/health.js'
@@ -15,7 +17,7 @@ import { createPartnersRepository } from './services/partners-repository.js'
 
 declare module 'fastify' { interface FastifyRequest { auth: AuthContext | null } }
 
-export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixtures?: FixtureScope; logger?: boolean; salesDevelopment?: boolean; authenticate?: (authorization?: string) => Promise<AuthContext> }) {
+export function buildApp(options: { frontendOrigin: string; passwordLogin?: PasswordLogin; pool?: Pool; fixtures?: FixtureScope; logger?: boolean; salesDevelopment?: boolean; authenticate?: (authorization?: string) => Promise<AuthContext> }) {
   const app = Fastify({ logger: options.logger ?? false, trustProxy: false })
   const { pool } = options
   if (pool) {
@@ -46,9 +48,11 @@ export function buildApp(options: { frontendOrigin: string; pool?: Pool; fixture
   app.register(async (local) => {
     await localAccess(local, options.frontendOrigin)
     await healthRoutes(local, pool ? () => pool.query('SELECT 1') : undefined)
+    passwordLoginRoutes(local, options.passwordLogin)
     local.decorateRequest('auth', null)
     local.addHook('preHandler', async (request) => {
-      if (request.method === 'OPTIONS' || request.url.split('?')[0] === '/api/health') return
+      if (request.method === 'OPTIONS' || request.url.split('?')[0] === '/api/health' ||
+          (request.method === 'POST' && request.routeOptions.url === '/api/auth/login')) return
       if (!options.authenticate) throw new AuthError(503, 'AUTH_UNAVAILABLE', '서버 인증 설정을 확인해 주세요.')
       request.auth = await options.authenticate(request.headers.authorization)
     })

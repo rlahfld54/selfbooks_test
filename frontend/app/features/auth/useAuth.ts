@@ -1,4 +1,5 @@
 import type { NuxtApp } from '#app'
+import { createPasswordLoginService } from './password-login'
 import { ApiRequestError, createApiClient } from '~/services/api-client'
 
 interface AuthUser { id: string; name: string; email: string; officeId: string; role: string }
@@ -81,15 +82,20 @@ export function useAuth() {
     try { await $authClient?.auth.signOut({ scope: 'local' }) }
     finally { await router.replace('/login') }
   }
-  async function login(email: string, password: string, remember: boolean) {
-    if (!$authClient) return 'Supabase 연결 설정을 확인해 주세요.'
+  async function login(identifier: string, password: string, remember: boolean) {
+    if (!$authClient || pagesPreview) return 'Supabase 연결 설정을 확인해 주세요.'
     warning.value = ''
     localStorage.setItem('selfbooks:remember', String(remember))
-    const { error } = await $authClient.auth.signInWithPassword({ email: email.trim(), password })
-    if (error) return error.code === 'email_not_confirmed' ? '이메일 인증을 완료해 주세요.' : '이메일 또는 비밀번호를 확인해 주세요. 연결 상태도 확인해 주세요.'
-    return verifyAccess()
+    const request = createApiClient((path, options) => $fetch(path, options), apiBase, 'same-origin', 20000)
+    try {
+      const { data } = await createPasswordLoginService(request)(identifier, password)
+      const { error } = await $authClient.auth.setSession(data)
+      if (error) return '로그인 세션을 저장하지 못했습니다. 다시 시도해 주세요.'
+      return verifyAccess()
+    } catch (error) {
+      return error instanceof ApiRequestError ? error.message : '로그인 처리 중 문제가 발생했습니다. 다시 시도해 주세요.'
+    }
   }
-
   async function verifyAccess() {
     revision.value++
     user.value = null
