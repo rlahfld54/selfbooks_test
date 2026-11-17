@@ -1,55 +1,40 @@
 <script setup lang="ts">
-import WorkspaceSidebar from '~/features/workspace/components/WorkspaceSidebar.vue'
-import WorkspaceHeader from '~/features/workspace/components/WorkspaceHeader.vue'
-import WorkspaceTabs from '~/features/workspace/components/WorkspaceTabs.vue'
-import WorkspaceDetail from '~/features/workspace/components/WorkspaceDetail.vue'
-import WorkspaceConfirmation from '~/features/workspace/components/WorkspaceConfirmation.vue'
 import { useWorkspaceProvider } from '~/features/workspace/composables/useWorkspaceProvider'
-import { useMobileWorkspace } from '~/features/workspace/composables/useMobileWorkspace'
-import { tabInfo } from '~/utils/workspace-routes'
-
-const { generation, state, activeTab, collapsed, storageAvailable } = useWorkspaceProvider()
-const { mobileOpen, narrow, sidebar } = useMobileWorkspace()
-const overlayPanel = computed(() => narrow.value && activeTab.value.panel)
-const backgroundInert = computed(() => overlayPanel.value || mobileOpen.value)
+import WorkspaceConfirmation from './WorkspaceConfirmation.vue'
+import WorkspaceDetail from './WorkspaceDetail.vue'
+import { tabInfo, type TabId } from '~/utils/workspace-routes'
+const { state, navigate, requestClose, generation, density } = useWorkspaceProvider()
+const mobileOpen = ref(false)
+const notice = ref('')
+const groups: { title: string; items: { id: TabId; symbol: string }[] }[] = [
+  { title: 'WORKSPACE', items: [{ id: 'home', symbol: '▦' }] },
+  { title: 'ORGANIZATION', items: [{ id: 'clients', symbol: '▤' }, { id: 'organization', symbol: '▧' }] },
+  { title: 'ACCOUNTING', items: [{ id: 'company', symbol: '▣' }, { id: 'settings', symbol: '⚙' }, { id: 'voucher', symbol: '▥' }, { id: 'sales-journal', symbol: '▥' }] },
+  { title: 'PERSONAL', items: [{ id: 'mypage', symbol: '◉' }] },
+]
+async function open(id: TabId) {
+  if (await navigate(id)) mobileOpen.value = false
+}
 </script>
-
 <template>
-  <div class="app-shell" :class="{ collapsed, 'mobile-menu-open': mobileOpen }">
-    <a href="#main-content" class="skip-link" :inert="backgroundInert">본문으로 이동</a>
-    <button v-if="mobileOpen" class="mobile-backdrop" aria-label="메뉴 닫기" @click="mobileOpen = false" />
-    <aside ref="sidebar" class="sidebar" aria-label="주 메뉴" :inert="overlayPanel">
-      <WorkspaceSidebar @close="mobileOpen = false" />
+  <div class="reference-workspace app">
+    <aside class="sidebar" :class="{ 'mobile-open': mobileOpen }">
+      <div class="brand"><div class="brand-icon">A</div><div><b>AAT <span>Accounting Pro</span></b><small>AI ACCOUNTING &amp; TAX</small></div></div>
+      <div class="workspace-select"><button class="org-switch" @click="open('organization')"><span class="circle">원</span><span><strong>회계법인 원지</strong><small>관리자 워크스페이스</small></span><span class="chev">⌄</span></button></div>
+      <nav class="nav" aria-label="업무 메뉴">
+        <template v-for="group in groups" :key="group.title">
+          <div class="nav-label">{{ group.title }}</div>
+          <button v-for="item in group.items" :key="item.id" :class="{ active: state.active === item.id }" @click="open(item.id)"><span class="sym">{{ item.symbol }}</span>{{ tabInfo(item.id).title }}</button>
+        </template>
+      </nav>
+      <div class="sidebar-user"><button class="profile-mini" @click="open('mypage')"><span class="avatar">김</span><span><b>김원지</b><small>조직 관리자</small></span><span class="chev">⋯</span></button></div>
     </aside>
-    <div class="app-main">
-      <WorkspaceHeader
-        :title="tabInfo(state.active).title"
-        :inert="backgroundInert"
-        @toggle-menu="mobileOpen = !mobileOpen"
-      />
-      <WorkspaceTabs :inert="backgroundInert" />
-      <div class="workspace-body">
-        <main id="main-content" tabindex="-1" class="page-content" :inert="backgroundInert">
-          <div v-if="!storageAvailable" class="info-banner" role="status">
-            브라우저 저장소를 사용할 수 없어 UI 설정이 이번 세션에만 유지됩니다.
-          </div>
-          <div
-            :id="'page-' + state.active"
-            :key="generation"
-            role="tabpanel"
-            :aria-labelledby="'tab-' + state.active"
-            tabindex="0"
-          >
-            <slot />
-          </div>
-        </main>
-        <WorkspaceDetail :key="generation + ':' + state.active" />
-      </div>
-      <footer class="app-footer" :inert="backgroundInert">
-        <span><i />{{ state.active === 'sales-journal' ? '로컬 개발 · 해솔문구 전표 DB 연결' : state.active === 'clients' ? '로컬 개발 · Fastify 읽기 전용' : '샘플 모드 · 실제 데이터와 연결되지 않음' }}</span>
-        <span>Accounting Pro <span class="footer-version">v1.0</span></span>
-      </footer>
+    <div class="main">
+      <header class="topbar"><div class="breadcrumbs"><button class="icon-btn mobile-toggle" aria-label="메뉴 열기" @click="mobileOpen = !mobileOpen">☰</button>회계법인 원지 <span>›</span><strong>{{ tabInfo(state.active).title }}</strong></div><div class="top-right"><span class="top-pill">● 데모 데이터</span><button class="icon-btn" title="테이블 밀도 전환" @click="density = density === 'normal' ? 'compact' : 'normal'">▤</button><button class="icon-btn" aria-label="알림" @click="notice = '새로운 알림이 없습니다.'">♧</button><button class="avatar" aria-label="마이페이지" @click="open('mypage')">김</button></div></header>
+      <div class="workspace-tabs" role="tablist" aria-label="열린 업무"><div v-for="tab in state.tabs" :key="tab.id" class="ws-tab" :class="{ active: state.active === tab.id }"><button role="tab" :aria-selected="state.active === tab.id" @click="open(tab.id)">{{ tabInfo(tab.id).title }}{{ tab.dirty ? ' •' : '' }}</button><button v-if="tab.id !== 'home'" class="x" :aria-label="tabInfo(tab.id).title + ' 닫기'" @click="requestClose(tab.id)">×</button></div></div>
+      <div class="reference-body"><main class="content"><div class="page" :key="generation"><p v-if="notice" role="status" @click="notice = ''">{{ notice }}</p><slot /></div></main><WorkspaceDetail :key="generation + ':' + state.active" /></div>
     </div>
     <WorkspaceConfirmation />
   </div>
 </template>
+<style src="~/features/management/reference-workspace.css"></style>

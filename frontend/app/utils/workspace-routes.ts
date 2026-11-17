@@ -15,6 +15,8 @@ export const menu = [
   { id: 'tax', path: '/tax', title: '부가가치세', icon: 'calendar' },
   { id: 'reports', path: '/reports', title: '장부 및 재무제표', icon: 'chart' },
   { id: 'settings', path: '/settings', title: '환경등록', icon: 'settings' },
+  { id: 'organization', path: '/organization', title: '조직 설정', icon: 'settings' },
+  { id: 'mypage', path: '/mypage', title: '마이페이지', icon: 'users' },
   { id: 'components', path: '/components', title: 'UI 컴포넌트', icon: 'grid' },
 ] as const
 export type TabId = (typeof menu)[number]['id']
@@ -34,3 +36,4 @@ export const workspaceMenuGroups = [
     { id: 'ledger', label: '전표조회 및 검증', short: '조회' },
   ] },
 ] as const satisfies readonly { title: string; icon: string; items: readonly { id: TabId; label: string; short?: string }[] }[]
+

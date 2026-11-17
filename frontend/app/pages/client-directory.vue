@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import ClientDirectory from '~/features/client-directory/ClientDirectory.vue'
+import ManagementView from '~/features/management/ManagementView.vue'
 definePageMeta({ workspaceTab: 'clients' })
 </script>
-
-<template>
-  <ClientDirectory />
-</template>
+<template><ManagementView page="clients" /></template>

@@ -19,7 +19,7 @@ function key(event: KeyboardEvent) {
 }
 watch(() => props.open, async value => {
  if (value && (!props.preserveFocus || overlay.value)) { previous = document.activeElement as HTMLElement; await nextTick(); panel.value?.querySelector<HTMLElement>('button')?.focus() }
- else if (!value) previous?.isConnected && previous.focus()
+ else if (!value && previous) { await nextTick(); previous.isConnected && previous.focus() }
 }, { immediate: true })
 onMounted(() => { resizeQuery = matchMedia('(max-width: 1023px)'); updateOverlay(); resizeQuery.addEventListener('change', updateOverlay); document.addEventListener('keydown', key) })
 onBeforeUnmount(() => { resizeQuery?.removeEventListener('change', updateOverlay); document.removeEventListener('keydown', key) })

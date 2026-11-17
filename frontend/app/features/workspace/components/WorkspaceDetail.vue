@@ -3,13 +3,17 @@ import DemoPartnerDetails from '~/features/demo-partners/components/DemoPartnerD
 import VoucherInsight from '~/features/vouchers/VoucherInsight.vue'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 const { activeTab } = useWorkspaceContext()
+const title = computed(() => {
+  if (['voucher', 'sales'].includes(activeTab.value.id)) return '전표 인사이트'
+  return '거래처 상세'
+})
 </script>
 
 <template>
   <DetailPanel
     :open="activeTab.panel" :min-width="['voucher', 'sales'].includes(activeTab.id) ? 300 : 320" :preserve-focus="['voucher', 'sales'].includes(activeTab.id)"
     :width="activeTab.panelWidth"
-    :title="['voucher', 'sales'].includes(activeTab.id) ? '전표 인사이트' : '거래처 상세'"
+    :title="title"
     @close="activeTab.panel = false"
     @update:width="activeTab.panelWidth = $event"
   >
@@ -17,3 +21,4 @@ const { activeTab } = useWorkspaceContext()
     <DemoPartnerDetails v-else />
   </DetailPanel>
 </template>
+
