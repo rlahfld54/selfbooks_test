@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import WorkspacePreview from '~/features/previews/WorkspacePreview.vue'
+import CollectionStatusView from '~/features/collection/CollectionStatusView.vue'
 definePageMeta({ workspaceTab: 'collection' })
 </script>
-<template><WorkspacePreview /></template>
+<template><CollectionStatusView /></template>

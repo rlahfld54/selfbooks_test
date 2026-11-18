@@ -14,6 +14,8 @@ import { createOfficeRegistration } from './services/office-registration.js'
 import { AuthError, type AuthContext } from './services/auth.js'
 import { partnersRoutes } from './routes/partners.js'
 import { createPartnersRepository } from './services/partners-repository.js'
+import { collectionRoutes } from './routes/collection.js'
+import { createCollectionRepository } from './services/collection-repository.js'
 
 declare module 'fastify' { interface FastifyRequest { auth: AuthContext | null } }
 
@@ -70,6 +72,12 @@ export function buildApp(options: { frontendOrigin: string; passwordLogin?: Pass
       ? request => {
         if (request.auth!.officeId !== options.fixtures!.officeId) throw new AuthError(403, 'ACCESS_DENIED', '사무소 접근 권한을 확인하세요.')
         return createPartnersRepository(pool, options.fixtures!.officeId, request.auth!.id)
+      } : undefined)
+    // 자료수집 현황 — 수임 사업체만 읽는다(개발 · 서버에 정한 사무소 한정)
+    await collectionRoutes(local, pool && options.fixtures && options.salesDevelopment && process.env.NODE_ENV !== 'production'
+      ? (request) => {
+        if (request.auth!.officeId !== options.fixtures!.officeId) throw new AuthError(403, 'ACCESS_DENIED', '사무소 접근 권한을 확인하세요.')
+        return createCollectionRepository(pool, options.fixtures!.officeId)
       } : undefined)
     const context = options.fixtures ? createSalesContext(options.fixtures) : undefined
     await salesRoutes(local, pool && context && options.salesDevelopment && process.env.NODE_ENV !== 'production'
