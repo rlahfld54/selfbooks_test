@@ -9,7 +9,7 @@ const notice = ref('')
 const groups: { title: string; items: { id: TabId; symbol: string }[] }[] = [
   { title: 'WORKSPACE', items: [{ id: 'home', symbol: '▦' }] },
   { title: 'ORGANIZATION', items: [{ id: 'clients', symbol: '▤' }, { id: 'organization', symbol: '▧' }] },
-  { title: 'ACCOUNTING', items: [{ id: 'company', symbol: '▣' }, { id: 'settings', symbol: '⚙' }, { id: 'voucher', symbol: '▥' }, { id: 'sales-journal', symbol: '▥' }] },
+  { title: 'ACCOUNTING', items: [{ id: 'company', symbol: '▣' }, { id: 'settings', symbol: '⚙' }, { id: 'accounts', symbol: '▤' }, { id: 'voucher', symbol: '▥' }, { id: 'sales-journal', symbol: '▥' }] },
   { title: 'PERSONAL', items: [{ id: 'mypage', symbol: '◉' }] },
 ]
 async function open(id: TabId) {
@@ -37,3 +37,4 @@ async function open(id: TabId) {
     <WorkspaceConfirmation />
   </div>
 </template>
+

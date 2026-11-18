@@ -68,3 +68,17 @@ POST/PUT 본문: `id`(신규 UUID, 재시도 시 동일 값), `version`(신규 0
 - 브라우저는 Supabase auth.setSession으로 세션을 적용하고 기존 /auth/me 확인을 수행한다.
 - 참고: https://supabase.com/docs/reference/javascript/auth-setsession
 - 기존 SNS 전용 계정에 비밀번호를 자동 설정하지 않는다.
+
+## GET /api/account-defaults
+- 기존 Bearer 인증 및 로컬 접근 정책을 사용한다. 공통 마스터 public.fi_account_default에서 deleted_at IS NULL 행만 sort_order/account_code/account_default_id 순으로 반환한다.
+- 응답: { data: [{ sourceId, code, name, englishName, categoryCode, subcategory, attribute, normalBalance, relatedAccount, statementCode, fxMethodCode, businessCar, isActive, isLocked }] }.
+- bigint sourceId와 계정코드는 문자열, normalBalance는 D/C 원문이다. 개인정보/생성자/수정자 필드는 반환하지 않는다.
+- 회사/사무소 입력 및 쓰기 메서드는 제공하지 않는다. 읽기 실패/설정 누락은 503 ACCOUNTS_UNAVAILABLE. Cache-Control: no-store.
+- 테스트·타입 검사·빌드·DB 통합·브라우저/E2E: 미실행 — 사용자 요청 시 실행.
+
+## GET /api/account-summaries
+- 인증된 officeId에 속한 서버 지정 네네치킨 청라1호점의 회사별 적요 조회. 클라이언트 업체 ID는 받지 않는다.
+- 응답 data: { client: { id, name }, summaries: [{ sourceId, code, summaryNo, name, typeCode, transactionElementCode, isActive, accountSourceId, accountDefaultId, accountCode, accountName }] }.
+- bigint ID/계정·적요코드는 문자열이며 적요코드와 기본계정 ID는 null 가능.
+- 업체 범위 불일치 403 CLIENT_ACCESS_DENIED, 조회 실패 503 SUMMARIES_UNAVAILABLE. Cache-Control: no-store.
+- 수정/삭제/등록 API는 추가하지 않는다.

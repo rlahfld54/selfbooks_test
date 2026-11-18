@@ -38,3 +38,9 @@ Thumbs.db
 !/backend/migrations/007_tax_office_partners.sql
 !/backend/tests/partners.test.ts
 !/backend/tests/partners.integration.ts
+
+!/docs/account-management-ui.md
+!/backend/tests/account-defaults.test.ts
+!/backend/migrations/008_fi_existing_client_keys.sql
+!/docs/fi-schema-alignment.md
+!/backend/tests/client-summaries.test.ts
