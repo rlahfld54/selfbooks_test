@@ -12,7 +12,7 @@ export function assignmentRole(client: Client, userId: string) {
   }
   return client.secondaryIds?.includes(userId) ? '보조담당' : ''
 }
-export const needsReview = (client: Client) => client.company !== '검토 완료' || client.environment !== '검토 완료'
+export const needsReview = (client: Client) => ['검토 전', '검토 중'].includes(client.company) || ['검토 전', '검토 중'].includes(client.environment)
 export function assignmentSummary(clients: Client[], userId: string) {
   const mine = clients.filter(client => assignmentRole(client, userId))
   return { total: mine.length, primary: mine.filter(client => assignmentRole(client, userId) === '주담당').length,

@@ -46,7 +46,7 @@ async function switchClient(event: Event) {
             :value="item.id"
           >{{ item.name }}</option></select></label>
         </div>
-        <p>{{ client.biz }} · {{ client.type }} · {{ assignmentRole(client, user?.id || '') || '관리자 조회' }}</p>
+        <p>{{ client.biz || '사업자등록번호 정보 없음' }} · {{ client.type }} · {{ assignmentRole(client, user?.id || '') || '관리자 조회' }}</p>
         <p><ManagementBadge :value="client.status" /> · 현재 회계연도 {{ year }}년 <span class="sub">(목업 · 달력 연도 기준)</span></p>
       </section>
       <div class="work-grid">
@@ -61,7 +61,7 @@ async function switchClient(event: Event) {
         </button>
       </div>
       <p class="sub">
-        업체 전환 시 열린 업무 탭을 정리합니다. 담당자 변경·신규 등록은 화면을 이동해도 유지되며 새로고침하면 초기화됩니다.
+        업체 전환 시 열린 업무 탭을 정리합니다. 업체 정보는 실제 조회값입니다. 임시 담당자 배정은 새로고침하면 초기화됩니다.
       </p>
     </template>
     <p

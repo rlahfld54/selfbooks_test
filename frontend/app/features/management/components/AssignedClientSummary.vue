@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useClientAssignments } from '../useClientAssignments'
 
-const { summary } = useClientAssignments()
+const { summary, loading, error, mine } = useClientAssignments()
 </script>
 
 <template>
@@ -10,8 +10,8 @@ const { summary } = useClientAssignments()
     aria-label="내 담당 업체 요약"
   >
     <div>
-      <h3>내 담당 업체</h3><p class="sub">
-        전체 {{ summary.total }}개 · 주담당 {{ summary.primary }}개 · 보조담당 {{ summary.secondary }}개 · 확인 필요 {{ summary.review }}개
+      <h3>내 담당 업체</h3><p v-if="loading" role="status">업체 정보를 불러오는 중입니다.</p><p v-else-if="error" role="alert">{{ error }}</p><p v-else class="sub">
+        전체 {{ summary.total }}개 · 주담당 {{ summary.primary }}개 · 보조담당 {{ summary.secondary }}개 · 확인 필요 {{ mine.some(client => client.company || client.environment) ? summary.review + '개' : '정보 없음' }}
       </p>
     </div>
     <NuxtLink

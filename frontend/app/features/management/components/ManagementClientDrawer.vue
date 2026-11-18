@@ -34,15 +34,15 @@ const emit = defineEmits<{
       <h3>업체 기본정보</h3>
       <div class="info-row">
         <span class="label">사업자등록번호</span>
-        <span class="value">{{ client.biz }}</span>
+        <span class="value">{{ client.biz || '정보 없음' }}</span>
       </div>
       <div class="info-row">
         <span class="label">대표자명</span>
-        <span class="value">{{ client.ceo }}</span>
+        <span class="value">{{ client.ceo || '정보 없음' }}</span>
       </div>
       <div class="info-row">
         <span class="label">사업장 주소</span>
-        <span class="value">{{ client.address }}</span>
+        <span class="value">{{ client.address || '정보 없음' }}</span>
       </div>
     </section>
     <section class="drawer-section">
@@ -73,7 +73,7 @@ const emit = defineEmits<{
     <section class="drawer-section review-progress">
       <h3>설정 진행 상태</h3>
       <div class="progress-item">
-        <div class="title"><strong>회사정보 검토</strong><ManagementBadge :value="client.company" /></div>
+        <div class="title"><strong>회사정보 검토</strong><ManagementBadge :value="client.company || '정보 없음'" /></div>
         <div class="progress-bar" aria-hidden="true">
           <div
             class="progress-fill"
@@ -82,7 +82,7 @@ const emit = defineEmits<{
         </div>
       </div>
       <div class="progress-item">
-        <div class="title"><strong>환경정보 검토</strong><ManagementBadge :value="client.environment" /></div>
+        <div class="title"><strong>환경정보 검토</strong><ManagementBadge :value="client.environment || '정보 없음'" /></div>
         <div class="progress-bar" aria-hidden="true">
           <div
             class="progress-fill"
@@ -91,7 +91,7 @@ const emit = defineEmits<{
         </div>
       </div>
       <div class="progress-item">
-        <div class="title"><strong>적요 및 계정과목 등록</strong><ManagementBadge :value="client.chart" /></div>
+        <div class="title"><strong>적요 및 계정과목 등록</strong><ManagementBadge :value="client.chart || '정보 없음'" /></div>
         <div class="progress-bar" aria-hidden="true">
           <div
             class="progress-fill"

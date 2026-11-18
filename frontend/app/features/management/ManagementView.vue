@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import ClientDirectory from '~/features/client-directory/ClientDirectory.vue'
 import { managementSession } from './session'
 import { filterClients } from './management'
 import { roles } from './data'
@@ -32,7 +31,7 @@ const { state, navigate, activeTab, setDirty, density } = useWorkspaceContext()
 const route = useRoute()
 const router = useRouter()
 const data = managementSession(state)
-const { user: directoryUser, admin, mine, summary, loading: directoryLoading } = useClientAssignments()
+const { user: directoryUser, admin, mine, summary, loading: directoryLoading, error: directoryError, reload: reloadDirectory } = useClientAssignments()
 const directoryTab = computed(() => admin.value && route.query.tab !== 'mine' ? 'all' : 'mine')
 function selectDirectoryTab(value: string) {
   resetFilters()
@@ -53,7 +52,6 @@ async function clientDestination(destination: ManagementDestination) {
   if (path) await openClientWork(selectedClient.value, path)
 }
 const tab = ref(props.page === 'mypage' ? 'info' : 'basic')
-const live = computed(() => props.page === 'clients' && admin.value && route.query.source === 'live')
 const filters = reactive<ManagementFilters>({
   query: '', biz: '', kind: '', status: '', person: '', review: '', team: '', role: '',
 })
@@ -82,7 +80,7 @@ const rows = computed<ManagementRows>(() => ({
   clientStats: {
     total: data.clients.length,
     active: data.clients.filter((row) => row.status === '수임 중').length,
-    reviewPending: data.clients.filter((row) => row.company !== '검토 완료').length,
+    reviewPending: data.clients.filter((row) => ['검토 전', '검토 중'].includes(row.company)).length,
     ended: data.clients.filter((row) => row.status === '수임 종료').length,
   },
 }))
@@ -154,10 +152,10 @@ const filteredActiveStaff = computed(() =>
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 
 watch(
-  () => [route.query.client, live.value] as const,
-  ([id, liveMode]) => {
+  () => [route.query.client, data.directory.status] as const,
+  ([id]) => {
     if (props.page === 'clients')
-      selectedClient.value = liveMode ? undefined : data.clients.find((row) => row.id === id && canOpenClient(row, directoryUser.value))
+      selectedClient.value = data.clients.find((row) => row.id === id && canOpenClient(row, directoryUser.value))
   },
   { immediate: true },
 )
@@ -190,6 +188,7 @@ function resetFilters() {
   filters.role = ''
 }
 function open(title: string) {
+  if (title === '수임업체 등록') { showToast('업체 등록 저장 API 연결이 필요합니다. 조회된 업체만 표시합니다.'); return }
   if (['수임업체 등록', '담당자 지정'].includes(title) && !admin.value) return
   clearTimeout(toastTimer)
   Object.keys(form).forEach((key) => delete form[key])
@@ -254,29 +253,9 @@ function changeTab(value: string) {
 }
 function save() {
   if (['수임업체 등록', '담당자 지정'].includes(modal.value) && !admin.value) return
+  if (modal.value === '수임업체 등록') return
   try {
-    if (modal.value === '수임업체 등록') {
-      if (!form.name?.trim() || !form.biz?.trim() || !form.ceo?.trim())
-        throw new Error('업체명, 사업자등록번호, 대표자명을 입력해 주세요.')
-      const assignment = assignById(data.staff, form.primary || '', secondary.value)
-      const client: Client = {
-        id: `C${String(data.clients.length + 1).padStart(3, '0')}`,
-        name: form.name.trim(),
-        biz: form.biz.trim(),
-        ceo: form.ceo.trim(),
-        type: form.type || '개인',
-        ...assignment,
-        status: '등록 대기',
-        company: '검토 전',
-        environment: '검토 전',
-        chart: '검토 전',
-        start: form.start || '',
-        end: '',
-        address: '주소 미입력',
-      }
-      data.clients.unshift(client)
-      selectedClient.value = client
-    } else if (modal.value === '담당자 지정' && selectedClient.value) {
+    if (modal.value === '담당자 지정' && selectedClient.value) {
       Object.assign(
         selectedClient.value,
         assignById(data.staff, form.primary || '', secondary.value),
@@ -347,12 +326,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="page management" :class="{ narrow: page === 'mypage', 'management-live': live }">
-    <template v-if="live">
-      <NuxtLink class="small-link live-back" to="/client-directory">← 수임업체 관리 시안</NuxtLink>
-      <ClientDirectory />
-    </template>
-    <template v-else>
+  <div class="page management" :class="{ narrow: page === 'mypage' }">
       <header class="page-header">
         <div>
           <div class="eyebrow">{{ pageCopy[page][0] }}</div>
@@ -360,10 +334,11 @@ onBeforeUnmount(() => {
           <p class="sub">{{ pageCopy[page][1] }}</p>
         </div>
         <div v-if="page === 'clients'" class="actions">
-          <button class="btn" @click="showToast('데이터는 프론트엔드 Mock Data입니다.')">
+          <button class="btn" @click="showToast('업체는 기존 API로 Supabase에서 조회합니다. 담당자 배정만 화면에서 임시 적용됩니다.')">
             ⓘ 화면 안내
           </button>
-          <button v-if="admin" class="btn primary" @click="open('수임업체 등록')">+ 수임업체 등록</button>
+          <button class="btn" :disabled="directoryLoading" @click="reloadDirectory()">새로고침</button>
+          <button v-if="admin" class="btn primary" disabled title="업체 등록 저장 API 연결 필요">+ 수임업체 등록 · 준비 중</button>
         </div>
       </header>
       <template v-if="profileLive">
@@ -377,8 +352,9 @@ onBeforeUnmount(() => {
         <button :class="{ active: directoryTab === 'mine' }" :aria-pressed="directoryTab === 'mine'" @click="selectDirectoryTab('mine')">내 담당 업체</button>
         <button v-if="admin" :class="{ active: directoryTab === 'all' }" :aria-pressed="directoryTab === 'all'" @click="selectDirectoryTab('all')">전체 업체</button>
       </nav>
+      <p v-if="page === 'clients'" class="sub">실제 수임업체 조회 · 제공되지 않는 상세정보와 검토 상태는 정보 없음으로 표시합니다. 담당자 변경은 임시 적용입니다.</p>
       <ManagementClientList v-if="page === 'clients'"
-        :rows="rows" :filters="filters" :density="density" :staff-options="staffOptions" :loading="directoryLoading"
+        :rows="rows" :filters="filters" :density="density" :staff-options="staffOptions" :loading="directoryLoading" :error="directoryError" :review-known="data.clients.some(row => row.company || row.environment)"
         :mine="directoryTab === 'mine'" :summary="summary" :user-id="directoryUser?.id || ''" :admin="admin" :selected-id="selectedClient?.id" :total="directoryTab === 'mine' ? mine.length : data.clients.length"
         @filter="setFilter" @reset="resetFilters" @select="selectClient" @work="openClientWork($event)"
       />
@@ -489,9 +465,8 @@ onBeforeUnmount(() => {
           </div>
         </section>
       </template>
-    </template>
 
-    <ManagementClientDrawer v-if="selectedClient && !live" :client="selectedClient" :admin="admin"
+    <ManagementClientDrawer v-if="selectedClient" :client="selectedClient" :admin="admin"
       @close="closeClient" @assign="open('담당자 지정')" @navigate="clientDestination"
     />
 

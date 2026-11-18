@@ -14,6 +14,8 @@ const props = defineProps<{
   density: Density
   staffOptions: { id: string; name: string }[]
   loading: boolean
+  error: string
+  reviewKnown: boolean
   mine: boolean
   userId: string
   admin: boolean
@@ -43,19 +45,19 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
   <div class="stats">
     <div class="panel stat">
       <div class="hint">{{ mine ? '내 담당 업체' : '전체 수임업체' }}</div>
-      <strong>{{ formatAmount(mine ? summary.total : rows.clientStats.total) }}<span class="stat-note">개 업체</span></strong>
+      <strong>{{ loading || error ? '—' : formatAmount(mine ? summary.total : rows.clientStats.total) }}<span class="stat-note">개 업체</span></strong>
     </div>
     <div class="panel stat">
       <div class="hint">{{ mine ? '주담당 업체' : '수임 중인 업체' }}</div>
-      <strong>{{ formatAmount(mine ? summary.primary : rows.clientStats.active) }}<span class="stat-note">개 업체</span></strong>
+      <strong>{{ loading || error ? '—' : formatAmount(mine ? summary.primary : rows.clientStats.active) }}<span class="stat-note">개 업체</span></strong>
     </div>
     <div class="panel stat">
       <div class="hint">{{ mine ? '보조담당 업체' : '등록정보 검토 대기' }}</div>
-      <strong>{{ formatAmount(mine ? summary.secondary : rows.clientStats.reviewPending) }}<span class="stat-note">개 업체</span></strong>
+      <strong>{{ loading || error || (!mine && !reviewKnown) ? '—' : formatAmount(mine ? summary.secondary : rows.clientStats.reviewPending) }}<span class="stat-note">개 업체</span></strong>
     </div>
     <div class="panel stat">
       <div class="hint">{{ mine ? '확인 필요 업체' : '수임 종료 업체' }}</div>
-      <strong>{{ formatAmount(mine ? summary.review : rows.clientStats.ended) }}<span class="stat-note">개 업체</span></strong>
+      <strong>{{ loading || error || (mine && !reviewKnown) ? '—' : formatAmount(mine ? summary.review : rows.clientStats.ended) }}<span class="stat-note">개 업체</span></strong>
     </div>
   </div>
   <section class="panel table-panel" aria-label="수임업체 목록">
@@ -146,18 +148,18 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="client in loading ? [] : visible" :key="client.id" :class="{ selected: selectedId === client.id }" @click="emit('select', client)">
+          <tr v-for="client in (loading || error ? [] : visible)" :key="client.id" :class="{ selected: selectedId === client.id }" @click="emit('select', client)">
             <td>
               <button class="small-link table-name" @click.stop="emit('select', client)">{{ client.name }}</button>
               <div class="table-sub">{{ client.id }}</div>
             </td>
-            <td>{{ client.biz }}</td>
+            <td>{{ client.biz || '정보 없음' }}</td>
             <td><ManagementBadge :value="client.type" /></td>
-            <td>{{ mine ? assignmentRole(client, userId) : client.ceo }}</td>
-            <td>{{ client.primary }}</td>
+            <td>{{ mine ? assignmentRole(client, userId) : (client.ceo || '정보 없음') }}</td>
+            <td>{{ client.primary || '미배정' }}</td>
             <td v-if="!mine">{{ client.secondary.join(', ') || '—' }}</td>
             <td><ManagementBadge :value="client.status" /></td>
-            <td><span v-if="mine">등록 </span><ManagementBadge :value="client.company" /><div v-if="mine" class="review-line">환경 <ManagementBadge :value="client.environment" /></div></td>
+            <td><span v-if="mine">등록 </span><ManagementBadge :value="client.company || '정보 없음'" /><div v-if="mine" class="review-line">환경 <ManagementBadge :value="client.environment || '정보 없음'" /></div></td>
             <td v-if="!mine"><ManagementBadge :value="client.environment" /></td>
             <td>
               <button
@@ -170,6 +172,7 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
             </td>
           </tr>
           <tr v-if="loading"><td :colspan="mine ? 8 : 10" role="status" class="empty">수임업체를 불러오는 중입니다.</td></tr>
+          <tr v-else-if="error"><td :colspan="mine ? 8 : 10" class="empty" role="alert">{{ error }} 상단 새로고침 버튼으로 다시 조회해 주세요.</td></tr>
           <tr v-else-if="!rows.filteredClients.length">
             <td :colspan="mine ? 8 : 10" class="empty">
               {{ total ? '검색 조건에 맞는 수임업체가 없습니다. 필터를 초기화해보세요.' : mine ? '배정된 담당 업체가 없습니다.' : '등록된 수임업체가 없습니다.' }}
@@ -179,10 +182,8 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
       </table>
     </div>
     <footer class="table-footer">
-      <span>{{ formatAmount(rows.filteredClients.length) }}개 업체 · Mock Data</span>
-      <NuxtLink v-if="admin" class="small-link" to="/client-directory?source=live"
-        >등록된 수임업체 조회</NuxtLink
-        >
+      <span>{{ formatAmount(rows.filteredClients.length) }}개 업체 · 실제 조회</span>
+      <span class="muted-note">담당자 배정은 임시 적용</span>
       <nav class="pagination" aria-label="업체 목록 페이지">
         <button class="btn sm" :disabled="page <= 1" @click="page--">이전</button>
         <span aria-live="polite">{{ page }} / {{ pageCount }}</span>

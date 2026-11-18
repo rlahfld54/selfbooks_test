@@ -7,7 +7,7 @@ import { assignmentRole, assignmentSummary, canManageClients, canOpenClient, typ
 export function useClientAssignments() {
   const workspace = useWorkspaceContext()
   const data = managementSession(workspace.state)
-  const { user: authenticated, verifying: loading } = useAuth()
+  const { user: authenticated, verifying } = useAuth()
   const { public: { pagesPreview } } = useRuntimeConfig()
   const user = computed<DirectoryUser | null>(() => authenticated.value ?? (pagesPreview
     ? {
@@ -23,9 +23,11 @@ export function useClientAssignments() {
       })
     }
   }, { immediate: true })
+  const loading = computed(() => verifying.value || ['idle', 'pending'].includes(data.directory.status))
+  const error = computed(() => data.directory.error)
   const admin = computed(() => canManageClients(user.value?.role))
   const mine = computed(() => data.clients.filter(client => assignmentRole(client, user.value?.id ?? '')))
   const summary = computed(() => assignmentSummary(data.clients, user.value?.id ?? ''))
   const accessible = computed(() => data.clients.filter(client => canOpenClient(client, user.value)))
-  return { data, user, admin, mine, summary, accessible, loading }
+  return { data, user, admin, mine, summary, accessible, loading, error, reload: workspace.reloadDirectory }
 }
