@@ -2,8 +2,12 @@
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import ClientDirectory from '~/features/client-directory/ClientDirectory.vue'
 import { managementSession } from './session'
-import { filterClients, assignedPeople } from './management'
+import { filterClients } from './management'
 import { roles } from './data'
+import { clientWorkLinks } from './client-work'
+import { assignById, assignmentRole, canOpenClient } from './assignments'
+import { useClientAssignments } from './useClientAssignments'
+import AssignedClientSummary from './components/AssignedClientSummary.vue'
 import type { Client, Staff } from './data'
 import ManagementBadge from './ManagementBadge.vue'
 import { useBackendApi } from '~/composables/useBackendApi'
@@ -28,8 +32,28 @@ const { state, navigate, activeTab, setDirty, density } = useWorkspaceContext()
 const route = useRoute()
 const router = useRouter()
 const data = managementSession(state)
+const { user: directoryUser, admin, mine, summary, loading: directoryLoading } = useClientAssignments()
+const directoryTab = computed(() => admin.value && route.query.tab !== 'mine' ? 'all' : 'mine')
+function selectDirectoryTab(value: string) {
+  resetFilters()
+  selectedClient.value = undefined
+  void router.replace({ path: route.path, query: { tab: value } })
+}
+function selectClient(client: Client) {
+  if (canOpenClient(client, directoryUser.value)) selectedClient.value = client
+}
+async function openClientWork(client: Client, destination = '/client-work') {
+  if (!canOpenClient(client, directoryUser.value)) return
+  await router.push({ path: destination, query: { clientId: client.id } })
+  selectedClient.value = undefined
+}
+async function clientDestination(destination: ManagementDestination) {
+  if (!selectedClient.value) return
+  const path = destination === 'client-work' ? '/client-work' : clientWorkLinks.find(link => link.id === destination && link.enabled)?.path
+  if (path) await openClientWork(selectedClient.value, path)
+}
 const tab = ref(props.page === 'mypage' ? 'info' : 'basic')
-const live = computed(() => props.page === 'clients' && route.query.source === 'live')
+const live = computed(() => props.page === 'clients' && admin.value && route.query.source === 'live')
 const filters = reactive<ManagementFilters>({
   query: '', biz: '', kind: '', status: '', person: '', review: '', team: '', role: '',
 })
@@ -58,7 +82,7 @@ const rows = computed<ManagementRows>(() => ({
   clientStats: {
     total: data.clients.length,
     active: data.clients.filter((row) => row.status === '수임 중').length,
-    reviewPending: data.clients.filter((row) => row.company !== '검토 완료' || row.environment !== '검토 완료').length,
+    reviewPending: data.clients.filter((row) => row.company !== '검토 완료').length,
     ended: data.clients.filter((row) => row.status === '수임 종료').length,
   },
 }))
@@ -86,14 +110,14 @@ const pageCopy = {
   organization: ['ORGANIZATION', '회계법인 정보, 구성원, 역할 및 사무소를 관리합니다.'],
   clients: [
     'CLIENT MANAGEMENT',
-    '조직이 관리하는 수임업체를 조회하고 담당자 및 검토 상태를 관리합니다.',
+    '수임업체를 조회하고 담당 업체의 업무를 관리합니다.',
   ],
 }
 const editableProfile = ['name', 'email', 'phone']
 const organizationName = computed(() => rows.value.organization['회계법인명/사무소명'] || '—')
 const clients = computed(() =>
   filterClients(
-    data.clients,
+    directoryTab.value === 'mine' ? mine.value.filter(row => !filters.role || assignmentRole(row, directoryUser.value?.id ?? '') === filters.role) : data.clients,
     filters.query,
     filters.biz,
     filters.kind,
@@ -112,11 +136,11 @@ const staff = computed(() =>
   ),
 )
 const activeStaff = computed(() => data.staff.filter((row) => row.status === '활성'))
-const staffNames = computed(() => [...new Set(data.staff.map((row) => row.name))])
+const staffOptions = computed(() => data.staff.map(row => ({ id: row.id, name: row.name })))
 const assignedClients = computed(() => {
-  const name = selectedStaff.value?.name
-  return name
-    ? data.clients.filter((row) => row.primary === name || row.secondary.includes(name))
+  const id = selectedStaff.value?.id
+  return id
+    ? data.clients.filter(row => assignmentRole(row, id))
     : []
 })
 const modalTitle = computed(() =>
@@ -133,14 +157,14 @@ watch(
   () => [route.query.client, live.value] as const,
   ([id, liveMode]) => {
     if (props.page === 'clients')
-      selectedClient.value = liveMode ? undefined : data.clients.find((row) => row.id === id)
+      selectedClient.value = liveMode ? undefined : data.clients.find((row) => row.id === id && canOpenClient(row, directoryUser.value))
   },
   { immediate: true },
 )
 
 function closeClient() {
   selectedClient.value = undefined
-  if (route.query.client) void router.replace({ path: route.path })
+  if (route.query.client) void router.replace({ path: route.path, query: { tab: directoryTab.value } })
 }
 function showToast(text: string) {
   clearTimeout(toastTimer)
@@ -166,18 +190,19 @@ function resetFilters() {
   filters.role = ''
 }
 function open(title: string) {
+  if (['수임업체 등록', '담당자 지정'].includes(title) && !admin.value) return
   clearTimeout(toastTimer)
   Object.keys(form).forEach((key) => delete form[key])
   const client = title === '담당자 지정' ? selectedClient.value : undefined
   Object.assign(form, {
     type: '개인',
-    primary: client?.primary || activeStaff.value[0]?.name || '',
+    primary: client?.primaryId || activeStaff.value[0]?.id || '',
     team: '세무1팀',
     role: selectedStaff.value?.role || roles[1],
     status: '활성',
     start: '2026-11-17',
   })
-  secondary.value = [...(client?.secondary || [])]
+  secondary.value = [...(client?.secondaryIds || [])]
   staffQuery.value = ''
   message.value = ''
   modal.value = title
@@ -228,11 +253,12 @@ function changeTab(value: string) {
   resetFilters()
 }
 function save() {
+  if (['수임업체 등록', '담당자 지정'].includes(modal.value) && !admin.value) return
   try {
     if (modal.value === '수임업체 등록') {
       if (!form.name?.trim() || !form.biz?.trim() || !form.ceo?.trim())
         throw new Error('업체명, 사업자등록번호, 대표자명을 입력해 주세요.')
-      const assignment = assignedPeople(data.staff, form.primary || '', secondary.value)
+      const assignment = assignById(data.staff, form.primary || '', secondary.value)
       const client: Client = {
         id: `C${String(data.clients.length + 1).padStart(3, '0')}`,
         name: form.name.trim(),
@@ -253,7 +279,7 @@ function save() {
     } else if (modal.value === '담당자 지정' && selectedClient.value) {
       Object.assign(
         selectedClient.value,
-        assignedPeople(data.staff, form.primary || '', secondary.value),
+        assignById(data.staff, form.primary || '', secondary.value),
       )
     } else if (modal.value === '직원 초대') {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email || ''))
@@ -337,7 +363,7 @@ onBeforeUnmount(() => {
           <button class="btn" @click="showToast('데이터는 프론트엔드 Mock Data입니다.')">
             ⓘ 화면 안내
           </button>
-          <button class="btn primary" @click="open('수임업체 등록')">+ 수임업체 등록</button>
+          <button v-if="admin" class="btn primary" @click="open('수임업체 등록')">+ 수임업체 등록</button>
         </div>
       </header>
       <template v-if="profileLive">
@@ -347,12 +373,18 @@ onBeforeUnmount(() => {
         </p>
       </template>
 
+      <nav v-if="page === 'clients'" class="tabs" aria-label="수임업체 조회 범위">
+        <button :class="{ active: directoryTab === 'mine' }" :aria-pressed="directoryTab === 'mine'" @click="selectDirectoryTab('mine')">내 담당 업체</button>
+        <button v-if="admin" :class="{ active: directoryTab === 'all' }" :aria-pressed="directoryTab === 'all'" @click="selectDirectoryTab('all')">전체 업체</button>
+      </nav>
       <ManagementClientList v-if="page === 'clients'"
-        :rows="rows" :filters="filters" :density="density" :staff-names="staffNames"
-        @filter="setFilter" @reset="resetFilters" @select="selectedClient = $event"
+        :rows="rows" :filters="filters" :density="density" :staff-options="staffOptions" :loading="directoryLoading"
+        :mine="directoryTab === 'mine'" :summary="summary" :user-id="directoryUser?.id || ''" :admin="admin" :selected-id="selectedClient?.id" :total="directoryTab === 'mine' ? mine.length : data.clients.length"
+        @filter="setFilter" @reset="resetFilters" @select="selectClient" @work="openClientWork($event)"
       />
 
       <template v-else>
+        <AssignedClientSummary v-if="page === 'mypage'" />
         <section v-if="page === 'mypage'" class="panel profile-banner">
           <span class="avatar big-avatar">{{ rows.person.name.charAt(0) }}</span>
           <div class="profile-heading">
@@ -459,8 +491,8 @@ onBeforeUnmount(() => {
       </template>
     </template>
 
-    <ManagementClientDrawer v-if="selectedClient && !live" :client="selectedClient"
-      @close="closeClient" @assign="open('담당자 지정')" @navigate="go"
+    <ManagementClientDrawer v-if="selectedClient && !live" :client="selectedClient" :admin="admin"
+      @close="closeClient" @assign="open('담당자 지정')" @navigate="clientDestination"
     />
 
     <ManagementStaffDrawer v-if="selectedStaff" :staff="selectedStaff"

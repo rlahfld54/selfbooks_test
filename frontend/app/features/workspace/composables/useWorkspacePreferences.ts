@@ -19,7 +19,7 @@ export function useWorkspacePreferences(store: WorkspaceStore, resume: () => Tab
     return restoreWorkspace(read(id))
   }
   function persist() {
-    if (!ready.value) return
+    if (!ready.value || store.clientId.value) return
     write(store.company.value, snapshot())
     write('last-company', store.company.value)
     write('preferences', JSON.stringify({ collapsed: store.collapsed.value, density: store.density.value }))

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { clientWorkLinks } from '../client-work'
 import ManagementBadge from '../ManagementBadge.vue'
 import ManagementDialog from '../ManagementDialog.vue'
 
 import type { Client } from '../data'
 import type { ManagementDestination } from '../view-types'
-defineProps<{ client: Client }>()
+defineProps<{ client: Client; admin?: boolean }>()
 const emit = defineEmits<{
   close: []
   assign: []
@@ -47,7 +48,7 @@ const emit = defineEmits<{
     <section class="drawer-section">
       <div class="section-heading drawer-section-heading">
         <h3>수임 정보</h3>
-        <button class="small-link" @click="emit('assign')">담당자 변경 →</button>
+        <button v-if="admin" class="small-link" @click="emit('assign')">담당자 변경 →</button>
       </div>
       <div class="info-row">
         <span class="label">수임 상태</span><ManagementBadge :value="client.status" />
@@ -101,14 +102,12 @@ const emit = defineEmits<{
     </section>
     <section class="drawer-section">
       <h3>업무 바로가기</h3>
-      <button class="link-line" @click="emit('navigate', 'company')">회사등록 화면으로 이동 <span>↗</span></button>
-      <button class="link-line" @click="emit('navigate', 'settings')">환경등록 화면으로 이동 <span>↗</span></button>
-      <button class="link-line" @click="emit('navigate', 'voucher')">전표입력 화면으로 이동 <span>↗</span></button>
-      <button class="link-line" @click="emit('navigate', 'accounts')">계정과목 화면으로 이동 <span>↗</span></button>
+      <button class="link-line" @click="emit('navigate', 'client-work')">업체별 업무 홈 <span>↗</span></button>
+      <button v-for="link in clientWorkLinks" :key="link.id" class="link-line" :disabled="!link.enabled" @click="emit('navigate', link.id)">{{ link.title }} <span>{{ link.enabled ? '↗' : '준비 중' }}</span></button>
     </section>
     <template #footer>
-      <button class="btn" @click="emit('assign')">담당자 지정</button>
-      <button class="btn primary" @click="emit('navigate', 'company')">회사정보 검토 →</button>
+      <button v-if="admin" class="btn" @click="emit('assign')">담당자 지정</button>
+      <button class="btn primary" @click="emit('navigate', 'client-work')">업무 열기 →</button>
     </template>
   </ManagementDialog>
 </template>

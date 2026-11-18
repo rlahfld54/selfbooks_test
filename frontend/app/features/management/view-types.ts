@@ -23,4 +23,4 @@ export interface ManagementRows {
   clientStats: { total: number; active: number; reviewPending: number; ended: number }
 }
 
-export type ManagementDestination = 'company' | 'settings' | 'accounts' | 'voucher' | 'organization'
+export type ManagementDestination = 'client-work' | 'sales-journal' | 'company' | 'settings' | 'accounts' | 'voucher' | 'organization'

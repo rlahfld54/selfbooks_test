@@ -24,18 +24,18 @@ try {
   // Child filter events, empty results, reset, and drawer selection.
   await visit('/client-directory')
   const clientRows = page.locator('.management-table tbody tr')
-  await expect(clientRows).toHaveCount(10)
-  await page.getByLabel('업체명 검색', { exact: true }).fill('없는업체')
+  await expect(clientRows).toHaveCount(5)
+  await page.getByLabel('업체명·사업자등록번호 검색', { exact: true }).fill('없는업체')
   await expect(page.locator('.empty')).toContainText('검색 조건에 맞는 수임업체가 없습니다')
   await page.getByRole('button', { name: '↻ 초기화' }).click()
-  await expect(clientRows).toHaveCount(10)
+  await expect(clientRows).toHaveCount(5)
   await clientRows.first().click()
   await expect(page.locator('dialog.drawer')).toBeVisible()
   await page.locator('dialog.drawer').getByRole('button', { name: '닫기', exact: true }).click()
 
   // Invalid submission stays open; successful submission updates parent state.
   await page.getByRole('button', { name: '+ 수임업체 등록', exact: true }).click()
-  const modal = page.locator('dialog.modal')
+  const modal = page.locator('dialog.management-dialog.modal')
   await modal.getByRole('button', { name: '확인', exact: true }).click()
   await expect(modal.getByRole('alert')).toContainText('업체명, 사업자등록번호, 대표자명')
   await modal.getByLabel('업체명 *', { exact: true }).fill('컴포넌트 등록 테스트')
@@ -44,7 +44,7 @@ try {
   await modal.locator('.checkbox-list input:not(:disabled)').first().check()
   await modal.getByRole('button', { name: '확인', exact: true }).click()
   await expect(modal).toHaveCount(0)
-  await expect(clientRows).toHaveCount(11)
+  await expect(clientRows).toHaveCount(5)
   await expect(page.locator('dialog.drawer h2')).toHaveText('컴포넌트 등록 테스트')
 
   // Shared form actions: cancel discards edits, save updates organization data.

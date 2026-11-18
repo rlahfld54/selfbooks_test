@@ -1,13 +1,14 @@
 import { isNavigationFailure, type RouteLocationNormalized } from 'vue-router'
 import { isDemoCompany, type WorkspaceStore } from '~/features/workspace/stores/workspace'
-import { closeDestination, closeTab, openTab } from '~/utils/workspace'
+import { isClientWork } from '~/features/management/client-work'
+import { closeDestination, closeTab, openTab, freshWorkspace } from '~/utils/workspace'
 import { tabInfo, type TabId } from '~/utils/workspace-routes'
 import { useWorkspacePreferences } from './useWorkspacePreferences'
 
 type Confirmation = { kind: 'close' | 'company' | 'navigate'; resolve: (accepted: boolean) => void }
 const routeTab = (route: RouteLocationNormalized) => route.meta.workspaceTab
 
-export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => boolean) {
+export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => boolean, canUseRoute: (route: RouteLocationNormalized) => boolean) {
   const router = useRouter()
   const pending = shallowRef<Confirmation>()
   const resumeTab = ref<TabId>()
@@ -27,8 +28,9 @@ export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => b
   }
   async function go(id: TabId, mode: 'menu' | 'tab' | 'replace', commit?: () => void) {
     if (pending.value || (busy && mode !== 'replace') || permit) return false
-    const path = tabInfo(id).path
-    if (router.currentRoute.value.path === path) {
+    const base = tabInfo(id).path
+    const path = store.clientId.value && isClientWork(id) ? `${base}?clientId=${encodeURIComponent(store.clientId.value)}` : base
+    if (router.currentRoute.value.fullPath === path) {
       commit?.()
       return true
     }
@@ -82,10 +84,19 @@ export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => b
     const { company, snapshot } = preferences.restore()
     const id = routeTab(router.currentRoute.value) ?? 'home'
     if (id === 'home' && snapshot.active !== 'home') resumeTab.value = snapshot.active
-    store.replace(company, snapshot, id, true)
+    const initialClient = router.currentRoute.value.query.clientId
+    if (typeof initialClient === 'string' && canUseRoute(router.currentRoute.value)) store.clientId.value = initialClient
+    store.replace(company, store.clientId.value ? freshWorkspace() : snapshot, id, true)
     preferences.ready.value = true
     preferences.persist()
-    removeGuard = router.beforeEach((to, from) => {
+    removeGuard = router.beforeEach(async (to, from) => {
+      if (!canUseRoute(to)) return false
+      const nextClient = to.query.clientId
+      if (typeof nextClient === 'string' && nextClient !== store.clientId.value) {
+        if (busy || pending.value) return false
+        if ((store.state.tabs.length > 1 || store.hasDirtyTabs.value) && !await ask('company')) return false
+        return true
+      }
       if (to.path === '/login' && !canAccess()) return true
       if (permit?.path === to.fullPath && !permit.accepted) {
         permit.accepted = to
@@ -97,6 +108,12 @@ export function useWorkspaceNavigation(store: WorkspaceStore, canAccess: () => b
     removeSync = router.afterEach((to, from, failure) => {
       const id = routeTab(to)
       if (!failure && id) {
+        const nextClient = to.query.clientId
+        if (typeof nextClient === 'string' && nextClient !== store.clientId.value) {
+          store.clientId.value = nextClient
+          resumeTab.value = undefined
+          store.replace(store.company.value, freshWorkspace(), id)
+        }
         if (permit?.accepted === to) permit.commit?.()
         if (to.path !== from.path) resumeTab.value = undefined
         openTab(store.state, id)

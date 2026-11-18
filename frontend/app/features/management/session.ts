@@ -1,11 +1,12 @@
 import { reactive } from 'vue'
+import type { Client } from './data'
 import { staff, clients } from './data'
 import type { Workspace } from '~/types/workspace'
 
 export function createManagementData() {
   return {
     staff: staff.map(person => ({ ...person })),
-    clients: clients.map(client => ({ ...client, secondary: [...client.secondary] })),
+    clients: clients.map<Client>(client => ({ ...client, secondary: [...client.secondary], primaryId: staff.find(person => person.name === client.primary)?.id, secondaryIds: staff.filter(person => client.secondary.includes(person.name)).map(person => person.id) })),
     organization: {
       '회계법인명/사무소명': '회계법인 원지', '사업자등록번호': '000-00-00000',
       '법인등록번호': '000000-0000000', '대표자명': '김원지',
