@@ -87,7 +87,7 @@ function toggleSecondary(name: string, event: Event) {
           <div class="field">
             <label for="client-primary">주담당자</label
                 ><select id="client-primary" :value="form['primary']" @change="updateField('primary', $event)">
-              <option v-for="employee in activeStaff" :key="employee.id">
+              <option v-for="employee in activeStaff" :key="employee.id" :value="employee.id">
                 {{ employee.name }}
               </option>
             </select>
@@ -111,7 +111,7 @@ function toggleSecondary(name: string, event: Event) {
         <div class="field">
           <label for="assign-primary">주담당자</label
               ><select id="assign-primary" :value="form['primary']" @change="updateField('primary', $event)">
-            <option v-for="employee in activeStaff" :key="employee.id">
+            <option v-for="employee in activeStaff" :key="employee.id" :value="employee.id">
               {{ employee.name }}
             </option>
           </select>
@@ -131,10 +131,10 @@ function toggleSecondary(name: string, event: Event) {
         <div class="checkbox-list">
           <label v-for="employee in filteredActiveStaff" :key="employee.id">
             <input
-              :checked="secondary.includes(employee.name)" @change="toggleSecondary(employee.name, $event)"
+              :checked="secondary.includes(employee.id)" @change="toggleSecondary(employee.id, $event)"
               type="checkbox"
-              :value="employee.name"
-              :disabled="employee.name === form.primary"
+              :value="employee.id"
+              :disabled="employee.id === form.primary"
             />
             {{ employee.name }} · {{ employee.team }}
           </label>

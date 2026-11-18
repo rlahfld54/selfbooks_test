@@ -1,10 +1,12 @@
 import type { Client, Staff } from './data'
 export function filterClients(rows: Client[], query: string, biz: string, type: string, status: string, person: string, review: string) {
   const normalized = biz.replace(/\D/g, '')
-  return rows.filter(row => row.name.toLowerCase().includes(query.trim().toLowerCase())
+  const text = query.trim().toLowerCase()
+  const number = /^[\d\s-]+$/.test(text) ? text.replace(/\D/g, '') : ''
+  return rows.filter(row => (row.name.toLowerCase().includes(text) || (!!number && row.biz.replace(/\D/g, '').includes(number)))
     && row.biz.replace(/\D/g, '').includes(normalized)
     && (!type || row.type === type) && (!status || row.status === status)
-    && (!person || row.primary === person || row.secondary.includes(person))
+    && (!person || row.primaryId === person || row.secondaryIds?.includes(person) || row.primary === person || row.secondary.includes(person))
     && (!review || row.company === review || row.environment === review))
 }
 export function assignedPeople(staff: Staff[], primary: string, secondary: string[]) {

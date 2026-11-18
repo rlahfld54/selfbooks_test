@@ -1,3 +1,7 @@
+import { clientSummaryRoutes } from './routes/client-summaries.js'
+import { createClientSummaries } from './services/client-summaries.js'
+import { accountDefaultsRoutes } from './routes/account-defaults.js'
+import { createAccountDefaults } from './services/account-defaults.js'
 import Fastify from 'fastify'
 import { passwordLoginRoutes } from './routes/password-login.js'
 import type { PasswordLogin } from './services/password-login.js'
@@ -67,6 +71,8 @@ export function buildApp(options: { frontendOrigin: string; passwordLogin?: Pass
       if (!data) return reply.code(404).send({ error: { code: 'OFFICE_NOT_FOUND', message: '서버에 설정된 사무소가 없습니다.' } })
       return { data }
     })
+    await clientSummaryRoutes(local, pool ? createClientSummaries(pool) : undefined)
+    await accountDefaultsRoutes(local, pool ? createAccountDefaults(pool) : undefined)
     await directoryRoutes(local, pool && options.fixtures ? createDirectory(pool, options.fixtures) : undefined)
     await partnersRoutes(local, pool && options.fixtures && options.salesDevelopment && process.env.NODE_ENV !== 'production'
       ? request => {
@@ -85,3 +91,5 @@ export function buildApp(options: { frontendOrigin: string; passwordLogin?: Pass
   })
   return app
 }
+
+
