@@ -66,13 +66,18 @@ pages/collection.vue → features/collection/CollectionStatusView.vue
 - 샘플 자료는 팀장님 `front-simple/app/demo/fixtures.json` 의 가상 회사(가온상사) 자료를 종류별 10건까지 줄인 것이다. 거래유형 · 계정과목처럼 판정이 들어간 값은 넣지 않았다.
 - 시나리오: 바른카페(C003) 홈택스 정보 없음 → 로그인 실패 · 나머지 건너뜀, 주식회사 오션물류(C008) 전자계산서 매출 → 권한 부족 건너뜀.
 
-## Fastify 1단계 (2026-11-18, 읽기 전용)
+## Fastify — 실제 수집 (2026-11-18)
 
-- `backend/src/routes/collection.ts` · `services/collection-repository.ts`, `app.ts` 에 등록(개발 · 서버 사무소 한정, partners 와 같은 조건).
-- `GET /api/collection/status` — 공용 DB `public.clients`(사무소 전체, 지금 589곳)와 주 담당자(`client_assignments` PRIMARY → `users.name`)를 읽는다. 홈택스 계정 · 수집 테이블이 아직 없어 모든 칸은 「미수집」, 모든 업체는 「계정 미등록」.
-- `GET /api/collection/rows` · `/history` — 빈 목록. `POST /runs` · `/cancel` · `/retry`, `GET /runs/:id` — 503 `COLLECTION_NOT_READY`(홈택스에 접속하지 않는다).
-- 확인: 실제 DB 로 status 200 · 589곳 · 네네치킨 청라1호점(담당 회계법인 원지), runs 503. 백엔드 테스트 `tests/collection.test.ts` 2개 통과, `tsc --noEmit` 통과.
-- 「준비 중」(수출실적명세서 · 화물운전자복지카드 · 신고서 · 세무대리 인증서)은 clients 와 무관하다 — 스크랩 API 에 경로가 없어서다.
+- 마이그레이션 `backend/migrations/008_collection.sql` (`npm run db:migrate:collection`, 공용 DB 적용 완료): 새 테이블 3개만 추가, RLS 켜고 anon · authenticated 권한 회수.
+  - `client_hometax_accounts` — 업체별 홈택스 아이디 + 비밀번호 · 주민번호 앞6/뒤1 암호문(AES-256-GCM, 키 `HOMETAX_CRED_KEY`). 화면에는 아이디와 등록 여부만.
+  - `collection_requests` — 요청 1건 = 업체 1 × 종류 1. 진행 상태 · 이력 · 오류 코드.
+  - `collection_rows` — 받은 자료. `(client_id, kind, source_key)` 로 덮어쓴다.
+- `services/hometax-scrap.ts` — 스크랩 API 클라이언트와 매핑(가이드 규칙: YYYYMMDD, warning 미저장, 현금영수증 취소 제외, 카드 취소 음수 합산, tnmNm=상대방, 등록증명 basicOnly).
+- `services/collection-repository.ts` — 업체당 로그인 1회 → 종류 차례로, 인증 오류면 남은 종류 건너뜀, 자동 재시도 없음, 세션 만료만 1회 재로그인. 동시 수집 방지.
+- `PUT /api/collection/clients/:id/hometax` — 계정 저장(비밀번호를 비우면 기존 유지).
+- 확인(해동카클리닝, 2024-01-01~오늘): 9종 모두 완료 · 4,758건 저장. 2026년분은 이지북스와 매입 세금계산서 · 사업용카드 · 판매대행 건수 · 금액 일치, 현금영수증은 취소건 제외만큼 적다.
+- 다른 PC 에서 저장된 계정을 쓰려면 같은 `HOMETAX_CRED_KEY` 가 필요하다(커밋 금지). 키가 다르면 계정을 다시 저장하면 된다.
+- 「준비 중」(수출실적명세서 · 화물운전자복지카드 · 신고서 · 세무대리 인증서)은 스크랩 API 에 경로가 없어서다.
 
 ## Fastify API 계약
 

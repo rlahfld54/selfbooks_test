@@ -13,7 +13,7 @@ import './collection.css'
 
 const { activeTab, company, user } = useWorkspaceContext()
 const session = collectionSession(activeTab.value)
-const { sample, status, companies, run, running, actionError, start, retry, cancel, refresh } = useCollection(user + ':' + company.value, session)
+const { sample, status, companies, run, running, actionError, start, retry, cancel, saveAccount, refresh } = useCollection(user + ':' + company.value, session)
 
 const managers = computed(() => [...new Set(companies.value.map(row => row.manager).filter(Boolean))].sort())
 const managerOptions = computed(() => [{ value: '', label: '전체 담당자' }, ...managers.value.map(name => ({ value: name, label: name }))])
@@ -333,6 +333,7 @@ const fmtBiz = (value: string) => value.replace(/^(\d{3})(\d{2})(\d{5})$/, '$1-$
       :initial-clients="dialogClients"
       :starting="starting"
       :error="startError"
+      :save-account="saveAccount"
       @close="dialogOpen = false"
       @start="startRun"
     />

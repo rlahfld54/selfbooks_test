@@ -114,6 +114,15 @@ export interface StartRunInput {
   full?: boolean
 }
 
+/** 업체 홈택스 계정 저장 — 비밀번호는 서버가 암호화해 두고 다시 내려 주지 않는다. 비우면 기존 비밀번호 유지 */
+export interface SaveAccountInput {
+  hometaxId: string
+  password?: string
+  /** 계정에 따라 2차 인증에 쓰는 주민번호 앞 6자리 · 뒤 1자리 */
+  juminFront6?: string
+  juminLast1?: string
+}
+
 /** 인증 방식 — 이지북스와 같다. 세무대리 인증서는 스크랩 API 에 아직 없다 */
 export type LoginType = 'idpw' | 'cert'
 export const LOGIN_TYPE_LABEL: Record<LoginType, string> = { idpw: '홈택스 계정', cert: '세무대리 인증서' }

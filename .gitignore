@@ -37,5 +37,6 @@ Thumbs.db
 /backend/tests/*
 /backend/migrations/*
 !/backend/migrations/007_tax_office_partners.sql
+!/backend/migrations/008_collection.sql
 !/backend/tests/partners.test.ts
 !/backend/tests/partners.integration.ts

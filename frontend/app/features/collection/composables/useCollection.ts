@@ -1,4 +1,4 @@
-import type { CollectedRow, CollectionHistoryItem, CollectionRun, CollectionRunItem, CollectionStatus, StartRunInput } from '../types'
+import type { CollectedRow, CollectionHistoryItem, CollectionRun, CollectionRunItem, CollectionStatus, SaveAccountInput, StartRunInput } from '../types'
 import type { ApiResponse } from '~/services/api-client'
 import { createCollectionService } from '../services/collection'
 import { createPreviewCollectionService } from '../services/previewCollection'
@@ -11,6 +11,7 @@ interface Service {
   run: (id: string, signal?: AbortSignal) => Promise<ApiResponse<CollectionRun>>
   retry: (runId: string, itemId: string) => Promise<ApiResponse<CollectionRun>>
   cancel: (runId: string) => Promise<ApiResponse<CollectionRun>>
+  saveAccount: (clientId: string, input: SaveAccountInput) => Promise<ApiResponse<{ clientId: string, hometaxId: string, hometaxReady: boolean }>>
   history: (clientId: string, signal?: AbortSignal) => Promise<ApiResponse<CollectionHistoryItem[]>>
   rows: (input: { clientId: string, from: string, to: string }, signal?: AbortSignal) => Promise<ApiResponse<CollectedRow[]>>
 }
@@ -90,6 +91,12 @@ export function useCollection(scope: string, session: Session) {
     }
   }
 
+  /** 업체 홈택스 계정 저장 — 저장 뒤 표를 다시 읽어 「계정 미등록」을 지운다 */
+  async function saveAccount(clientId: string, input: SaveAccountInput) {
+    await service().saveAccount(clientId, input)
+    await status.refresh()
+  }
+
   // 화면에 다시 들어오면 진행 중이던 작업을 이어서 본다
   onMounted(() => { if (session.runId) { void poll() } })
   onBeforeUnmount(() => { alive = false; stopPolling(); status.clear() })
@@ -97,7 +104,7 @@ export function useCollection(scope: string, session: Session) {
   const companies = computed(() => overlayRun(status.data.value?.data.companies ?? [], run.value))
   const running = computed(() => !!run.value && !runFinished(run.value))
 
-  return { sample, status, companies, run, running, actionError, start, retry, cancel, refresh: () => status.refresh() }
+  return { sample, status, companies, run, running, actionError, start, retry, cancel, saveAccount, refresh: () => status.refresh() }
 }
 
 /** 한 회사의 수집 자료 — 행을 고를 때만 부른다. 기간은 패널이 정한다(연도 · 1기 · 2기) */

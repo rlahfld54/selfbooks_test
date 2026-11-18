@@ -6,7 +6,7 @@
 //   · 응답에 warning 이 붙은 0건은 「자료 없음」이 아니라 건너뜀이다
 //   · 같은 회사를 동시에 두 번 수집하지 않는다
 import { clients } from '../../management/data.ts'
-import { COLLECTION_KINDS, type CellStatus, type CollectedRow, type CollectionCompany, type CollectionHistoryItem, type CollectionRun, type CollectionRunItem, type RowsQuery, type StartRunInput } from '../types.ts'
+import { COLLECTION_KINDS, type CellStatus, type CollectedRow, type CollectionCompany, type CollectionHistoryItem, type CollectionRun, type CollectionRunItem, type RowsQuery, type SaveAccountInput, type StartRunInput } from '../types.ts'
 import { inPeriod, isoDay } from '../logic.ts'
 import { sampleRows } from './sampleRows.ts'
 
@@ -220,6 +220,15 @@ export function createPreviewCollectionService(options: PreviewOptions = {}) {
       }
       if (run.items.every(item => item.status !== 'running')) { run.finishedAt = new Date().toISOString() }
       return { data: copy(run) }
+    },
+    async saveAccount(clientId: string, input: SaveAccountInput) {
+      const company = companies.find(row => row.clientId === clientId)
+      if (!company) { throw new Error('사업체를 찾을 수 없습니다.') }
+      if (!input.hometaxId.trim()) { throw new Error('홈택스 아이디를 확인해 주세요.') }
+      if (!input.password && !company.hometaxReady) { throw new Error('홈택스 비밀번호를 입력해 주세요.') }
+      Object.assign(company, { hometaxId: input.hometaxId.trim(), hometaxReady: true })
+      NO_CREDENTIALS.delete(clientId)
+      return { data: { clientId, hometaxId: company.hometaxId!, hometaxReady: true } }
     },
     async history(clientId: string, signal?: AbortSignal) {
       signal?.throwIfAborted()

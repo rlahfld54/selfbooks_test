@@ -4,7 +4,7 @@
 // 매입매출은 이지북스처럼 한 줄이다 — 고르면 8종(세금계산서 · 계산서 · 현금영수증 · 카드 매출/매입)을 모두 받는다.
 // 수출실적명세서 · 화물운전자복지카드 · 신고서는 팀장님 스크랩 API 에 아직 없어 「준비 중」으로 보이기만 한다.
 import { bundleNotice, collectedNotice, filterCompanies, hometaxMaintenance, salesPurchasePeriod } from '../logic'
-import { COLLECTION_KINDS, LOGIN_TYPE_LABEL, type CollectionCompany, type LoginType, type StartRunInput } from '../types'
+import { COLLECTION_KINDS, LOGIN_TYPE_LABEL, type CollectionCompany, type LoginType, type SaveAccountInput, type StartRunInput } from '../types'
 
 const props = defineProps<{
   open: boolean
@@ -12,6 +12,8 @@ const props = defineProps<{
   initialClients: string[]
   starting: boolean
   error: string
+  /** 업체 홈택스 계정 저장 — 부모가 서비스로 보낸다 */
+  saveAccount?: (clientId: string, input: SaveAccountInput) => Promise<void>
 }>()
 const emit = defineEmits<{ close: [], start: [input: StartRunInput] }>()
 
@@ -75,6 +77,42 @@ function toggleListed(on: boolean) {
 const picked = computed(() => props.companies.filter(row => clientIds.value.includes(row.clientId)))
 const single = computed(() => picked.value.length === 1 ? picked.value[0]! : null)
 const missing = computed(() => picked.value.filter(row => !row.hometaxReady))
+
+/* 저장된 계정 — 한 곳만 고르면 아이디 · 비밀번호를 넣고 저장할 수 있다(이지북스와 같은 자리) */
+const account = reactive({ hometaxId: '', password: '', juminFront6: '', juminLast1: '' })
+const accountSaving = ref(false)
+const accountMessage = ref('')
+const accountError = ref('')
+watch(() => single.value?.clientId, () => {
+  Object.assign(account, { hometaxId: single.value?.hometaxId ?? '', password: '', juminFront6: '', juminLast1: '' })
+  accountMessage.value = ''
+  accountError.value = ''
+}, { immediate: true })
+const accountDirty = computed(() => !!single.value && (account.hometaxId.trim() !== (single.value.hometaxId ?? '') || !!account.password || !!account.juminFront6 || !!account.juminLast1))
+async function storeAccount() {
+  if (!single.value || !props.saveAccount) { return }
+  accountSaving.value = true
+  accountError.value = ''
+  accountMessage.value = ''
+  try {
+    await props.saveAccount(single.value.clientId, {
+      hometaxId: account.hometaxId.trim(),
+      ...(account.password ? { password: account.password } : {}),
+      ...(account.juminFront6 ? { juminFront6: account.juminFront6 } : {}),
+      ...(account.juminLast1 ? { juminLast1: account.juminLast1 } : {}),
+    })
+    account.password = ''
+    account.juminFront6 = ''
+    account.juminLast1 = ''
+    accountMessage.value = '저장했습니다.'
+  }
+  catch (error) {
+    accountError.value = (error as { data?: { error?: { message?: string } } }).data?.error?.message ?? (error as Error).message
+  }
+  finally {
+    accountSaving.value = false
+  }
+}
 
 /* 수집 항목 — 받을 수 있는 항목만 체크된다 */
 const groupState = (group: Group) => {
@@ -201,21 +239,67 @@ function submit() {
               <label>
                 <span>홈택스 아이디</span>
                 <input
-                  :value="single.hometaxId ?? ''"
-                  readonly
-                  placeholder="회사등록 > 홈택스 정보에서 등록"
+                  v-model="account.hometaxId"
+                  maxlength="50"
+                  autocomplete="off"
+                  placeholder="홈택스 아이디"
                 >
               </label>
               <label>
                 <span>홈택스 비밀번호</span>
                 <input
+                  v-model="account.password"
                   type="password"
-                  :value="single.hometaxReady ? '········' : ''"
-                  readonly
-                  placeholder="미등록"
-                  autocomplete="off"
+                  maxlength="100"
+                  autocomplete="new-password"
+                  :placeholder="single.hometaxReady ? '········ (바꿀 때만 입력)' : '홈택스 비밀번호'"
                 >
               </label>
+              <label>
+                <span>주민번호 앞 6자리 <small>계정에 따라</small></span>
+                <input
+                  v-model="account.juminFront6"
+                  inputmode="numeric"
+                  maxlength="6"
+                  autocomplete="off"
+                  placeholder="2차 인증이 필요한 계정만"
+                >
+              </label>
+              <label>
+                <span>주민번호 뒤 1자리 <small>계정에 따라</small></span>
+                <input
+                  v-model="account.juminLast1"
+                  inputmode="numeric"
+                  maxlength="1"
+                  autocomplete="off"
+                  placeholder="예: 1"
+                >
+              </label>
+            </div>
+            <div class="run-auth-save">
+              <span
+                v-if="accountError"
+                class="collection-invalid"
+                role="alert"
+              >{{ accountError }}</span>
+              <span
+                v-else-if="accountMessage"
+                class="run-auth-ok"
+                role="status"
+              >{{ accountMessage }}</span>
+              <span
+                v-else
+                class="run-help"
+              >비밀번호는 서버에만 암호화해 두고 화면에는 다시 보이지 않습니다.</span>
+              <UiButton
+                size="small"
+                variant="outline"
+                :disabled="!accountDirty || !account.hometaxId.trim() || !saveAccount"
+                :loading="accountSaving"
+                @click="storeAccount"
+              >
+                계정 저장
+              </UiButton>
             </div>
           </template>
           <p
@@ -387,6 +471,10 @@ function submit() {
 .run-auth-fields label { display: flex; flex-direction: column; gap: 4px; font-size: var(--aat-font-sm); font-weight: var(--aat-weight-semibold); color: var(--aat-color-text); }
 .run-auth-fields input { height: 40px; padding: 0 var(--aat-space-3); border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); background: var(--aat-color-surface); color: var(--aat-color-text); font: inherit; font-weight: var(--aat-weight-regular); }
 
+.run-auth-fields small { margin-left: 4px; font-weight: var(--aat-weight-regular); color: var(--aat-color-text-secondary); font-size: 11px; }
+.run-auth-save { display: flex; align-items: center; justify-content: space-between; gap: var(--aat-space-3); margin-top: var(--aat-space-3); }
+.run-auth-save .run-help { margin: 0; }
+.run-auth-ok { color: var(--aat-color-success); font-size: var(--aat-font-sm); }
 .run-full { display: inline-flex; align-items: center; gap: 6px; font-size: var(--aat-font-sm); color: var(--aat-color-text-secondary); cursor: pointer; }
 .run-kind-scroll { overflow-x: auto; border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); }
 .run-kind-table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: var(--aat-font-sm); }

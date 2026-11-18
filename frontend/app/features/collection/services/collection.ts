@@ -1,5 +1,5 @@
 import type { createApiClient } from '../../../services/api-client.ts'
-import type { CollectedRow, CollectionHistoryItem, CollectionRun, CollectionStatus, RowsQuery, StartRunInput } from '../types.ts'
+import type { CollectedRow, CollectionHistoryItem, CollectionRun, CollectionStatus, RowsQuery, SaveAccountInput, StartRunInput } from '../types.ts'
 
 export type CollectionService = ReturnType<typeof createCollectionService>
 
@@ -20,6 +20,8 @@ export function createCollectionService(request: ReturnType<typeof createApiClie
     /** 아직 시작하지 않은 작업을 멈춘다 — 도는 중인 종류는 끝까지 받는다 */
     cancel: (runId: string) =>
       request<CollectionRun>('/collection/runs/' + encodeURIComponent(runId) + '/cancel', { method: 'POST', body: {} }),
+    saveAccount: (clientId: string, input: SaveAccountInput) =>
+      request<{ clientId: string, hometaxId: string, hometaxReady: boolean }>('/collection/clients/' + encodeURIComponent(clientId) + '/hometax', { method: 'PUT', body: { ...input } }),
     history: (clientId: string, signal?: AbortSignal) =>
       request<CollectionHistoryItem[]>('/collection/history' + query({ clientId }), { signal }),
     rows: (input: RowsQuery, signal?: AbortSignal) =>
