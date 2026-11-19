@@ -22,15 +22,24 @@ const previewService = () => (preview ??= createPreviewCollectionService())
 
 type Session = ReturnType<typeof collectionSession>
 
-export function useCollection(scope: string, session: Session) {
+/** 자료수집 API — 미리보기면 브라우저 안 샘플, 아니면 Fastify. 전역 clientStore 도 이것을 쓴다 */
+export function useCollectionService(timeout = 20000): Service {
   // runtimeConfig 는 setup 에서 바로 읽는다. 서비스는 Nuxt 전역에 기대지 않는다.
   const sample = useRuntimeConfig().public.pagesPreview
-  const api = sample ? null : createCollectionService(useBackendApi(20000))
-  const service = (): Service => api ?? previewService()
-  const pollMs = sample ? 600 : 1500
+  return sample ? previewService() : createCollectionService(useBackendApi(timeout))
+}
 
-  const options = { server: false, getCachedData: () => undefined } as const
-  const status = useAsyncData('collection:' + scope, (_nuxt, { signal }) => service().status(signal), options)
+/*
+ * 자료수집 화면 — 업체 목록은 전역 clientStore(Pinia)에서 읽고, 여기서는 수집 작업(진행 · 중단 · 재시도)만 다룬다.
+ * 수집이 끝나면 clientStore.refresh() 로 목록을 다시 받아 다른 화면도 같은 상태를 본다.
+ */
+export function useCollection(session: Session) {
+  const sample = useRuntimeConfig().public.pagesPreview
+  const api = useCollectionService()
+  const service = (): Service => api
+  const pollMs = sample ? 600 : 1500
+  const clients = useClientStore()
+  void clients.fetchClients()
 
   const run = ref<CollectionRun | null>(null)
   const actionError = ref('')
@@ -46,7 +55,7 @@ export function useCollection(scope: string, session: Session) {
       if (!alive) { return }
       run.value = data
       if (runFinished(data)) {
-        await status.refresh()
+        await clients.refresh()
         return
       }
     }
@@ -91,27 +100,26 @@ export function useCollection(scope: string, session: Session) {
     }
   }
 
-  /** 업체 홈택스 계정 저장 — 저장 뒤 표를 다시 읽어 「계정 미등록」을 지운다 */
-  async function saveAccount(clientId: string, input: SaveAccountInput) {
-    await service().saveAccount(clientId, input)
-    await status.refresh()
-  }
+  /** 업체 홈택스 계정 저장 — 전역 목록에 바로 반영해 「계정 미등록」을 지운다 */
+  const saveAccount = (clientId: string, input: SaveAccountInput) => clients.saveHometaxAccount(clientId, input)
 
   // 화면에 다시 들어오면 진행 중이던 작업을 이어서 본다
   onMounted(() => { if (session.runId) { void poll() } })
-  onBeforeUnmount(() => { alive = false; stopPolling(); status.clear() })
+  // 목록은 전역이라 화면을 떠나도 지우지 않는다(다른 화면 · 다시 들어올 때 캐시로 바로 보인다)
+  onBeforeUnmount(() => { alive = false; stopPolling() })
 
-  const companies = computed(() => overlayRun(status.data.value?.data.companies ?? [], run.value))
+  const companies = computed(() => overlayRun(clients.companies, run.value))
   const running = computed(() => !!run.value && !runFinished(run.value))
+  const loading = computed(() => clients.loading)
+  const loadError = computed(() => clients.error)
 
-  return { sample, status, companies, run, running, actionError, start, retry, cancel, saveAccount, refresh: () => status.refresh() }
+  return { sample, companies, loading, loadError, run, running, actionError, start, retry, cancel, saveAccount, refresh: () => clients.refresh() }
 }
 
 /** 한 회사의 수집 자료 — 행을 고를 때만 부른다. 기간은 패널이 정한다(연도 · 1기 · 2기) */
 export function useCollectedRows(session: Session, period: Ref<{ from: string, to: string }>) {
-  const sample = useRuntimeConfig().public.pagesPreview
-  const api = sample ? null : createCollectionService(useBackendApi())
-  const service = (): Service => api ?? previewService()
+  const api = useCollectionService()
+  const service = (): Service => api
   const key = computed(() => ['collection-rows', session.selectedClientId, period.value.from, period.value.to].join(':'))
   const rows = useAsyncData(key, (_nuxt, { signal }) => session.selectedClientId
     ? service().rows({ clientId: session.selectedClientId, ...period.value }, signal)
@@ -122,9 +130,8 @@ export function useCollectedRows(session: Session, period: Ref<{ from: string, t
 
 /** 한 회사의 자료수집 이력 */
 export function useCollectionHistory(session: Session) {
-  const sample = useRuntimeConfig().public.pagesPreview
-  const api = sample ? null : createCollectionService(useBackendApi())
-  const service = (): Service => api ?? previewService()
+  const api = useCollectionService()
+  const service = (): Service => api
   const key = computed(() => 'collection-history:' + session.selectedClientId)
   const history = useAsyncData(key, (_nuxt, { signal }) => session.selectedClientId
     ? service().history(session.selectedClientId, signal)

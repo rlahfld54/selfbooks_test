@@ -45,6 +45,14 @@
 
 화면모음에 있지만 이번에 넣지 않은 것: 상단 「◀ 전기 / 차기 ▶」(전 메뉴 공통 규칙), 그리드 컬럼 보이기 · 순서 사용자 저장과 DEL 셀삭제(2026-09-23 요건), 「라이트/다크 → 인쇄 → 삭제」 공통 버튼 순서 — 공통 컴포넌트로 따로 만드는 편이 맞아 팀과 정한 뒤 붙인다.
 
+## 전역 상태 — Pinia `clientStore` (2026-11-19)
+
+- `frontend/app/stores/clientStore.ts` (`useClientStore`): 수임업체 목록을 한 곳에서 관리. 데이터는 `GET /api/collection/status`(clients + 홈택스 계정 등록 여부 + 종류별 마지막 수집 상태), 미리보기면 샘플.
+- 상태: `companies` · `sample` · `loading` · `error` · `loadedAt` · `hometaxReadyCount`.
+- `fetchClients()` 처음 한 번, 60초 안에는 캐시, 동시 호출은 한 요청으로 합친다. `refresh()` 강제 갱신. `findClient(id)`. `saveHometaxAccount(id, input)` 저장 후 목록 갱신.
+- 자료수집 화면(`useCollection`)은 목록을 이 store 에서 읽고, 수집이 끝나면 `refresh()` 한다. 다른 화면에서도 `useClientStore()` 로 같은 목록을 쓴다.
+- 수집 진행(작업 · 폴링)과 업체별 자료 · 이력은 화면 단위 상태로 둔다(전역에 둘 필요가 없는 일회성 데이터).
+
 ## 지켜야 할 홈택스 규칙 (팀장님 스크랩 서버 가이드)
 
 1. `BAD_CREDENTIALS` · `ACCOUNT_LOCKED` 는 **자동 재시도 금지**. 화면의 재시도는 사람이 누를 때만, `ACCOUNT_LOCKED` 는 막는다.

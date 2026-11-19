@@ -11,9 +11,9 @@ import CollectionProgressDock from './components/CollectionProgressDock.vue'
 import CollectionRowsPanel from './components/CollectionRowsPanel.vue'
 import './collection.css'
 
-const { activeTab, company, user } = useWorkspaceContext()
+const { activeTab } = useWorkspaceContext()
 const session = collectionSession(activeTab.value)
-const { sample, status, companies, run, running, actionError, start, retry, cancel, saveAccount, refresh } = useCollection(user + ':' + company.value, session)
+const { sample, companies, loading, loadError, run, running, actionError, start, retry, cancel, saveAccount, refresh } = useCollection(session)
 
 const managers = computed(() => [...new Set(companies.value.map(row => row.manager).filter(Boolean))].sort())
 const managerOptions = computed(() => [{ value: '', label: '전체 담당자' }, ...managers.value.map(name => ({ value: name, label: name }))])
@@ -84,7 +84,7 @@ const fmtBiz = (value: string) => value.replace(/^(\d{3})(\d{2})(\d{5})$/, '$1-$
       </UiBadge>
       <UiButton
         variant="outline"
-        :loading="status.status.value === 'pending'"
+        :loading="loading"
         @click="refresh()"
       >
         <UiIcon
@@ -123,11 +123,11 @@ const fmtBiz = (value: string) => value.replace(/^(\d{3})(\d{2})(\d{5})$/, '$1-$
     </div>
 
     <p
-      v-if="actionError"
+      v-if="actionError || (loadError && companies.length)"
       class="collection-alert"
       role="alert"
     >
-      {{ actionError }}
+      {{ actionError || loadError }}
     </p>
 
     <UiCard>
@@ -165,10 +165,10 @@ const fmtBiz = (value: string) => value.replace(/^(\d{3})(\d{2})(\d{5})$/, '$1-$
         </span>
       </div>
 
-      <LoadingState v-if="status.status.value === 'pending' && !companies.length" />
+      <LoadingState v-if="loading && !companies.length" />
       <ErrorState
-        v-else-if="status.error.value"
-        :message="status.error.value.message"
+        v-else-if="loadError && !companies.length"
+        :message="loadError"
         @retry="refresh()"
       />
       <EmptyState
