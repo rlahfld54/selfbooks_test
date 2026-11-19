@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint'],
+  modules: ['@nuxt/eslint', '@pinia/nuxt'],
   // Nuxt 호환성 기준일
   compatibilityDate: '2025-07-15',
 

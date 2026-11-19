@@ -12,5 +12,9 @@
     "@nuxtjs/supabase": "^2.1.0",
     "concurrently": "^10.0.7",
     "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^1.0.3",
+    "pinia": "^4.1.0"
   }
 }
