@@ -41,6 +41,30 @@ watch(() => props.company && JSON.stringify(Object.values(props.company.cells).m
 })
 
 const rows = computed(() => data.value?.data ?? [])
+
+/*
+ * 개발 모드 콘솔 — 업체 패널에서 받은 수집 자료를 종류별로 찍는다(운영 빌드에는 안 들어간다).
+ * F12 / ⌘+⌥+J → [수집 자료] 업체 · 기간 · 종류별 건수, 펼치면 종류마다 표.
+ */
+watch(rows, (list) => {
+  if (!import.meta.dev || !import.meta.client || !props.company || status.value !== 'success') { return }
+  const sums = categoryTotals(list)
+  console.groupCollapsed(`[수집 자료] ${props.company.name} · ${period.value.from} ~ ${period.value.to} · 총 ${list.length}건`)
+  for (const item of ROW_CATEGORIES) {
+    const own = list.filter(row => row.kind === item.type)
+    const sum = sums[item.type]
+    const title = `${item.flow === 'sale' ? '매출' : '매입'} ${item.label} — ${own.length}건${sum ? ` · 공급가액 ${sum.supply.toLocaleString()} · 세액 ${sum.tax.toLocaleString()} · 합계 ${sum.total.toLocaleString()}` : ''}`
+    if (!own.length) {
+      console.log(title)
+      continue
+    }
+    console.groupCollapsed(title)
+    console.table(own.slice(0, 300).map(row => Object.fromEntries((ROW_COLUMNS[item.type] ?? []).map(column => [column.label, row[column.field] ?? '']))))
+    if (own.length > 300) { console.log(`… 외 ${own.length - 300}건`) }
+    console.groupEnd()
+  }
+  console.groupEnd()
+})
 const totals = computed(() => categoryTotals(rows.value))
 const empty = { count: 0, supply: 0, tax: 0, total: 0 }
 const shown = computed(() => rows.value.filter(row => row.kind === category.value))
