@@ -38,7 +38,7 @@ test("balanced entries pass; invalid money, dates, types and company injection f
   for (const supply of ["-1", "1.1", "1e3", "01", "9".repeat(16)])
     rejects({ ...draft(), supply }, "INVALID_INPUT");
   rejects({ ...draft(), date: "2026-02-30" }, "INVALID_INPUT");
-  rejects({ ...draft(), type: "12" }, "INVALID_INPUT");
+  rejects({ ...draft(), type: "99" }, "INVALID_INPUT");
   rejects({ ...draft(), companyId: id }, "INVALID_INPUT");
   rejects({ ...draft(), lines: [] }, "INVALID_INPUT");
   const bad = draft();
@@ -65,6 +65,19 @@ test("11 and 51 zero VAT require confirmation; arithmetic is exact", () => {
   assert.equal(validateSales(input).lines.length, 100);
   input.lines[99]!.amount = "999999999999998";
   rejects(input, "UNBALANCED");
+});
+test('expanded types validate exempt VAT, card company, non-deduction and no-journal explicitly',()=>{
+  assert.equal(validateSales({...draft(),type:'13',vat:'0'}).vat,'0');
+  rejects({...draft(),type:'13'},'INVALID_VAT');
+  rejects({...draft(),type:'17'},'CARD_REQUIRED');
+  assert.equal(validateSales({...draft(),type:'17',cardCompany:'검증 카드사'}).type,'17');
+  rejects({...draft(),type:'54'},'REASON_REQUIRED');
+  assert.equal(validateSales({...draft(),type:'54',nonDeductionReason:'사용자 확인 사유'}).type,'54');
+  assert.equal(validateSales({...draft(),journalType:'0',lines:[]}).lines.length,0);
+  rejects({...draft(),journalType:'0'},'INVALID_INPUT');
+  rejects({...draft(),journalType:'2',supply:'101'},'JOURNAL_TOTAL');
+  rejects({...draft(),items:[{name:'a',quantity:'1',unitPrice:'99',supply:'99',vat:'10'}]},'ITEM_TOTAL');
+  for(const type of ['15','21','55','56'])rejects({...draft(),type},'INVALID_INPUT');
 });
 test("writes require local origin and configured development context", async (t) => {
   const app = buildApp({ frontendOrigin: "http://localhost:3000" });

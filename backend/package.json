@@ -17,7 +17,8 @@
     "db:migrate:partners": "tsx src/db/migrate-partners.ts --local-development",
     "db:migrate:collection": "tsx src/db/migrate-collection.ts --local-development",
     "test:integration:partners": "tsx tests/partners.integration.ts --local-development",
-    "test:integration:sales": "tsx tests/sales.integration.ts --local-development"
+    "test:integration:sales": "tsx tests/sales.integration.ts --local-development",
+    "test:integration:sales-workbench": "tsx tests/sales-workbench.integration.ts --local-development"
   },
   "keywords": [],
   "author": "",

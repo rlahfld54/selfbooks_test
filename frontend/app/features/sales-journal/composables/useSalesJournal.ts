@@ -46,6 +46,7 @@ export function useSalesJournal() {
   const partners = computed(() =>
     (meta.value?.partners ?? []).map((row) => ({
       ...row,
+      code: [row.code, row.businessNumber].filter(Boolean).join(' · '),
       contact: '',
       status: '',
       amount: '',
@@ -158,6 +159,7 @@ export function useSalesJournal() {
         to: data.metadata.periods[0]?.end ?? '',
         type: '',
         query: '',
+        payment: '',
       }
       session.applied = { ...session.filter }
       session.initialized = true
@@ -179,8 +181,9 @@ export function useSalesJournal() {
     session.applied = { ...session.filter }
     filterError.value = ''
   }
-  function filterType(type: string) {
+  function filterType(type: string, payment = '') {
     session.filter.type = type
+    session.filter.payment = payment
     applyFilter()
   }
   async function queryRecords() {

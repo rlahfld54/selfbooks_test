@@ -1,8 +1,18 @@
 <script setup lang="ts">
+import VoucherSearchModal from './VoucherSearchModal.vue'
+import { advancedSearch, type AdvancedFilter } from './services/voucherSearch'
+import VoucherEditorTools from './VoucherEditorTools.vue'
+import VoucherOperations from './VoucherOperations.vue'
+import VoucherTypeTabs from './VoucherTypeTabs.vue'
+import VoucherGridCell from './VoucherGridCell.vue'
 import WorkspaceVoucherNavigation from '~/features/workspace/components/WorkspaceVoucherNavigation.vue'
-const detailOpen = ref(true)
+import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
+import '../vouchers/vouchers.css'
+const { density } = useWorkspaceContext()
+const detailOpen = ref(false)
+const journalOpen = ref(true)
 import { formatAmount } from '~/utils/formatAmount'
-import { payments, sumAmounts, transactionTypes } from './services/salesJournal'
+import { monthRange, payments, sumAmounts, transactionTypes } from './services/salesJournal'
 import SalesAmountInput from './SalesAmountInput.vue'
 import { useSalesJournal } from './composables/useSalesJournal'
 const {
@@ -25,8 +35,6 @@ const {
   currentPeriod,
   locked,
   rows,
-  supplyTotal,
-  vatTotal,
   draftTotal,
   debit,
   credit,
@@ -42,6 +50,40 @@ const {
   save,
   remove,
 } = useSalesJournal()
+const editorTools=ref<InstanceType<typeof VoucherEditorTools>>()
+const typeTabs=ref<InstanceType<typeof VoucherTypeTabs>>()
+const selectedIds=ref<string[]>([]), electronic=ref(''), pinned=ref(false)
+const checkedRows=computed(()=>session.rows.filter(row=>selectedIds.value.includes(row.id)))
+const advancedOpen=ref(false), advanced=ref<AdvancedFilter>({})
+const visibleRows=computed(()=>advancedSearch(rows.value.filter(row=>!electronic.value||Boolean(row.electronic)===(electronic.value==='yes')),advanced.value))
+const availableTypes=computed(()=>meta.value?.vatTypes?.filter(t=>t.enabled).map(t=>({value:t.code,label:t.code+' · '+(t.direction==='sales'?'매출 ':'매입 ')+t.name}))??transactionTypes)
+function pick(row: typeof session.rows[number]){if(!pinned.value)select(row)}
+function focusSearch(){advancedOpen.value=true}
+const accountIndex=ref<number|null>(null)
+const accountSearchItems=computed(()=>(meta.value?.accounts??[]).map(row=>({...row,contact:'',status:'',amount:'',date:''})))
+function chooseAccount(row:{id:string}){if(accountIndex.value!==null&&session.draft.lines[accountIndex.value]){session.draft.lines[accountIndex.value]!.account=row.id;edit()}accountIndex.value=null}
+const dateMode = ref('period')
+const queryMonth = ref('')
+const selectedRecord = computed(() => session.rows.find(row => row.id === session.selected))
+function setDateMode(mode: string) {
+  dateMode.value = mode
+  if (mode === 'month') queryMonth.value = session.filter.from.slice(0, 7)
+}
+function prepareDateFilter() {
+  if (dateMode.value === 'month') {
+    const range = monthRange(queryMonth.value)
+    if (!range) {
+      filterError.value = '조회할 월을 선택하세요.'
+      return false
+    }
+    Object.assign(session.filter, range)
+  }
+  return true
+}
+function searchRecords() {
+  if (!prepareDateFilter()) return
+  return queryRecords()
+}
 function addLine() {
   session.draft.lines.push({ side: 'debit', account: '', amount: '', memo: '' })
   edit()
@@ -57,27 +99,18 @@ function confirmPending() {
 </script>
 
 <template>
-  <div class="sales-journal">
-    <PageToolbar
-      title="매입매출전표입력"
-      description="거래 내역부터 분개까지, 한 화면에서 입력하세요."
-    >
-      <template #eyebrow>전표관리</template>
-      <UiBadge tone="primary">{{ pagesPreview ? '샘플 데이터' : meta?.company ?? 'DB 연결' }}</UiBadge>
-      <UiButton :disabled="busy || loading || !meta" @click="protect(reset)"
-        ><UiIcon name="plus" :size="16" />신규 전표</UiButton
-      >
-      <UiButton :disabled="pagesPreview || !session.selected || busy || loading || locked" @click="deleting = true"
-        >삭제</UiButton
-      >
-      <UiButton variant="primary" :disabled="pagesPreview || busy || loading || !meta || locked" @click="save"
-        >저장</UiButton
-      >
-      <UiButton :aria-expanded="detailOpen" aria-controls="sales-detail" @click="detailOpen = !detailOpen">
-        {{ detailOpen ? '상세 패널 접기' : '상세 패널 열기' }}
-      </UiButton>
+  <div class="sales-journal voucher-screen" :class="{ 'voucher-compact': density === 'compact' }">
+    <PageToolbar title="매입매출전표입력" description="거래 입력과 분개 내역을 한 화면에서 확인하세요.">
+      <template #eyebrow>ACCOUNTING / VOUCHERS</template>
+      <UiBadge tone="neutral">{{ pagesPreview ? '미리보기' : meta?.company ?? '연결 대기' }}</UiBadge>
+      <UiButton :aria-expanded="detailOpen" aria-controls="sales-detail" @click="detailOpen = !detailOpen">{{ detailOpen ? '인사이트 닫기' : '인사이트 열기' }}</UiButton>
+      <UiButton variant="primary" :disabled="pagesPreview || busy || loading || !meta || locked" @click="save">{{ busy ? '저장 중…' : '전표 저장' }}</UiButton>
     </PageToolbar>
     <WorkspaceVoucherNavigation />
+    <details class="sales-more"><summary>추가 기능 <span>복사 · 이동 · 집계 · 내보내기</span></summary>
+    <VoucherOperations :rows="visibleRows" :all-rows="session.rows" :selected="checkedRows.length?checkedRows:(selectedRecord?[selectedRecord]:[])" :meta="meta" :dirty="tab.dirty" :preview="!!pagesPreview" @refresh="load" @filter="type=>filterType(type)" @pin="pinned=!pinned" @items="editorTools?.openItems()" @search="focusSearch" @preferences="typeTabs?.open()" />
+    </details>
+    <p v-if="pinned" role="status">하단 전표 고정 중 — 고정 전환 버튼으로 해제할 수 있습니다.</p>
     <div class="context-notice">
       <UiIcon name="document" :size="17" />
       <span v-if="pagesPreview">공개 미리보기입니다. 샘플 전표를 조회하고 입력 화면을 체험할 수 있습니다. 저장과 삭제는 비활성화되어 있습니다.</span>
@@ -94,23 +127,14 @@ function confirmPending() {
     <div class="sales-layout" :class="{ 'sales-layout-wide': !detailOpen }" :inert="busy || loading">
       <div class="sales-main">
         <section class="sales-card" aria-label="전표 조회">
-          <div class="type-tabs" aria-label="거래유형 필터">
-            <button
-              v-for="option in [
-                { value: '', label: '전체' },
-                { value: '11', label: '매출 과세' },
-                { value: '51', label: '매입 과세' },
-              ]"
-              :key="option.value"
-              :aria-pressed="session.applied.type === option.value"
-              :class="{ active: session.applied.type === option.value }"
-              @click="filterType(option.value)"
-            >
-              {{ option.label }}
-            </button>
-            <span>단위: 원</span>
-          </div>
-          <form class="sales-filters" @submit.prevent="queryRecords">
+          <VoucherTypeTabs v-if="meta" ref="typeTabs" :meta="meta" :type="session.applied.type" :electronic="electronic" @filter="(type,value)=>{electronic=value;filterType(type)}" />
+          <form class="sales-filters voucher-toolbar" @submit.prevent="searchRecords">
+            <div class="period-toggle" aria-label="조회 방식">
+              <button type="button" :aria-pressed="dateMode === 'period'" @click="setDateMode('period')">기간</button>
+              <button type="button" :aria-pressed="dateMode === 'month'" @click="setDateMode('month')">월별</button>
+            </div>
+            <input v-if="dateMode === 'month'" v-model="queryMonth" type="month" class="input" aria-label="조회 월" />
+            <template v-else>
             <label
               >조회기간
               <input
@@ -126,6 +150,7 @@ function confirmPending() {
               class="input"
               aria-label="조회 종료일"
             />
+            </template>
             <UiInput
               v-model="session.filter.query"
               aria-label="전표 검색"
@@ -133,88 +158,98 @@ function confirmPending() {
               class="sales-search"
             />
             <UiButton type="submit">조회</UiButton>
+            <UiButton :disabled="busy || loading || !meta" @click="protect(reset)">+ 신규 전표</UiButton>
+            <UiButton :disabled="pagesPreview || !session.selected || busy || loading || locked" @click="deleting = true">전표 삭제</UiButton>
+            <UiBadge v-if="tab.dirty" tone="warning">미저장 변경</UiBadge>
           </form>
           <p v-if="filterError" class="field-error" role="alert">{{ filterError }}</p>
-          <div class="sales-grid-scroll">
-            <table class="sales-grid">
+          <div class="voucher-section-title">
+            <p class="voucher-help">행 선택 후 셀 편집 · Enter / Tab 이동 · Esc 취소 · F2 코드 검색</p>
+            <label>밀도 <select v-model="density" aria-label="테이블 밀도"><option value="normal">기본</option><option value="compact">좁게</option></select></label>
+          </div>
+          <div class="sales-grid-scroll record-scroll voucher-grid-wrap">
+            <table class="sales-grid voucher-grid">
               <caption class="sr-only">
                 매입매출전표 목록
               </caption>
               <thead>
                 <tr>
                   <th>선택</th>
-                  <th>전표일자</th>
-                  <th>사업자번호</th>
+                  <th>년</th><th>월</th><th>일</th>
+                  <th>번호</th><th>사업자번호</th>
                   <th>거래처</th>
                   <th>유형</th>
-                  <th>품명</th>
+                  <th>품명</th><th>수량</th><th>단가</th>
                   <th class="numeric">공급가액</th>
                   <th class="numeric">부가세</th>
                   <th class="numeric">합계</th>
-                  <th>결제</th>
+                  <th>전자</th><th>분개</th><th>상태</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="row in rows"
+                  v-for="row in visibleRows"
                   :key="row.id"
                   :class="{ selected: session.selected === row.id }"
-                  @click="select(row)"
+                  @click="pick(row)"
                 >
                   <td>
                     <input
-                      type="radio"
-                      name="sales-record"
-                      :checked="session.selected === row.id"
+                      type="checkbox"
+                      v-model="selectedIds"
+                      :value="row.id"
                       :aria-label="`${row.date} ${row.partner} 전표 선택`"
-                      @click.stop="select(row)"
+                      @click.stop
                     />
                   </td>
-                  <td>{{ row.date }}</td>
-                  <td class="code">{{ row.partnerCode || '—' }}</td>
+                  <td class="date-cell">{{ row.date.slice(0, 4) }}</td><td class="date-cell">{{ row.date.slice(5, 7) }}</td><td class="date-cell">{{ row.date.slice(8, 10) }}</td>
+                  <td class="code">{{ row.entryNumber }}</td><td class="code">{{ row.partnerCode || '—' }}</td>
                   <td class="partner-cell">{{ row.partner }}</td>
                   <td>
-                    <span class="type-label" :class="{ purchase: row.type === '51' }">{{
-                      row.type === '11' ? '매출 과세' : '매입 과세'
+                    <select v-if="session.selected===row.id&&!locked" v-model="session.draft.type" aria-label="셀 유형" @change="taxEdit"><option v-for="type in availableTypes" :key="type.value" :value="type.value">{{ type.label }}</option></select><span v-else class="type-label" :class="{ purchase: Number(row.type) >= 50 }">{{
+                      availableTypes.find(type=>type.value===row.type)?.label??row.type
                     }}</span>
                   </td>
-                  <td>{{ row.item || '—' }}</td>
-                  <td class="numeric">{{ formatAmount(row.supply) }}</td>
+                  <td><VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.item" label="셀 품목" @update:model-value="edit" /><span v-else>{{ row.item || '—' }}</span></td>
+                  <td><VoucherGridCell v-if="session.selected===row.id&&!locked" :model-value="session.draft.quantity??'1'" label="셀 수량" @update:model-value="value=>{session.draft.quantity=value;edit()}" /><span v-else>{{ row.quantity??'1' }}</span></td><td><VoucherGridCell v-if="session.selected===row.id&&!locked" :model-value="session.draft.unitPrice??'0'" label="셀 단가" @update:model-value="value=>{session.draft.unitPrice=value;edit()}" /><span v-else>{{ row.unitPrice??'0' }}</span></td><td class="numeric"><VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.supply" label="셀 공급가액" @update:model-value="taxEdit" /><span v-else>{{ formatAmount(row.supply) }}</span></td>
                   <td class="numeric" :class="{ 'zero-vat': BigInt(row.vat) === 0n }">
-                    {{ formatAmount(row.vat)
-                    }}<span v-if="row.needsReview" class="review-label">확인요망 · 확인완료</span>
+                    <VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.vat" label="셀 부가세" @update:model-value="taxEdit" /><span v-else>{{ formatAmount(row.vat) }}</span><span v-if="row.needsReview" class="review-label">확인요망 · 확인완료</span>
                   </td>
                   <td class="numeric total-cell">
                     {{ formatAmount(sumAmounts([row.supply, row.vat])) }}
                   </td>
-                  <td>{{ row.payment }}</td>
+                  <td><input v-if="session.selected===row.id&&!locked" v-model="session.draft.electronic" type="checkbox" aria-label="셀 전자증빙" @change="edit" /><span v-else>{{ row.electronic?'전자':'종이' }}</span></td><td>{{ row.journalType??row.payment }}</td><td><span class="record-status" :class="{ posted: row.status === 'posted' }">{{ row.status === 'posted' ? '확정' : '미확정' }}</span></td>
                 </tr>
-                <tr v-if="!rows.length">
-                  <td colspan="10" class="empty-cell">
+                <tr v-if="!visibleRows.length">
+                  <td colspan="17" class="empty-cell">
                     조회된 전표가 없습니다. 기간과 검색어를 확인하거나 신규 전표를 입력하세요.
                   </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="6">
-                    조회 합계 <span>{{ rows.length }}건</span>
+                  <td colspan="11">
+                    조회 합계 <span>{{ visibleRows.length }}건</span>
                   </td>
-                  <td class="numeric">{{ formatAmount(supplyTotal) }}</td>
-                  <td class="numeric">{{ formatAmount(vatTotal) }}</td>
-                  <td class="numeric">{{ formatAmount(sumAmounts([supplyTotal, vatTotal])) }}</td>
-                  <td />
+                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.map(row=>row.supply))) }}</td>
+                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.map(row=>row.vat))) }}</td>
+                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.flatMap(row=>[row.supply,row.vat]))) }}</td>
+                  <td colspan="3" />
                 </tr>
               </tfoot>
             </table>
           </div>
           <div class="list-footer">
             <span>행을 선택하면 아래에서 내용을 수정할 수 있습니다.</span
-            ><span>{{ rows.length }} / {{ session.rows.length }}건</span>
+            ><span>{{ visibleRows.length }} / {{ session.rows.length }}건</span>
           </div>
         </section>
 
-        <section class="sales-card editor" aria-labelledby="sales-editor-heading">
+        <div class="voucher-section-title">
+          <strong>선택 전표 {{ selectedRecord?.entryNumber ?? '신규' }} · {{ visibleRows.length }}건</strong>
+          <UiButton :aria-expanded="journalOpen" aria-controls="sales-journal-editor" @click="journalOpen = !journalOpen">{{ journalOpen ? '분개 상세 접기' : '분개 상세 펼치기' }}</UiButton>
+        </div>
+        <section v-show="journalOpen" id="sales-journal-editor" class="sales-card editor" aria-labelledby="sales-editor-heading">
           <div class="section-heading">
             <h2 id="sales-editor-heading">
               {{ session.selected ? '전표 수정' : '신규 전표 입력' }}
@@ -229,6 +264,9 @@ function confirmPending() {
                     : '입력 대기'
             }}</UiBadge>
           </div>
+          <details class="sales-more calculation-tools"><summary>계산 및 자동분개 <span>수량·단가 계산 · 복수거래 · 입력 환경설정</span></summary>
+          <VoucherEditorTools v-if="meta" ref="editorTools" :draft="session.draft" :meta="meta" :locked="locked" @edit="edit" @tax-edit="taxEdit" @refresh="load" />
+          </details>
           <form @submit.prevent="save" @input="edit" @change="edit">
             <fieldset :disabled="locked || !meta" class="entry-fields">
               <div class="sales-form">
@@ -252,7 +290,7 @@ function confirmPending() {
                   <UiSelect
                     aria-label="거래유형"
                     v-model="session.draft.type"
-                    :options="transactionTypes"
+                    :options="availableTypes"
                     @update:model-value="taxEdit"
                 /></label>
                 <label class="wide"
@@ -310,7 +348,7 @@ function confirmPending() {
                     maxlength="500"
                 /></label>
               </div>
-              <label v-if="session.draft.vat && /^0+$/.test(session.draft.vat)" class="vat-confirm"
+              <label v-if="['11','51'].includes(session.draft.type) && session.draft.vat && /^0+$/.test(session.draft.vat)" class="vat-confirm"
                 ><input v-model="session.draft.zeroVatConfirmed" type="checkbox" /> 확인요망: 과세
                 거래의 부가세가 0원임을 확인했습니다.</label
               >
@@ -328,7 +366,7 @@ function confirmPending() {
                 검증합니다.
               </p>
               <div class="sales-grid-scroll">
-                <table class="sales-grid line-grid">
+                <table class="sales-grid line-grid voucher-grid">
                   <caption class="sr-only">
                     전표 분개 입력
                   </caption>
@@ -336,7 +374,7 @@ function confirmPending() {
                     <tr>
                       <th>구분</th>
                       <th>계정과목</th>
-                      <th class="numeric">금액</th>
+                      <th class="numeric">차변(출금)</th><th class="numeric">대변(입금)</th><th>거래처</th>
                       <th>적요</th>
                       <th>삭제</th>
                     </tr>
@@ -357,17 +395,21 @@ function confirmPending() {
                         <UiSelect
                           v-model="line.account"
                           :aria-label="`분개 ${index + 1} 계정과목`"
+                          @keydown.f2.prevent="accountIndex=index"
                           :options="accountOptions"
                         />
                       </td>
-                      <td>
-                        <SalesAmountInput
-                          v-model="line.amount"
-                          :aria-label="`분개 ${index + 1} 금액`"
-                        />
+                      <td class="line-amount" :class="{ inactive: line.side !== 'debit' }">
+                        <SalesAmountInput v-if="line.side === 'debit'" v-model="line.amount" :aria-label="`분개 ${index + 1} 금액`" />
+                        <span v-else aria-label="차변 금액 없음">—</span>
                       </td>
+                      <td class="line-amount" :class="{ inactive: line.side !== 'credit' }">
+                        <SalesAmountInput v-if="line.side === 'credit'" v-model="line.amount" :aria-label="`분개 ${index + 1} 금액`" />
+                        <span v-else aria-label="대변 금액 없음">—</span>
+                      </td>
+                      <td>{{ partnerName || '—' }}</td>
                       <td>
-                        <UiInput v-model="line.memo" :aria-label="`분개 ${index + 1} 적요`" />
+                        <input v-model="line.memo" class="input" :list="`summary-${index}`" :aria-label="`분개 ${index + 1} 적요`" maxlength="500" /><datalist :id="`summary-${index}`"><option v-for="summary in meta?.summaries?.filter(s=>s.accountId===line.account)" :key="summary.id" :value="summary.text" /></datalist>
                       </td>
                       <td>
                         <UiButton
@@ -379,7 +421,7 @@ function confirmPending() {
                       </td>
                     </tr>
                     <tr v-if="!session.draft.lines.length">
-                      <td colspan="5" class="empty-cell">
+                      <td colspan="7" class="empty-cell">
                         분개 행을 추가해 차변·대변 내역을 입력하세요.
                       </td>
                     </tr>
@@ -387,7 +429,7 @@ function confirmPending() {
                 </table>
               </div>
 
-              <div class="journal-totals">
+              <div class="journal-totals voucher-summary">
                 <span
                   >차변 <strong>{{ formatAmount(debit) }} 원</strong></span
                 ><span
@@ -415,34 +457,36 @@ function confirmPending() {
         </section>
       </div>
       <aside v-show="detailOpen" id="sales-detail" class="sales-aside" aria-label="입력 도움말">
-        <section class="sales-card">
-          <h2><UiIcon name="help" :size="18" /> 입력 안내</h2>
-          <p>상단에서 전표를 조회하고 아래 입력 영역에서 신규 등록 또는 수정을 진행하세요.</p>
-          <dl>
-            <dt>회계기간</dt>
-            <dd>{{ currentPeriod?.start }} ~ {{ currentPeriod?.end }}</dd>
-            <dt>작성자</dt>
-            <dd>{{ pagesPreview ? meta?.user : '개발 관리자' }}</dd>
-            <dt>저장 위치</dt>
-            <dd>{{ pagesPreview ? '샘플 데이터 미리보기' : `${meta?.company ?? ''} · PostgreSQL` }}</dd>
-          </dl>
+        <div class="aside-notice"><UiIcon name="help" :size="18" /><span>{{ tab.dirty ? '변경한 내용을 저장해 주세요.' : '전표를 선택하거나 신규 입력하세요.' }}</span></div>
+        <details class="aside-section shortcut-card">
+          <summary>단축키 안내</summary>
+          <div class="aside-body"><p><kbd>F2</kbd> 거래처 입력 중 검색</p><p><kbd>Tab</kbd> 다음 입력 항목</p><p><kbd>Shift + Tab</kbd> 이전 입력 항목</p></div>
+        </details>
+        <section class="aside-section selected-info">
+          <span class="aside-label">선택 전표</span>
+          <strong>{{ selectedRecord?.entryNumber ?? '신규 전표' }}</strong>
+          <span>{{ selectedRecord?.date ?? session.draft.date }} · {{ selectedRecord?.status === 'posted' ? '확정' : '미확정' }}</span>
+          <span v-if="locked" class="field-error">확정 전표 또는 마감 기간은 수정할 수 없습니다.</span>
         </section>
-        <section class="sales-card">
-          <h2>입력 기준</h2>
-          <p>지원 거래유형은 11 매출 과세, 51 매입 과세입니다.</p>
-          <p>공급가액과 부가세는 원 단위 정수로 입력하며 합계만 자동 표시합니다.</p>
-          <p>
-            11·51 유형의 부가세 0원은 서버에서 확인요망으로 판정합니다. 확인 체크 후 저장하면 확인
-            시점과 작성자를 기록합니다.
-          </p>
-        </section>
-        <section class="sales-card shortcut-card">
-          <h2>빠른 입력</h2>
-          <p><kbd>F2</kbd> 거래처 입력 중 검색</p>
-          <p><kbd>Tab</kbd> 다음 입력 항목으로 이동</p>
-        </section>
+        <details class="aside-section" open>
+          <summary>관리항목 <span class="aside-tag">연동 준비</span></summary>
+          <div class="aside-body management-fields">
+            <label v-for="field in ['사원', '부서', '현장', '프로젝트', '제품']" :key="field">{{ field }}<input class="input" :placeholder="field + '코드, ' + field + '명으로 검색'" disabled /></label>
+            <p>관리항목은 아직 저장을 지원하지 않습니다.</p>
+          </div>
+        </details>
+        <details class="aside-section"><summary>회계기간</summary><div class="aside-body"><p>{{ currentPeriod?.start ?? '—' }} ~ {{ currentPeriod?.end ?? '—' }}</p><p>{{ meta?.company }} · {{ meta?.establishment }}</p></div></details>
+        <details class="aside-section"><summary>작성자</summary><div class="aside-body"><p>{{ meta?.user ?? '정보 없음' }}</p><p>저장 시 로그인한 사용자로 기록됩니다.</p></div></details>
+        <details class="aside-section"><summary>메모</summary><div class="aside-body"><p class="memo-preview">{{ session.draft.memo || '입력한 전표 적요가 없습니다.' }}</p></div></details>
+        <details class="aside-section"><summary>입력 기준</summary><div class="aside-body"><p>서버의 활성 부가세 유형을 지원합니다. 유형 탭은 공통 데이터의 조회 필터입니다.</p><p>금액은 원 단위 정수로 입력합니다. 과세 거래의 부가세가 0원이면 확인이 필요합니다.</p><p>차변·대변 합계가 일치해야 저장할 수 있습니다.</p></div></details>
       </aside>
     </div>
+    <footer class="sales-status muted">
+      <span>{{ tab.dirty ? '미저장 변경 있음' : visibleRows.length + '건 조회됨' }}</span>
+      <span>{{ checkedRows.length }}건 체크 · 선택 공급가액 {{ formatAmount(sumAmounts(checkedRows.map(row=>row.supply))) }}원</span>
+    </footer>
+    <SearchDialog title="계정과목 검색" :open="accountIndex!==null" :items="accountSearchItems" @close="accountIndex=null" @select="chooseAccount" />
+    <VoucherSearchModal :open="advancedOpen" :value="advanced" @close="advancedOpen=false" @apply="value=>advanced=value" />
     <SearchDialog
       :open="searchOpen"
       :items="partners"
@@ -457,7 +501,7 @@ function confirmPending() {
     <ConfirmDialog
       :open="deleting"
       title="전표를 삭제할까요?"
-      message="선택한 미확정 전표와 분개가 DB에서 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
+      message="선택한 전표를 삭제자료로 이동하고 활성 분개에서 제외합니다. 열린 회계기간에는 삭제자료에서 복원할 수 있습니다."
       confirm-label="삭제"
       @cancel="deleting = false"
       @confirm="remove"
@@ -466,408 +510,94 @@ function confirmPending() {
 </template>
 
 <style scoped>
-.entry-fields {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  min-width: 0;
-}
-.error-notice {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: #fff1f2;
-  color: #b91c1c;
-  padding: 14px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-}
-.vat-confirm {
-  display: flex;
-  gap: 8px;
-  margin: 0 20px 16px;
-  padding: 12px;
-  background: #edf3ff;
-  color: #2457c5;
-  font-size: 12px;
-}
-.review-label {
-  display: block;
-  font-size: 10px;
-  margin-top: 4px;
-}
-.sales-journal {
-  min-width: 0;
-}
-.context-notice {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  background: #edf3ff;
-  color: #45628f;
-  border: 1px solid #dbe7fa;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  font-size: 12px;
-  line-height: 1.7;
-}
-.result-notice {
-  background: #ecfdf5;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  color: #166534;
-}
-.sales-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 24%);
-  gap: 20px;
-  align-items: start;
-}
-.sales-main {
-  min-width: 0;
-  display: grid;
-  gap: 20px;
-}
-.sales-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.type-tabs {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-  padding: 0 18px;
-  gap: 22px;
-}
-.type-tabs button {
-  border: 0;
-  border-bottom: 3px solid transparent;
-  background: none;
-  padding: 16px 2px;
-  color: var(--secondary);
-  font-weight: 600;
-}
-.type-tabs button.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-.type-tabs > span {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--secondary);
-}
-.sales-filters {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  flex-wrap: wrap;
-  background: #fafbfd;
-}
-.sales-filters label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  font-size: 12px;
-}
-.sales-filters input[type='date'] {
-  width: 145px;
-}
-.sales-search {
-  flex: 1;
-  min-width: 160px;
-}
-.sales-grid-scroll {
-  overflow: auto;
-}
-.sales-grid {
-  border-collapse: collapse;
-  width: 100%;
-  white-space: nowrap;
-  font-size: 12px;
-}
-.sales-grid th {
-  background: #f4f6fa;
-  font-weight: 500;
-  color: #66758b;
-  padding: 12px 10px;
-  text-align: left;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.sales-grid td {
-  padding: 14px 10px;
-  border-bottom: 1px solid #edf0f5;
-}
-.sales-grid .numeric {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.sales-grid tbody tr:hover {
-  background: #f5f8ff;
-}
-.sales-grid tbody tr.selected {
-  background: #eaf2ff;
-  box-shadow: inset 3px 0 var(--primary);
-}
-.sales-grid tbody tr {
-  cursor: pointer;
-}
-.sales-grid .partner-cell {
-  font-weight: 600;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.code {
-  color: var(--secondary);
-}
-.type-label {
-  color: #2457c5;
-  background: #edf3ff;
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-}
-.type-label.purchase {
-  color: #8a55b0;
-  background: #f4ecfc;
-}
-.zero-vat {
-  color: var(--primary);
-  font-weight: 600;
-}
-.total-cell {
-  font-weight: 600;
-}
-.sales-grid tfoot td {
-  background: #edf3ff;
-  color: #244b8c;
-  font-weight: 600;
-  border-top: 1px solid #d4e2fa;
-}
-.sales-grid tfoot span {
-  margin-left: 10px;
-  font-weight: 400;
-  font-size: 11px;
-}
-.sales-grid .empty-cell {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--secondary);
-  white-space: normal;
-}
-.list-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  color: var(--secondary);
-  font-size: 11px;
-}
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.section-heading h2 {
-  font-size: 15px;
-}
-.sales-form {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  padding: 20px;
-}
-.sales-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  min-width: 0;
-}
-.sales-form .wide {
-  grid-column: span 2;
-}
-.partner-input {
-  display: flex;
-  gap: 6px;
-}
-.partner-input .input {
-  min-width: 0;
-  width: 100%;
-}
-.memo-field {
-  grid-column: span 3;
-}
-.amount-output {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 36px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: #edf3ff;
-  color: var(--primary);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-.amount-output small {
-  font-size: 11px;
-  font-weight: 400;
-}
-.field-error {
-  color: var(--danger);
-  font-size: 11px;
-  line-height: 1.5;
-}
-.field-error:empty {
-  display: none;
-}
-.journal-heading {
-  border-top: 1px solid var(--border);
-  border-bottom: 0;
-  padding-bottom: 8px;
-}
-.journal-hint {
-  font-size: 11px;
-  color: var(--secondary);
-  padding: 0 20px 16px;
-}
-.line-grid {
-  min-width: 600px;
-}
-.line-grid td {
-  padding: 8px;
-}
-.line-grid td:first-child {
-  width: 110px;
-}
-.line-grid td:last-child {
-  width: 50px;
-}
-.line-grid .input {
-  width: 100%;
-  min-width: 0;
-}
-.journal-totals {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 24px;
-  background: #f8fafc;
-  padding: 16px 20px;
-  font-size: 12px;
-}
-.journal-totals strong {
-  margin-left: 10px;
-}
-.editor-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  gap: 12px;
-  border-top: 1px solid var(--border);
-}
-.editor-actions > span {
-  color: var(--secondary);
-  font-size: 11px;
-}
-.sales-aside {
-  display: grid;
-  gap: 16px;
-}
-.sales-aside .sales-card {
-  padding: 18px;
-}
-.sales-aside h2 {
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.sales-aside p {
-  font-size: 12px;
-  color: var(--secondary);
-  line-height: 1.9;
-  margin-bottom: 12px;
-}
-.sales-aside p:last-child {
-  margin-bottom: 0;
-}
-.sales-aside dl {
-  font-size: 11px;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-  margin-bottom: 0;
-}
-.sales-aside dt {
-  color: var(--secondary);
-  margin-top: 12px;
-}
-.sales-aside dd {
-  margin: 6px 0 0;
-}
-.shortcut-card kbd {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 5px;
-  font-family: inherit;
-  background: #f8fafc;
-  margin-right: 5px;
-}
-.sales-layout.sales-layout-wide {
-  grid-template-columns: minmax(0, 1fr);
-}
-@media (max-width: 1250px) {
-  .sales-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sales-aside {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@media (max-width: 650px) {
-  .sales-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 16px;
-  }
-  .memo-field {
-    grid-column: span 2;
-  }
-  .sales-aside {
-    grid-template-columns: 1fr;
-  }
-  .sales-filters {
-    gap: 10px;
-  }
-  .sales-filters label {
-    flex-wrap: wrap;
-  }
-  .sales-filters .sales-search {
-    flex-basis: 100%;
-  }
-  .type-tabs {
-    gap: 16px;
-  }
-  .editor-actions {
-    flex-wrap: wrap;
-  }
-  .journal-totals {
-    gap: 12px;
-    justify-content: flex-start;
-  }
-}
+/* General-voucher typography, controls and grid come from vouchers.css. */
+.sales-journal { min-width: 0; color: var(--text); }
+.sales-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.sales-layout-wide { grid-template-columns: minmax(0, 1fr); }
+.sales-main, .sales-card { min-width: 0; }
+.sales-main { display: flex; flex-direction: column; }
+.context-notice { display: flex; align-items: center; gap: 8px; margin: 10px 0; color: var(--secondary); font-size: 12px; line-height: 1.6; }
+.context-notice svg { flex-shrink: 0; }
+.sales-more { border: 1px solid var(--border); border-radius: 6px; background: var(--surface); margin: 10px 0; }
+.sales-more > summary { cursor: pointer; padding: 10px 12px; font-size: 12px; font-weight: 600; }
+.sales-more > summary span { font-weight: 400; color: var(--secondary); margin-left: 10px; }
+.sales-more[open] > summary { border-bottom: 1px solid var(--border); }
+.sales-filters { margin-top: 10px; }
+.sales-filters label, .period-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.period-toggle { gap: 0; }
+.period-toggle button { padding: 6px 10px; background: var(--surface); border: 1px solid var(--border); color: var(--secondary); font: inherit; cursor: pointer; }
+.period-toggle button:first-child { border-radius: 4px 0 0 4px; }
+.period-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: 0; }
+.period-toggle button[aria-pressed='true'] { background: var(--primary-light); color: var(--primary); }
+.sales-search { flex: 1; min-width: 170px; }
+.voucher-section-title { flex-wrap: wrap; }
+.voucher-section-title strong { overflow-wrap: anywhere; }
+.voucher-section-title select { border: 1px solid var(--border); border-radius: 4px; padding: 5px; background: var(--surface); color: var(--text); }
+.sales-grid-scroll { overflow: auto; }
+.record-scroll { resize: vertical; height: 340px; }
+.record-scroll .sales-grid { min-width: 2000px; table-layout: auto; }
+.record-scroll .numeric { min-width: 145px; }
+.record-scroll th { resize: horizontal; overflow: auto; min-width: 55px; }
+.record-scroll tbody tr { cursor: pointer; }
+.record-scroll td:first-child, .record-scroll th:first-child { position: sticky; left: 0; background: var(--surface); z-index: 3; }
+.record-scroll th:first-child { background: #edf2f8; z-index: 4; }
+.record-scroll td select { max-width: 160px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; }
+.sales-grid input[type='checkbox'] { accent-color: var(--primary); }
+.sales-grid .date-cell { text-align: center; }
+.sales-grid .code { color: var(--secondary); font-variant-numeric: tabular-nums; }
+.sales-grid .partner-cell { font-weight: 500; }
+.type-label { color: var(--primary); }
+.type-label.purchase { color: var(--text); }
+.review-label { display: block; font-size: 11px; color: var(--warning); }
+.sales-grid .total-cell { font-weight: 600; }
+.sales-grid tfoot td { position: sticky; bottom: 0; height: 34px; background: #f6f8fb; font-weight: 600; border-top: 1px solid var(--border); }
+.sales-grid .empty-cell { height: 180px; padding: 24px; text-align: center; color: var(--secondary); white-space: normal; }
+.list-footer, .sales-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-size: 11px; padding: 10px 0; color: var(--secondary); }
+.editor { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; }
+.section-heading h2 { margin: 0; font-size: 13px; font-weight: 600; }
+.calculation-tools { margin: 0 12px 8px; }
+.entry-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.sales-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+.sales-form label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; }
+.sales-form .wide { grid-column: span 2; }
+.memo-field { grid-column: span 3; }
+.partner-input { display: flex; gap: 4px; }
+.partner-input :deep(.input) { min-width: 0; width: 100%; }
+.amount-output { display: flex; justify-content: space-between; align-items: center; min-height: 36px; padding: 6px 10px; background: #f6f8fb; border: 1px solid var(--border); border-radius: 4px; font-weight: 600; }
+.amount-output small { color: var(--secondary); font-weight: 400; }
+.vat-confirm { display: flex; gap: 8px; align-items: center; margin: 0 12px 10px; padding: 10px; background: #fff8e6; color: var(--warning); font-size: 12px; }
+.journal-heading { border-top: 1px solid var(--border); }
+.journal-hint { margin: 0; padding: 0 12px 10px; color: var(--secondary); font-size: 12px; }
+.line-grid { min-width: 850px; }
+.line-grid td { padding: 2px 6px; }
+.line-grid td:first-child { width: 90px; }
+.line-grid td:nth-child(2) { width: 200px; }
+.line-grid td:last-child { width: 55px; }
+.line-grid :deep(.input) { width: 100%; min-width: 0; font-size: 12px; min-height: 28px; }
+.line-amount { min-width: 130px; text-align: right; }
+.line-grid td.inactive { color: var(--secondary); }
+.journal-totals strong { margin-left: 8px; }
+.editor-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 12px; font-size: 12px; color: var(--secondary); }
+.sales-aside { display: grid; gap: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 16px; background: var(--surface); }
+.aside-notice { display: flex; gap: 8px; font-size: 12px; color: var(--secondary); line-height: 1.6; }
+.aside-section { min-width: 0; font-size: 12px; }
+.aside-section summary { padding: 10px 0; border-bottom: 1px solid var(--border); font-weight: 600; cursor: pointer; }
+.aside-body { padding: 10px 0; }
+.aside-body p { margin: 0 0 8px; line-height: 1.7; color: var(--secondary); }
+.selected-info { display: flex; flex-direction: column; gap: 8px; overflow-wrap: anywhere; padding: 12px 0; }
+.aside-label, .aside-tag { color: var(--secondary); font-size: 11px; }
+.aside-tag { float: right; }
+.management-fields { display: grid; gap: 10px; }
+.management-fields label { display: grid; gap: 5px; }
+.management-fields input { min-width: 0; width: 100%; }
+.memo-preview { white-space: pre-wrap; overflow-wrap: anywhere; }
+.error-notice, .result-notice { padding: 10px 12px; margin: 10px 0; font-size: 12px; border-radius: 6px; }
+.error-notice { color: var(--danger); background: #fff1f2; }
+.result-notice { color: var(--success); background: #eefaf3; }
+.field-error { color: var(--danger); font-size: 12px; }
+@media (max-width: 1100px) { .sales-layout { grid-template-columns: minmax(0, 1fr); } .sales-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .sales-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } .memo-field { grid-column: span 2; } .sales-aside { grid-template-columns: minmax(0, 1fr); } .sales-more > summary span { display: none; } .sales-search { flex-basis: 100%; } }
+@media (max-width: 640px) { .sales-journal .voucher-help { font-size: 12px; } .sales-journal .voucher-help::after { content: none; } }
+
 </style>

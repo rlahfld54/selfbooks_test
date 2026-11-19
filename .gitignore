@@ -47,3 +47,7 @@ Thumbs.db
 !/backend/migrations/008_fi_existing_client_keys.sql
 !/docs/fi-schema-alignment.md
 !/backend/tests/client-summaries.test.ts
+!/backend/migrations/011_sales_workbench.sql
+!/backend/migrations/010_sales_base.sql
+!/backend/tests/sales-workbench.integration.ts
+!/docs/sales-workbench.md

@@ -16,7 +16,7 @@ function setup(t: TestContext, blocked = false) {
   const query = t.mock.fn(async (sql: string, values?: unknown[]) => {
     if (sql.includes('pg_catalog.pg_policy')) return { rows: [{ blocked }] }
     if (sql.includes('FROM public.clients')) {
-      return { rows: values?.length === 3 && values[2] !== id ? [] : [client] }
+      return { rows: values?.length === 2 && values[1] !== id ? [] : [client] }
     }
     if (sql.includes('FROM public.tax_offices')) return { rows: [{ id: officeId, name: '샘플 사무소' }] }
     return { rows: [] }
@@ -47,7 +47,7 @@ test('health, scoped directory queries and pool shutdown', async (t) => {
       assert.deepEqual(response.json(), { data })
     }
     assert.ok(query.mock.calls.some(({ arguments: args }) =>
-      args[0].includes('id = $3') && JSON.stringify(args[1]) === JSON.stringify([officeId, [id], id])))
+      args[0].includes('id = $2') && JSON.stringify(args[1]) === JSON.stringify([officeId, id])))
   } finally {
     await app.close()
   }

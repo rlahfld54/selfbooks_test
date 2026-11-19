@@ -9,8 +9,8 @@ export function createClientDirectoryService(request: ReturnType<typeof createAp
 }
 
 const sampleClients: ClientRecord[] = [
-  { id: 'preview-1', officeId: 'preview-office', name: '샘플 문구점', taxpayerKind: '개인', status: 'active' },
-  { id: 'preview-2', officeId: 'preview-office', name: '샘플 디자인', taxpayerKind: '법인', status: 'active' },
+  { id: 'preview-1', officeId: 'preview-office', name: '샘플 문구점', taxpayerKind: '개인', status: 'active', business_registration_number: null, representative_name: null, address: null, engagement_start_date: null, engagement_end_date: null },
+  { id: 'preview-2', officeId: 'preview-office', name: '샘플 디자인', taxpayerKind: '법인', status: 'active', business_registration_number: null, representative_name: null, address: null, engagement_start_date: null, engagement_end_date: null },
 ]
 
 export const previewClientDirectory = {

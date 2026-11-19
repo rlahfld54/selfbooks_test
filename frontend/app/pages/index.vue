@@ -15,38 +15,6 @@ useHead({ title: 'Accounting Pro · 세무회계 업무의 새로운 시작' })
 </script>
 <template>
   <LandingHeader />
-  <main>
-    <div>
-      <p
-        style="
-          background-color: #007bff;
-          color: white;
-          padding: 10px 20px;
-          margin: 10px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        "
-      >
-        선택 업체: {{ workspaceStore.selectedClientName }}
-      </p>
-
-      <UButton
-        style="
-          background-color: #007bff;
-          color: white;
-          padding: 10px 20px;
-          margin: 10px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-        "
-        @click="changeClient"
-      >
-        업체 선택
-      </UButton>
-    </div>
-    <HeroSection /><FeatureSection /><WorkflowSection />
-  </main>
+  <main><HeroSection /><FeatureSection /><WorkflowSection /></main>
   <LandingFooter />
 </template>

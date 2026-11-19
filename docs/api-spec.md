@@ -82,3 +82,8 @@ POST/PUT 본문: `id`(신규 UUID, 재시도 시 동일 값), `version`(신규 0
 - bigint ID/계정·적요코드는 문자열이며 적요코드와 기본계정 ID는 null 가능.
 - 업체 범위 불일치 403 CLIENT_ACCESS_DENIED, 조회 실패 503 SUMMARIES_UNAVAILABLE. Cache-Control: no-store.
 - 수정/삭제/등록 API는 추가하지 않는다.
+
+
+## 2026-11-19 매입매출전표 업무 확장
+
+현재 DB 구조·저장 대상·추가 기능·검증·남은 범위는 [매입매출전표 확장 구현](sales-workbench.md)을 따른다. 이전 문서의 11/51 전용, 물리 삭제, 해솔문구 고정 회사 및 자동분개 미지원 설명은 이번 적용 범위에서 대체된다.

@@ -87,7 +87,10 @@ export function buildApp(options: { frontendOrigin: string; passwordLogin?: Pass
       } : undefined)
     const context = options.fixtures ? createSalesContext(options.fixtures) : undefined
     await salesRoutes(local, pool && context && options.salesDevelopment && process.env.NODE_ENV !== 'production'
-      ? (request) => createSalesRepository(pool, { ...context, userId: request.auth!.id }) : undefined)
+      ? (request) => {
+        if (request.auth!.officeId !== context.officeId) throw new AuthError(403, 'ACCESS_DENIED', '사무소 접근 권한을 확인하세요.')
+        return createSalesRepository(pool, { ...context, userId: request.auth!.id })
+      } : undefined)
   })
   return app
 }
