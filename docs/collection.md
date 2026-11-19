@@ -68,7 +68,7 @@ pages/collection.vue → features/collection/CollectionStatusView.vue
 
 ## Fastify — 실제 수집 (2026-11-18)
 
-- 마이그레이션 `backend/migrations/008_collection.sql` (`npm run db:migrate:collection`, 공용 DB 적용 완료): 새 테이블 3개만 추가, RLS 켜고 anon · authenticated 권한 회수.
+- 마이그레이션 `backend/migrations/009_collection.sql` (`npm run db:migrate:collection`, 공용 DB 적용 완료): 새 테이블 3개만 추가, RLS 켜고 anon · authenticated 권한 회수.
   - `client_hometax_accounts` — 업체별 홈택스 아이디 + 비밀번호 · 주민번호 앞6/뒤1 암호문(AES-256-GCM, 키 `HOMETAX_CRED_KEY`). 화면에는 아이디와 등록 여부만.
   - `collection_requests` — 요청 1건 = 업체 1 × 종류 1. 진행 상태 · 이력 · 오류 코드.
   - `collection_rows` — 받은 자료. `(client_id, kind, source_key)` 로 덮어쓴다.

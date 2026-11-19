@@ -1,4 +1,5 @@
 export const menu = [
+  { id: 'client-work', path: '/client-work', title: '업체별 업무 홈', icon: 'users' },
   { id: 'home', path: '/dashboard', title: '대시보드', icon: 'home' },
   { id: 'company', path: '/company', title: '회사등록', icon: 'users' },
   { id: 'accounts', path: '/accounts', title: '계정과목 및 적요관리', icon: 'document' },

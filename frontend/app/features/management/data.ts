@@ -1,5 +1,5 @@
 export interface Staff { id: string; name: string; login: string; email: string; team: string; title: string; role: string; status: string; joined: string; phone?: string }
-export interface Client { id: string; name: string; biz: string; type: string; ceo: string; primary: string; secondary: string[]; status: string; company: string; environment: string; chart: string; start: string; end: string; address: string }
+export interface Client { primaryId?: string; secondaryIds?: string[]; id: string; name: string; biz: string; type: string; ceo: string; primary: string; secondary: string[]; status: string; company: string; environment: string; chart: string; start: string; end: string; address: string }
 export const roles=['조직 관리자','일반 사용자'];
 export const staff: Staff[]=[
 {id:'U001',name:'김원지',login:'wonji.kim',email:'wonji@aat-demo.example',team:'세무1팀',title:'세무사',role:'조직 관리자',status:'활성',joined:'2025-02-03',phone:'010-0000-1001'},

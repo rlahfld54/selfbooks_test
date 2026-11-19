@@ -5,7 +5,7 @@ import { decryptSecret, encryptSecret, CredentialKeyMissing } from './credential
 import { createScrapClient, ScrapFailure, type ScrapKind, type ScrapRow } from './hometax-scrap.js'
 
 /*
- * 자료수집 현황 — 공용 DB 의 수임 사업체(public.clients) + 008 마이그레이션의 수집 테이블.
+ * 자료수집 현황 — 공용 DB 의 수임 사업체(public.clients) + 009 마이그레이션의 수집 테이블.
  *   client_hometax_accounts  업체별 홈택스 계정(비밀번호 · 주민번호 조각은 암호문)
  *   collection_requests      수집 요청 1건 = 업체 1 × 종류 1 (이력 · 진행 상태)
  *   collection_rows          받은 자료 (같은 원본은 덮어쓴다)
@@ -98,7 +98,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
     }
     catch (error) {
       await db.query('ROLLBACK').catch(() => {})
-      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 008 마이그레이션을 먼저 적용해 주세요.')
+      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 009 마이그레이션을 먼저 적용해 주세요.')
       throw error
     }
     finally { db.release() }
@@ -114,7 +114,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
 
   async function status() {
     return read(async (db) => {
-      // 008 마이그레이션 전이어도 업체 목록은 보인다(칸은 모두 미수집 · 계정 미등록)
+      // 009 마이그레이션 전이어도 업체 목록은 보인다(칸은 모두 미수집 · 계정 미등록)
       const ready = (await db.query(`SELECT to_regclass('public.collection_requests') IS NOT NULL AND to_regclass('public.client_hometax_accounts') IS NOT NULL
         AND to_regclass('public.collection_rows') IS NOT NULL AS ready`)).rows[0]?.ready === true
       const { rows } = await db.query(`
@@ -246,7 +246,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
     }
     catch (error) {
       if (error instanceof CredentialKeyMissing) throw new SalesError(503, 'CREDENTIAL_KEY_MISSING', '서버에 홈택스 계정 암호화 키(HOMETAX_CRED_KEY)가 없습니다.')
-      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 008 마이그레이션을 먼저 적용해 주세요.')
+      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 009 마이그레이션을 먼저 적용해 주세요.')
       throw error
     }
     return { clientId, hometaxId: input.hometaxId, hometaxReady: true }
@@ -410,7 +410,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
         VALUES ${tuples.join(',')}`, values)
     }
     catch (error) {
-      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 008 마이그레이션을 먼저 적용해 주세요.')
+      if ((error as { code?: string }).code === '42P01') throw new SalesError(503, 'COLLECTION_NOT_MIGRATED', '자료수집 테이블이 아직 없습니다. 009 마이그레이션을 먼저 적용해 주세요.')
       throw error
     }
     void runQueue(queued, input.full === true)

@@ -13,6 +13,7 @@ export const isDemoCompany = (id: unknown): id is string => companies.some(compa
 export function createWorkspaceStore(initialTab: TabId, user = 'demo-admin') {
   const company = ref(companies[0]!.value)
   const generation = ref(0)
+  const clientId = ref('')
   const state = reactive(freshWorkspace())
   openTab(state, initialTab)
   const collapsed = ref(false)
@@ -39,7 +40,7 @@ export function createWorkspaceStore(initialTab: TabId, user = 'demo-admin') {
     tab.dirty = dirty
   }
 
-  return { user, company, generation, state, collapsed, density, activeTab, hasDirtyTabs, replace, setDirty }
+  return { user, company, clientId, generation, state, collapsed, density, activeTab, hasDirtyTabs, replace, setDirty }
 }
 export type WorkspaceStore = ReturnType<typeof createWorkspaceStore>
 
