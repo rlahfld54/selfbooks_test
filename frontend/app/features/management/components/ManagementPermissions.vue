@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import { usePermissionStore } from '~/stores/permissionStore'
+import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
+const { state } = useWorkspaceContext()
+const permissions = usePermissionStore().forScope(state)
+</script>
+
 <template>
   <div class="section-heading">
     <div>
@@ -20,45 +27,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>조직 정보 수정</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="cross" aria-label="미허용">—</span></td>
-        </tr>
-        <tr>
-          <td>직원 초대 및 관리</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="cross" aria-label="미허용">—</span></td>
-        </tr>
-        <tr>
-          <td>수임업체 등록</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-        </tr>
-        <tr>
-          <td>수임업체 정보 수정</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-        </tr>
-        <tr>
-          <td>담당 수임업체 조회</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-        </tr>
-        <tr>
-          <td>전표 조회 및 입력</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-        </tr>
-        <tr>
-          <td>마감 처리</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="cross" aria-label="미허용">—</span></td>
-        </tr>
-        <tr>
-          <td>신고 관련 업무</td>
-          <td><span class="check" aria-label="허용">✓</span></td>
-          <td><span class="check" aria-label="허용">✓</span></td>
+        <tr v-for="row in permissions.rows" :key="row.id">
+          <td>{{ row.label }}</td>
+          <td><span :class="row.admin ? 'check' : 'cross'" :aria-label="row.admin ? '허용' : '미허용'">{{ row.admin ? '✓' : '—' }}</span></td>
+          <td><span :class="row.member ? 'check' : 'cross'" :aria-label="row.member ? '허용' : '미허용'">{{ row.member ? '✓' : '—' }}</span></td>
         </tr>
       </tbody>
     </table>

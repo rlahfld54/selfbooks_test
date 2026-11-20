@@ -181,3 +181,9 @@ pages/collection.vue → features/collection/CollectionStatusView.vue
 - 브라우저(pagesPreview, 1600×1000 · 390×844): 표 표시, 사업체 3곳 선택 → 수집 시작 → 진행 → 완료(완료 18 · 건너뜀 8 · 실패 1), 행 클릭 → 수집 자료 패널, 콘솔 오류 없음.
 - `npm run build`, 기존 브라우저 회귀 스크립트(`tests/*.browser.mjs`): 미실행 — 사용자 요청 시 실행.
 - 실제 Fastify · DB · 스크랩 서버 연동: 미구현.
+
+## 업체 store 분리
+
+- `/api/collection/status`는 기존 `companies`, `sample`과 함께 `clients`(조직 내 전체 업체 원본), `assignedClients`(인증 사용자 담당 정보와 업체 원본)를 반환한다. 담당 조회는 서버의 officeId/userId로 제한한다.
+- `clientStore`가 세 목록을 저장하며 로그아웃·사용자/조직 변경 시 캐시와 이전 응답을 무효화한다. 로그인 API에는 업체 목록을 포함하지 않는다.
+- 검증: 미실행 — 사용자 요청 시 실행.

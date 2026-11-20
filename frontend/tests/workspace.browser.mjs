@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { createOnboardingData } from '../app/features/onboarding/mocks.ts'
-import { mockAuthenticatedContext } from './auth.browser-support.mjs'
+import { mockAuthenticatedContext, testClientStatus } from './auth.browser-support.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.SELFBOOKS_PLAYWRIGHT ?? 'playwright')
@@ -203,14 +203,14 @@ try {
     status: '활성',
   }
   const headers = { 'access-control-allow-origin': new URL(base).origin }
-  await page.route('**/api/clients', (route) => {
+  await page.route('**/api/collection/status', (route) => {
     listCalls++
     return route.fulfill({
       status: unavailable ? 503 : 200,
       headers,
       json: unavailable
         ? { error: { code: 'DIRECTORY_UNAVAILABLE', message: 'Unavailable' } }
-        : { data: [record] },
+        : { data: testClientStatus([record]) },
     })
   })
   await page.route('**/api/clients/fixture-1', (route) =>

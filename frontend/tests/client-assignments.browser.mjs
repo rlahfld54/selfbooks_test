@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { chromium, expect } from '@playwright/test'
-import { mockAuthenticatedContext, testUser } from './auth.browser-support.mjs'
+import { mockAuthenticatedContext, testUser, testClientStatus } from './auth.browser-support.mjs'
 
 // Test-only API interception. Production directory has no sample fallback.
 const base = process.env.SELFBOOKS_TEST_URL ?? 'http://localhost:3110'
@@ -16,11 +16,11 @@ try {
   let result = records
   let failure = false
   let requests = 0
-  await context.route('**/api/clients', async (route) => {
+  await context.route('**/api/collection/status', async (route) => {
     requests++
     await route.fulfill(failure
       ? { status: 503, json: { error: { code: 'UNAVAILABLE', message: '실제 조회 실패 테스트' } } }
-      : { json: { data: result } })
+      : { json: { data: testClientStatus(result) } })
   })
   const page = await context.newPage()
   page.setDefaultTimeout(10000)
@@ -74,7 +74,7 @@ try {
   const staff = await browser.newContext()
   await mockAuthenticatedContext(staff)
   await staff.route('**/api/auth/me', route => route.fulfill({ json: { data: { ...testUser, role: 'STAFF' } } }))
-  await staff.route('**/api/clients', route => route.fulfill({ json: { data: records } }))
+  await staff.route('**/api/collection/status', route => route.fulfill({ json: { data: testClientStatus(records) } }))
   const staffPage = await staff.newPage()
   await staffPage.goto(base + '/client-directory?source=live')
   await expect(staffPage.getByRole('button', { name: '전체 업체', exact: true })).toHaveCount(0)

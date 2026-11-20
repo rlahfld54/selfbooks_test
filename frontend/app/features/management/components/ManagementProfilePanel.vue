@@ -1,17 +1,33 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/authStore'
+import { mapProfile } from '../profile-mapping'
 import ManagementBadge from '../ManagementBadge.vue'
 import type { ManagementRows } from '../view-types'
+const authStore = useAuthStore()
 
+const { userInfo } = storeToRefs(authStore)
 import ManagementEditActions from './ManagementEditActions.vue'
 const props = defineProps<{
-  rows: Pick<ManagementRows, 'person' | 'organization'>
+  previewRows?: Pick<ManagementRows, 'person' | 'organization'>
+  displayEdits?: Record<string, string>
   tab: string
   form: Record<string, string>
   editing: boolean
   editDisabled: boolean
   message: string
 }>()
-const organizationName = computed(() => props.rows.organization['회계법인명/사무소명'] || '—')
+const { user } = storeToRefs(useAuthStore())
+const { pagesPreview } = useRuntimeConfig().public
+const rows = computed(() => {
+  const source =
+    (pagesPreview ? props.previewRows : undefined) ??
+    mapProfile(
+      user.value?.organization ? { user: user.value, office: user.value.organization } : undefined,
+    )
+  return { ...source, person: { ...source.person, ...props.displayEdits } }
+})
+const organizationName = computed(() => rows.value.organization['회계법인명/사무소명'] || '—')
 const emit = defineEmits<{
   edit: []
   save: []
@@ -56,8 +72,7 @@ function updateField(key: string, event: Event) {
             @input="updateField('name', $event)"
             @compositionend="updateField('name', $event)"
             inputmode="text"
-            @blur="emit('normalize', 'name')"
-          />
+            @blur="emit('normalize', 'name')" />
           <input v-else id="profile-name" :value="rows.person.name" disabled />
         </div>
         <div class="field">
@@ -69,8 +84,7 @@ function updateField(key: string, event: Event) {
             @input="updateField('email', $event)"
             @compositionend="updateField('email', $event)"
             inputmode="email"
-            @blur="emit('normalize', 'email')"
-          />
+            @blur="emit('normalize', 'email')" />
           <input v-else id="profile-email" :value="rows.person.email" disabled />
         </div>
         <div class="field">
@@ -82,8 +96,7 @@ function updateField(key: string, event: Event) {
             @input="updateField('phone', $event)"
             @compositionend="updateField('phone', $event)"
             inputmode="tel"
-            @blur="emit('normalize', 'phone')"
-          />
+            @blur="emit('normalize', 'phone')" />
           <input v-else id="profile-phone" :value="rows.person.phone" disabled />
         </div>
         <div class="field">
@@ -120,33 +133,39 @@ function updateField(key: string, event: Event) {
       <div>
         <div class="info-row">
           <span class="label">조직명</span>
-          <span class="value">{{ organizationName }}</span>
+          <span class="value">{{ userInfo?.name }}</span>
         </div>
         <div class="info-row">
           <span class="label">사업자등록번호</span>
-          <span class="value">{{ rows.organization['사업자등록번호'] || '—' }}</span>
+          <span class="value">
+            {{
+              formatNumber('business', userInfo?.organization?.business_registration_number) || '—'
+            }}
+          </span>
         </div>
         <div class="info-row">
           <span class="label">대표자명</span>
-          <span class="value">{{ rows.organization['대표자명'] || '—' }}</span>
+          <span class="value">{{ userInfo?.organization?.representative_name || '—' }}</span>
         </div>
         <div class="info-row">
           <span class="label">대표전화</span>
-          <span class="value">{{ rows.organization['대표전화'] || '—' }}</span>
+          <span class="value">
+            {{ formatNumber('mobile', userInfo?.organization?.representative_phone) || '—' }}
+          </span>
         </div>
       </div>
       <div>
         <div class="info-row">
           <span class="label">대표 이메일</span>
-          <span class="value">{{ rows.organization['대표 이메일'] || '—' }}</span>
+          <span class="value">{{ userInfo?.organization?.email || '—' }}</span>
         </div>
         <div class="info-row">
           <span class="label">사업장 주소</span>
-          <span class="value">{{ rows.organization['사업장 주소'] || '—' }}</span>
+          <span class="value">{{ userInfo?.organization?.address || '—' }}</span>
         </div>
         <div class="info-row">
           <span class="label">소속 부서</span>
-          <span class="value">{{ rows.person.team || '—' }}</span>
+          <span class="value">{{ userInfo?.departmentName || '—' }}</span>
         </div>
         <div class="info-row">
           <span class="label">조직 내 역할</span>

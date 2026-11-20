@@ -3,8 +3,11 @@ import ManagementBadge from '../ManagementBadge.vue'
 import ManagementDialog from '../ManagementDialog.vue'
 
 import type { Staff } from '../data'
-import { roles } from '../data'
+import { usePermissionStore } from '~/stores/permissionStore'
+import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { teams, clientTypes } from '../options'
+const { state: workspace } = useWorkspaceContext()
+const roles = usePermissionStore().forScope(workspace).roles
 const props = defineProps<{
   modal: string
   title: string
@@ -34,9 +37,12 @@ function searchStaff(event: Event) {
 }
 function toggleSecondary(name: string, event: Event) {
   const checked = (event.target as HTMLInputElement).checked
-  emit('update:secondary', checked
-    ? [...new Set([...props.secondary, name])]
-    : props.secondary.filter((value) => value !== name))
+  emit(
+    'update:secondary',
+    checked
+      ? [...new Set([...props.secondary, name])]
+      : props.secondary.filter((value) => value !== name),
+  )
 }
 </script>
 
@@ -49,58 +55,57 @@ function toggleSecondary(name: string, event: Event) {
         </div>
         <div class="form-grid">
           <div class="field">
-            <label for="client-name">업체명 *</label
-                ><input
+            <label for="client-name">업체명 *</label>
+            <input
               id="client-name"
               :value="form['name']"
               @input="updateField('name', $event)"
               @compositionend="updateField('name', $event)"
-              placeholder="예: 주식회사 새봄"
-            />
+              placeholder="예: 주식회사 새봄" />
           </div>
           <div class="field">
-            <label for="client-business">사업자등록번호 *</label
-                ><input
+            <label for="client-business">사업자등록번호 *</label>
+            <input
               id="client-business"
               :value="form['biz']"
               @input="updateField('biz', $event)"
               @compositionend="updateField('biz', $event)"
-              placeholder="000-00-00000"
-            />
+              placeholder="000-00-00000" />
           </div>
           <div class="field">
-            <label for="client-type">개인/법인 구분</label
-                ><select id="client-type" :value="form['type']" @change="updateField('type', $event)">
+            <label for="client-type">개인/법인 구분</label>
+            <select id="client-type" :value="form['type']" @change="updateField('type', $event)">
               <option v-for="value in clientTypes" :key="value">{{ value }}</option>
             </select>
           </div>
           <div class="field">
-            <label for="client-ceo">대표자명 *</label
-                ><input
+            <label for="client-ceo">대표자명 *</label>
+            <input
               id="client-ceo"
               :value="form['ceo']"
               @input="updateField('ceo', $event)"
               @compositionend="updateField('ceo', $event)"
-              placeholder="대표자명"
-            />
+              placeholder="대표자명" />
           </div>
           <div class="field">
-            <label for="client-primary">주담당자</label
-                ><select id="client-primary" :value="form['primary']" @change="updateField('primary', $event)">
+            <label for="client-primary">주담당자</label>
+            <select
+              id="client-primary"
+              :value="form['primary']"
+              @change="updateField('primary', $event)">
               <option v-for="employee in activeStaff" :key="employee.id" :value="employee.id">
                 {{ employee.name }}
               </option>
             </select>
           </div>
           <div class="field">
-            <label for="client-start">수임 시작일</label
-                ><input
+            <label for="client-start">수임 시작일</label>
+            <input
               id="client-start"
               :value="form['start']"
               @input="updateField('start', $event)"
               @compositionend="updateField('start', $event)"
-              type="date"
-            />
+              type="date" />
           </div>
         </div>
       </template>
@@ -109,8 +114,11 @@ function toggleSecondary(name: string, event: Event) {
           주담당자는 1명, 보조담당자는 여러 명 지정할 수 있습니다. 활성 직원만 표시합니다.
         </div>
         <div class="field">
-          <label for="assign-primary">주담당자</label
-              ><select id="assign-primary" :value="form['primary']" @change="updateField('primary', $event)">
+          <label for="assign-primary">주담당자</label>
+          <select
+            id="assign-primary"
+            :value="form['primary']"
+            @change="updateField('primary', $event)">
             <option v-for="employee in activeStaff" :key="employee.id" :value="employee.id">
               {{ employee.name }}
             </option>
@@ -123,19 +131,20 @@ function toggleSecondary(name: string, event: Event) {
         </legend>
         <input
           v-if="modal === '담당자 지정'"
-          :value="staffQuery" @input="searchStaff($event)" @compositionend="searchStaff($event)"
+          :value="staffQuery"
+          @input="searchStaff($event)"
+          @compositionend="searchStaff($event)"
           class="control"
           aria-label="직원 검색"
-          placeholder="직원 검색"
-        />
+          placeholder="직원 검색" />
         <div class="checkbox-list">
           <label v-for="employee in filteredActiveStaff" :key="employee.id">
             <input
-              :checked="secondary.includes(employee.id)" @change="toggleSecondary(employee.id, $event)"
+              :checked="secondary.includes(employee.id)"
+              @change="toggleSecondary(employee.id, $event)"
               type="checkbox"
               :value="employee.id"
-              :disabled="employee.id === form.primary"
-            />
+              :disabled="employee.id === form.primary" />
             {{ employee.name }} · {{ employee.team }}
           </label>
         </div>
@@ -149,8 +158,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('name', $event)"
             @compositionend="updateField('name', $event)"
             placeholder="지점명을 입력하세요"
-            type="text"
-          />
+            type="text" />
         </div>
         <div class="field">
           <label for="management-address">사업장 주소</label>
@@ -160,8 +168,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('address', $event)"
             @compositionend="updateField('address', $event)"
             placeholder="사업장 주소"
-            type="text"
-          />
+            type="text" />
         </div>
         <div class="field">
           <label for="management-phone">대표 연락처</label>
@@ -171,8 +178,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('phone', $event)"
             @compositionend="updateField('phone', $event)"
             placeholder="02-0000-0000"
-            type="text"
-          />
+            type="text" />
         </div>
       </template>
       <template v-if="modal === '비밀번호 변경'">
@@ -184,8 +190,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('old', $event)"
             @compositionend="updateField('old', $event)"
             placeholder="현재 비밀번호"
-            type="password"
-          />
+            type="password" />
         </div>
         <div class="field">
           <label for="management-new">새 비밀번호</label>
@@ -195,8 +200,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('new', $event)"
             @compositionend="updateField('new', $event)"
             placeholder="새 비밀번호"
-            type="password"
-          />
+            type="password" />
         </div>
         <div class="field">
           <label for="management-confirm">비밀번호 확인</label>
@@ -206,8 +210,7 @@ function toggleSecondary(name: string, event: Event) {
             @input="updateField('confirm', $event)"
             @compositionend="updateField('confirm', $event)"
             placeholder="다시 입력"
-            type="password"
-          />
+            type="password" />
         </div>
       </template>
       <template v-if="modal === '직원 초대'">
@@ -215,52 +218,51 @@ function toggleSecondary(name: string, event: Event) {
           실제 이메일은 발송되지 않습니다. 초대 대기 상태의 Mock Data만 추가됩니다.
         </div>
         <div class="field">
-          <label for="invite-email">초대 이메일 *</label
-              ><input
+          <label for="invite-email">초대 이메일 *</label>
+          <input
             id="invite-email"
-            :value="form['email']" @input="updateField('email', $event)" @compositionend="updateField('email', $event)"
+            :value="form['email']"
+            @input="updateField('email', $event)"
+            @compositionend="updateField('email', $event)"
             type="email"
-            placeholder="name@company.com"
-          />
+            placeholder="name@company.com" />
         </div>
         <div class="field">
-          <label for="invite-team">부서/팀</label
-              ><select id="invite-team" :value="form['team']" @change="updateField('team', $event)">
+          <label for="invite-team">부서/팀</label>
+          <select id="invite-team" :value="form['team']" @change="updateField('team', $event)">
             <option v-for="value in teams" :key="value">{{ value }}</option>
           </select>
         </div>
         <div class="field">
-          <label for="invite-title">직책</label
-              ><input
+          <label for="invite-title">직책</label>
+          <input
             id="invite-title"
             :value="form['title']"
             @input="updateField('title', $event)"
             @compositionend="updateField('title', $event)"
-            placeholder="세무대리"
-          />
+            placeholder="세무대리" />
         </div>
       </template>
       <p v-if="modal === '직원 권한 변경'">{{ selectedStaff?.name }} 님의 역할을 변경합니다.</p>
       <div v-if="modal === '직원 초대' || modal === '직원 권한 변경'" class="field">
-        <label for="staff-role">시스템 역할</label
-            ><select id="staff-role" :value="form['role']" @change="updateField('role', $event)">
+        <label for="staff-role">시스템 역할</label>
+        <select id="staff-role" :value="form['role']" @change="updateField('role', $event)">
           <option v-for="value in roles" :key="value">{{ value }}</option>
         </select>
       </div>
       <div v-if="modal === '지점 추가' || modal === '사무소 수정'" class="field">
-        <label for="branch-status">운영 상태</label
-            ><select id="branch-status" :value="form['status']" @change="updateField('status', $event)">
+        <label for="branch-status">운영 상태</label>
+        <select id="branch-status" :value="form['status']" @change="updateField('status', $event)">
           <option>활성</option>
           <option>비활성</option>
         </select>
       </div>
-      <p v-if="modal === '비밀번호 변경'" class="muted-note">
-        실제 비밀번호는 변경되지 않습니다.
-      </p>
+      <p v-if="modal === '비밀번호 변경'" class="muted-note">실제 비밀번호는 변경되지 않습니다.</p>
       <template v-if="modal === '2단계 인증 설정'">
         <p>실제 인증 연동 전 화면 예시입니다.</p>
         <div class="settings-row">
-          <b>인증 앱으로 로그인 보호</b><span class="switch" aria-label="설정되지 않음"></span>
+          <b>인증 앱으로 로그인 보호</b>
+          <span class="switch" aria-label="설정되지 않음"></span>
         </div>
       </template>
       <template v-if="modal === '로그인 기기 및 세션'">
@@ -279,8 +281,7 @@ function toggleSecondary(name: string, event: Event) {
           <button
             type="button"
             class="btn sm"
-            @click="emit('message', '세션 종료 UI만 시뮬레이션합니다.')"
-          >
+            @click="emit('message', '세션 종료 UI만 시뮬레이션합니다.')">
             로그아웃
           </button>
         </div>
@@ -291,8 +292,8 @@ function toggleSecondary(name: string, event: Event) {
       </template>
       <template v-if="modal === '직원 계정 비활성화'">
         <p>
-          <strong>{{ selectedStaff?.name }}</strong
-              >님의 계정을 비활성화하시겠습니까?
+          <strong>{{ selectedStaff?.name }}</strong>
+          님의 계정을 비활성화하시겠습니까?
         </p>
         <div class="alert">실제 로그인 차단은 수행되지 않습니다.</div>
       </template>
@@ -302,8 +303,7 @@ function toggleSecondary(name: string, event: Event) {
       <p
         v-if="message"
         :role="modal === '로그인 기기 및 세션' ? 'status' : 'alert'"
-        class="alert management-feedback"
-      >
+        class="alert management-feedback">
         {{ message }}
       </p>
     </form>

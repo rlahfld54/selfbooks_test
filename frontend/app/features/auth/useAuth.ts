@@ -9,7 +9,8 @@ export type SocialProvider = 'kakao' | 'custom:naver' | 'google'
 const restores = new WeakMap<NuxtApp, { revision: number; promise: Promise<void> }>()
 
 export function useAuth() {
-  const { user } = storeToRefs(useAuthStore())
+  const authStore = useAuthStore()
+  const { user } = storeToRefs(authStore)
   const warning = useState('auth-warning', () => '')
   const restoreIssue = useState('auth-restore-issue', () => '')
   const verifying = useState('auth-verifying', () => false)
@@ -41,7 +42,7 @@ export function useAuth() {
       )
       const result = await request<AuthUser>('/auth/me')
       if (started !== revision.value) return
-      user.value = result.data
+      authStore.setUser(result.data)
       restoreIssue.value = ''
       warning.value = ''
     } catch (error) {

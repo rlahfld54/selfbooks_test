@@ -6,8 +6,11 @@ import type { ManagementFilters } from '../view-types'
 import type { Density } from '~/types/workspace'
 
 import type { Staff } from '../data'
-import { roles } from '../data'
+import { usePermissionStore } from '~/stores/permissionStore'
+import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { teams, staffStatuses } from '../options'
+const { state: workspace } = useWorkspaceContext()
+const roles = usePermissionStore().forScope(workspace).roles
 defineProps<{
   rows: Pick<ManagementRows, 'staff' | 'filteredStaff'>
   filters: ManagementFilters

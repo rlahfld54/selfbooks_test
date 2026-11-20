@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { chromium, expect } from '@playwright/test'
 import { clients } from '../app/features/management/data.ts'
-import { mockAuthenticatedContext, testUser } from './auth.browser-support.mjs'
+import { mockAuthenticatedContext, testUser, testAuthUser, testClientStatus } from './auth.browser-support.mjs'
 
 // Run against the normal development server; API responses are mocked here.
 const base = process.env.SELFBOOKS_TEST_URL ?? 'http://localhost:3000'
@@ -9,20 +9,22 @@ const browser = await chromium.launch({ headless: true, executablePath: process.
 try {
   const context = await browser.newContext()
   await mockAuthenticatedContext(context)
-  await context.route('**/api/clients', route => route.fulfill({ json: { data: clients.map(client => ({ id: client.id, officeId: testUser.officeId, name: client.name, taxpayerKind: client.type, status: 'active' })) } }))
+  await context.route('**/api/collection/status', route => route.fulfill({ json: { data: testClientStatus(clients.map(client => ({ id: client.id, officeId: testUser.officeId, name: client.name, taxpayerKind: client.type, status: 'active' }))) } }))
   let profileFails = false
   let profileRequests = 0
-  await context.route('**/api/office-registration', route => {
+  let officeRequests = 0
+  await context.route('**/api/office-registration', route => { officeRequests++; return route.abort() })
+  await context.route('**/api/auth/me', route => {
     profileRequests++
     return route.fulfill(profileFails
     ? { status: 503, json: { message: '조회 실패' } }
-    : { json: { data: { id: testUser.officeId, name: '테스트 사무소', business_registration_number: null,
-      representative_name: null, representative_phone: null, address: null } } })
+    : { json: { data: testAuthUser } })
   })
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   async function visit(path) {
+    const previousRequests = profileRequests
     await page.goto(base + path)
     await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
     const management = page.locator('.page.management')
@@ -30,18 +32,19 @@ try {
       await expect(management.getByRole('heading', { level: 1 })).toHaveText('수임업체 관리')
       await expect(management.getByRole('navigation', { name: '수임업체 조회 범위' })).toBeVisible()
       await expect(management.locator('.profile-banner, .org-header')).toHaveCount(0)
-      assert.equal(profileRequests, 0, '업체 화면은 프로필 API를 조회하지 않는다')
+      assert.equal(profileRequests, previousRequests + 1, '세션 복원 시에만 조직을 조회한다')
     }
     if (path === '/organization') {
       await expect(management.getByRole('heading', { level: 1 })).toHaveText('조직 설정')
       await expect(management.getByRole('navigation', { name: '조직 설정 메뉴' })).toBeVisible()
       await expect(management.locator('.profile-banner')).toHaveCount(0)
-      assert.equal(profileRequests, 0, '조직 화면은 개인 프로필 API를 조회하지 않는다')
+      assert.equal(profileRequests, previousRequests + 1, '세션 복원 시에만 조직을 조회한다')
     }
     if (path === '/mypage') {
       await expect(management.getByRole('heading', { level: 1 })).toHaveText('마이페이지')
       await expect(management.getByRole('navigation', { name: '마이페이지 메뉴' })).toBeVisible()
       await expect(management.locator('.org-header')).toHaveCount(0)
+      assert.equal(profileRequests, previousRequests + 1, '마이페이지에서 조직을 중복 조회하지 않는다')
     }
   }
 
@@ -81,13 +84,18 @@ try {
 
   // Profile error propagation, retry, field events, and shared save action.
   profileFails = true
-  await visit('/mypage')
+  await page.goto(base + '/mypage')
   const editProfile = page.getByRole('button', { name: '✎ 정보 수정', exact: true })
   await expect(page.getByRole('button', { name: '다시 시도', exact: true })).toBeVisible()
-  await expect(editProfile).toBeDisabled()
+  await expect(page.locator('.page.management')).toHaveCount(0)
   profileFails = false
   await page.getByRole('button', { name: '다시 시도', exact: true }).click()
   await expect(editProfile).toBeEnabled()
+  const requestsAfterRestore = profileRequests
+  await page.getByRole('button', { name: '소속 조직', exact: true }).click()
+  await expect(page.locator('.tab-body')).toContainText('테스트 사무소')
+  await page.getByRole('button', { name: '내 정보', exact: true }).click()
+  assert.equal(profileRequests, requestsAfterRestore, '탭 전환은 store의 조직 정보를 사용한다')
   await editProfile.click()
   await page.getByLabel('이름', { exact: true }).fill('')
   await page.getByRole('button', { name: '변경사항 저장', exact: true }).click()
@@ -96,6 +104,7 @@ try {
   await page.getByRole('button', { name: '변경사항 저장', exact: true }).click()
   await expect(page.getByLabel('이름', { exact: true })).toHaveValue('수정한 이름')
   await expect(page.getByLabel('이름', { exact: true })).toBeDisabled()
+  assert.equal(officeRequests, 0, '마이페이지는 별도 조직 API를 조회하지 않는다')
   assert.deepEqual(errors, [])
 } finally {
   await browser.close()

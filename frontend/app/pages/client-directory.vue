@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useClientStore } from '~/stores/clientStore'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { managementSession } from '~/features/management/session'
 import { filterClients } from '~/features/management/management'
@@ -12,6 +13,7 @@ import ManagementActionDialog from '~/features/management/components/ManagementA
 import type { ManagementFilters, ManagementDestination } from '~/features/management/view-types'
 
 definePageMeta({ workspaceTab: 'clients' })
+const clientStore = useClientStore()
 
 const { state, density } = useWorkspaceContext()
 const data = managementSession(state)
@@ -90,7 +92,7 @@ const clients = computed(() =>
           (row) =>
             !filters.role || assignmentRole(row, directoryUser.value?.id ?? '') === filters.role,
         )
-      : data.clients,
+      : clientStore.clients,
     filters.query,
     filters.biz,
     filters.kind,
@@ -108,17 +110,17 @@ const modalTitle = computed(() =>
 const rows = computed(() => ({
   filteredClients: clients.value,
   clientStats: {
-    total: data.clients.length,
-    active: data.clients.filter((row) => row.status === '수임 중').length,
-    reviewPending: data.clients.filter((row) => ['검토 전', '검토 중'].includes(row.company))
+    total: clientStore.clients.length,
+    active: clientStore.clients.filter((row) => row.status === '수임 중').length,
+    reviewPending: clientStore.clients.filter((row) => ['검토 전', '검토 중'].includes(row.company))
       .length,
-    ended: data.clients.filter((row) => row.status === '수임 종료').length,
+    ended: clientStore.clients.filter((row) => row.status === '수임 종료').length,
   },
 }))
 watch(
   () => [route.query.client, data.directory.status] as const,
   ([id]) => {
-    selectedClient.value = data.clients.find(
+    selectedClient.value = clientStore.clients.find(
       (row) => row.id === id && canOpenClient(row, directoryUser.value),
     )
   },
@@ -231,13 +233,13 @@ onBeforeUnmount(() => clearTimeout(toastTimer))
       :staff-options="staffOptions"
       :loading="directoryLoading"
       :error="directoryError"
-      :review-known="data.clients.some((row) => row.company || row.environment)"
+      :review-known="clientStore.clients.some((row) => row.company || row.environment)"
       :mine="directoryTab === 'mine'"
       :summary="summary"
       :user-id="directoryUser?.id || ''"
       :admin="admin"
       :selected-id="selectedClient?.id"
-      :total="directoryTab === 'mine' ? mine.length : data.clients.length"
+      :total="directoryTab === 'mine' ? mine.length : clientStore.clients.length"
       @filter="setFilter"
       @reset="resetFilters"
       @select="selectClient"

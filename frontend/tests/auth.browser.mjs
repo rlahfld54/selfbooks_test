@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { chromium } from '@playwright/test'
-import { testSession, testUser } from './auth.browser-support.mjs'
+import { testSession, testUser, testOffice, testAuthUser, testClientStatus } from './auth.browser-support.mjs'
 import { createOnboardingData } from '../app/features/onboarding/mocks.ts'
 const browser = await chromium.launch({ headless: true, ...(process.env.SELFBOOKS_BROWSER ? { executablePath: process.env.SELFBOOKS_BROWSER } : {}) })
 const base = process.env.SELFBOOKS_TEST_URL ?? 'http://localhost:3000'
@@ -21,7 +21,8 @@ try {
   let validPassword = false, authorized = true
   let authUnavailable = false
   let authChecks = 0
-  let officeStatus = 403
+  let officeStatus = 200
+  let officeChecks = 0
   const oauthProviders = []
   let codeExchanges = 0
   let linkedProvider = ''
@@ -70,12 +71,16 @@ try {
   })
   await context.route('**/auth/v1/user', route => route.fulfill({ json: testSession().user }))
   await context.route('**/auth/v1/logout**', route => route.fulfill({ status: 204 }))
+  await context.route('**/api/collection/status', route => route.fulfill({ json: { data: testClientStatus() } }))
   await context.route('**/api/auth/me', route => {
     authChecks++
     if (authUnavailable) return route.fulfill({ status: 503, json: {} })
-    return route.fulfill(authorized ? { json: { data: testUser } } : { status: 403, json: { error: { message: '활성 관리자 계정과 사무소 소속 등록을 확인해 주세요.' } } })
+    return route.fulfill(authorized ? { json: { data: testAuthUser } } : { status: 403, json: { error: { message: '활성 관리자 계정과 사무소 소속 등록을 확인해 주세요.' } } })
   })
-  await context.route('**/api/office-registration', route => route.fulfill({ status: officeStatus, json: {} }))
+  await context.route('**/api/office-registration', route => {
+    officeChecks++
+    return route.fulfill({ status: officeStatus, json: officeStatus === 200 ? { data: testOffice } : {} })
+  })
   await page.goto(base + '/dashboard')
   await page.waitForURL('**/login')
   assert.equal(await page.getByText('테스트 계정 입력').count(), 0)
@@ -92,6 +97,7 @@ try {
   await page.getByRole('button', { name: '로그인', exact: true }).click()
   await page.getByRole('heading', { name: '홈 대시보드', exact: true }).waitFor()
   assert.equal(authChecks, checksBeforeLogin + 1)
+  assert.equal(officeChecks, 0, '로그인은 통합 auth/me 응답만 사용한다')
   assert.ok(await page.evaluate(() => sessionStorage.getItem('selfbooks:auth')))
   assert.equal(await page.evaluate(() => localStorage.getItem('selfbooks:auth')), null)
   authUnavailable = true
@@ -104,11 +110,13 @@ try {
   await page.getByRole('button', { name: '로그아웃', exact: true }).waitFor()
   const checksAfterRestore = authChecks
   await page.getByRole('button', { name: '기초정보관리', exact: true }).click()
+  officeStatus = 403
   await page.getByRole('button', { name: '회사등록', exact: true }).click()
   await page.getByRole('alert').filter({ hasText: '이 업무에 접근할 권한이 없습니다.' }).waitFor()
   officeStatus = 503
   await page.getByRole('button', { name: '다시 조회', exact: true }).click()
   await page.getByRole('alert').filter({ hasText: '잠시 후 다시 시도해 주세요.' }).waitFor()
+  officeStatus = 200
   await page.locator('#tab-home').click()
   await page.getByRole('heading', { name: '홈 대시보드', exact: true }).waitFor()
   assert.equal(authChecks, checksAfterRestore)

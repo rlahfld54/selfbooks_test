@@ -1,13 +1,8 @@
+import type { AuthUser, AuthOrganization } from '../auth/user'
 import type { createApiClient } from '../../services/api-client'
 
-export interface ProfileUser { id: string; name: string; email: string; officeId: string; role: string; userCode?: string | null; loginId?: string | null; phone?: string | null; departmentName?: string | null; jobTitle?: string | null; joinedAt?: string | null }
-export interface ProfileOffice {
-  id: string; name: string
-  business_registration_number: string | null
-  representative_name: string | null
-  representative_phone: string | null
-  address: string | null
-}
+export type ProfileUser = AuthUser
+export type ProfileOffice = AuthOrganization
 export function createProfileService(request: ReturnType<typeof createApiClient>) {
   return {
     async load(signal?: AbortSignal) {

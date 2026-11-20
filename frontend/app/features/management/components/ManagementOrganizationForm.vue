@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/authStore'
 import type { ManagementRows } from '../view-types'
+import { formatNumber, type NumberFormat } from '~/utils/number-validation'
 
 import ManagementEditActions from './ManagementEditActions.vue'
+
+const authStore = useAuthStore()
+const { userInfo } = storeToRefs(authStore)
+
 defineProps<{
   rows: Pick<ManagementRows, 'organization'>
   form: Record<string, string>
@@ -13,9 +20,10 @@ const emit = defineEmits<{
   cancel: []
   field: [key: string, value: string]
 }>()
-function updateField(key: string, event: Event) {
+function updateField(key: string, event: Event, format?: NumberFormat) {
   if (event instanceof InputEvent && event.isComposing) return
-  emit('field', key, (event.target as HTMLInputElement | HTMLSelectElement).value)
+  const value = (event.target as HTMLInputElement).value
+  emit('field', key, format ? formatNumber(format, value) : value)
 }
 </script>
 
@@ -32,101 +40,100 @@ function updateField(key: string, event: Event) {
       <h3>사업자 정보</h3>
       <div :class="editing ? 'form-grid' : 'group-grid'">
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보0">회계법인명/사무소명</label>
+          <label v-if="editing" for="org-name">회계법인명/사무소명</label>
           <input
             v-if="editing"
-            id="org-사업자 정보0"
+            id="org-name"
             :value="form['회계법인명/사무소명']"
             @input="updateField('회계법인명/사무소명', $event)"
-            @compositionend="updateField('회계법인명/사무소명', $event)"
-          />
+            @compositionend="updateField('회계법인명/사무소명', $event)" />
           <template v-else>
             <span class="field-label">회계법인명/사무소명</span>
-            <div class="display">{{ rows.organization['회계법인명/사무소명'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.name || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보1">사업자등록번호</label>
+          <label v-if="editing" for="org-business-number">사업자등록번호</label>
           <input
             v-if="editing"
-            id="org-사업자 정보1"
+            id="org-business-number"
             :value="form['사업자등록번호']"
             @input="updateField('사업자등록번호', $event)"
             @compositionend="updateField('사업자등록번호', $event)"
-          />
+            @blur="updateField('사업자등록번호', $event, 'business')" />
           <template v-else>
             <span class="field-label">사업자등록번호</span>
-            <div class="display">{{ rows.organization['사업자등록번호'] || '—' }}</div>
+            <div class="display">
+              {{ formatNumber('business', userInfo?.organization?.business_registration_number) || '—' }}
+            </div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보2">법인등록번호</label>
+          <label v-if="editing" for="org-corporate-number">법인등록번호</label>
           <input
             v-if="editing"
-            id="org-사업자 정보2"
+            id="org-corporate-number"
             :value="form['법인등록번호']"
             @input="updateField('법인등록번호', $event)"
             @compositionend="updateField('법인등록번호', $event)"
-          />
+            @blur="updateField('법인등록번호', $event, 'corporation')" />
           <template v-else>
             <span class="field-label">법인등록번호</span>
-            <div class="display">{{ rows.organization['법인등록번호'] || '—' }}</div>
+            <div class="display">
+              {{ formatNumber('corporation', userInfo?.organization?.corporate_registration_number) || '—' }}
+            </div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보3">대표자명</label>
+          <label v-if="editing" for="org-representative">대표자명</label>
           <input
             v-if="editing"
-            id="org-사업자 정보3"
+            id="org-representative"
             :value="form['대표자명']"
             @input="updateField('대표자명', $event)"
-            @compositionend="updateField('대표자명', $event)"
-          />
+            @compositionend="updateField('대표자명', $event)" />
           <template v-else>
             <span class="field-label">대표자명</span>
-            <div class="display">{{ rows.organization['대표자명'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.representative_name || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보4">사업장 주소</label>
+          <label v-if="editing" for="org-address">사업장 주소</label>
           <input
             v-if="editing"
-            id="org-사업자 정보4"
+            id="org-address"
             :value="form['사업장 주소']"
             @input="updateField('사업장 주소', $event)"
-            @compositionend="updateField('사업장 주소', $event)"
-          />
+            @compositionend="updateField('사업장 주소', $event)" />
           <template v-else>
             <span class="field-label">사업장 주소</span>
-            <div class="display">{{ rows.organization['사업장 주소'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.address || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보5">업태</label>
+          <label v-if="editing" for="org-business-type">업태</label>
           <input
             v-if="editing"
-            id="org-사업자 정보5"
+            id="org-business-type"
             :value="form['업태']"
             @input="updateField('업태', $event)"
-            @compositionend="updateField('업태', $event)"
-          />
+            @compositionend="updateField('업태', $event)" />
           <template v-else>
             <span class="field-label">업태</span>
-            <div class="display">{{ rows.organization['업태'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.business_type || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-사업자 정보6">종목</label>
+          <label v-if="editing" for="org-business-item">종목</label>
           <input
             v-if="editing"
-            id="org-사업자 정보6"
+            id="org-business-item"
             :value="form['종목']"
             @input="updateField('종목', $event)"
-            @compositionend="updateField('종목', $event)"
-          />
+            @compositionend="updateField('종목', $event)" />
           <template v-else>
             <span class="field-label">종목</span>
-            <div class="display">{{ rows.organization['종목'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.business_item || '—' }}</div>
           </template>
         </div>
       </div>
@@ -135,45 +142,44 @@ function updateField(key: string, event: Event) {
       <h3>연락처 정보</h3>
       <div :class="editing ? 'form-grid' : 'group-grid'">
         <div class="field">
-          <label v-if="editing" for="org-연락처 정보0">대표전화</label>
+          <label v-if="editing" for="org-phone">대표전화</label>
           <input
             v-if="editing"
-            id="org-연락처 정보0"
+            id="org-phone"
             :value="form['대표전화']"
             @input="updateField('대표전화', $event)"
             @compositionend="updateField('대표전화', $event)"
-          />
+            @blur="updateField('대표전화', $event, 'phone')" />
           <template v-else>
             <span class="field-label">대표전화</span>
-            <div class="display">{{ rows.organization['대표전화'] || '—' }}</div>
+            <div class="display">{{ formatNumber('phone', userInfo?.organization?.phone) || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-연락처 정보1">대표 이메일</label>
+          <label v-if="editing" for="org-email">대표 이메일</label>
           <input
             v-if="editing"
-            id="org-연락처 정보1"
+            id="org-email"
             :value="form['대표 이메일']"
             @input="updateField('대표 이메일', $event)"
-            @compositionend="updateField('대표 이메일', $event)"
-          />
+            @compositionend="updateField('대표 이메일', $event)" />
           <template v-else>
             <span class="field-label">대표 이메일</span>
-            <div class="display">{{ rows.organization['대표 이메일'] || '—' }}</div>
+            <div class="display">{{ userInfo?.organization?.email || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-연락처 정보2">팩스번호</label>
+          <label v-if="editing" for="org-fax">팩스번호</label>
           <input
             v-if="editing"
-            id="org-연락처 정보2"
+            id="org-fax"
             :value="form['팩스번호']"
             @input="updateField('팩스번호', $event)"
             @compositionend="updateField('팩스번호', $event)"
-          />
+            @blur="updateField('팩스번호', $event, 'phone')" />
           <template v-else>
             <span class="field-label">팩스번호</span>
-            <div class="display">{{ rows.organization['팩스번호'] || '—' }}</div>
+            <div class="display">{{ formatNumber('phone', rows.organization['팩스번호']) || '—' }}</div>
           </template>
         </div>
       </div>
@@ -182,42 +188,39 @@ function updateField(key: string, event: Event) {
       <h3>세무대리 관련 정보</h3>
       <div :class="editing ? 'form-grid' : 'group-grid'">
         <div class="field">
-          <label v-if="editing" for="org-세무대리 관련 정보0">세무대리인 관리번호</label>
+          <label v-if="editing" for="org-agent-number">세무대리인 관리번호</label>
           <input
             v-if="editing"
-            id="org-세무대리 관련 정보0"
+            id="org-agent-number"
             :value="form['세무대리인 관리번호']"
             @input="updateField('세무대리인 관리번호', $event)"
-            @compositionend="updateField('세무대리인 관리번호', $event)"
-          />
+            @compositionend="updateField('세무대리인 관리번호', $event)" />
           <template v-else>
             <span class="field-label">세무대리인 관리번호</span>
             <div class="display">{{ rows.organization['세무대리인 관리번호'] || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-세무대리 관련 정보1">사무소 구분</label>
+          <label v-if="editing" for="org-office-kind">사무소 구분</label>
           <input
             v-if="editing"
-            id="org-세무대리 관련 정보1"
+            id="org-office-kind"
             :value="form['사무소 구분']"
             @input="updateField('사무소 구분', $event)"
-            @compositionend="updateField('사무소 구분', $event)"
-          />
+            @compositionend="updateField('사무소 구분', $event)" />
           <template v-else>
             <span class="field-label">사무소 구분</span>
             <div class="display">{{ rows.organization['사무소 구분'] || '—' }}</div>
           </template>
         </div>
         <div class="field">
-          <label v-if="editing" for="org-세무대리 관련 정보2">기타 등록정보</label>
+          <label v-if="editing" for="org-other">기타 등록정보</label>
           <input
             v-if="editing"
-            id="org-세무대리 관련 정보2"
+            id="org-other"
             :value="form['기타 등록정보']"
             @input="updateField('기타 등록정보', $event)"
-            @compositionend="updateField('기타 등록정보', $event)"
-          />
+            @compositionend="updateField('기타 등록정보', $event)" />
           <template v-else>
             <span class="field-label">기타 등록정보</span>
             <div class="display">{{ rows.organization['기타 등록정보'] || '—' }}</div>

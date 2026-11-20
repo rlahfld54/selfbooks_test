@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { clientWorkLinks } from '../client-work'
+import { formatBusinessNumber } from '~/utils/number-validation'
 import ManagementBadge from '../ManagementBadge.vue'
 import ManagementDialog from '../ManagementDialog.vue'
 
@@ -34,7 +35,7 @@ const emit = defineEmits<{
       <h3>업체 기본정보</h3>
       <div class="info-row">
         <span class="label">사업자등록번호</span>
-        <span class="value">{{ client.biz || '정보 없음' }}</span>
+        <span class="value">{{ formatBusinessNumber(client.biz) || '정보 없음' }}</span>
       </div>
       <div class="info-row">
         <span class="label">대표자명</span>

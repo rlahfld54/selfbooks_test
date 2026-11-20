@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createPinia, setActivePinia, storeToRefs } from 'pinia'
 import { useAuthStore } from '../app/stores/authStore.ts'
+import type { AuthUser } from '../app/features/auth/user.ts'
 
 test('user ref exists before login and stays synchronized with nested state', () => {
   const store = useAuthStore(createPinia())
@@ -48,4 +49,36 @@ test('separate app instances do not share authenticated users', () => {
   first.setUser({ id: 'uuid', name: '사용자', email: 'user@example.test', officeId: 'office', role: 'ADMIN' })
   assert.equal(second.user, null)
   assert.equal(second.isAdmin, false)
+})
+
+test('organization follows identity replacement and clearing without persisting stale data', () => {
+  const store = useAuthStore(createPinia())
+  const account = { id: 'first', name: '사용자', email: 'user@example.test', officeId: 'office', role: 'ADMIN' }
+  store.setUser({ ...account, organization: { id: 'office', name: '사무소', business_registration_number: null, representative_name: null, representative_phone: null, address: null } })
+  assert.equal(store.user?.organization?.name, '사무소')
+  store.setUser({ ...account, id: 'second', officeId: 'another-office' })
+  assert.equal(store.user?.organization, undefined)
+  store.clear()
+  assert.equal(store.user, null)
+})
+
+test('query field getters follow replacement and clear, including missing optional fields', () => {
+  const store = useAuthStore(createPinia())
+  const fields = ['id', 'name', 'email', 'officeId', 'role', 'userCode', 'loginId', 'phone', 'departmentName', 'jobTitle', 'joinedAt'] as const
+  for (const field of fields) assert.equal(store[field], null)
+  assert.equal(store.profile, null)
+
+  const account: AuthUser = {
+    id: 'user', name: '사용자', email: 'user@example.test', officeId: 'office', role: 'ADMIN',
+    userCode: 'U001', loginId: 'login', phone: '01000000000', departmentName: '세무팀',
+    jobTitle: '팀장', joinedAt: '2026-01-01T00:00:00Z',
+  }
+  store.setUser(account)
+  for (const field of fields) assert.equal(store[field], account[field])
+  store.setUser({ id: 'another', name: '다른 사용자', email: 'another@example.test', officeId: 'another-office', role: 'OWNER' })
+  assert.equal(store.id, 'another')
+  assert.equal(store.departmentName, null)
+  assert.equal(store.joinedAt, null)
+  store.clear()
+  for (const field of fields) assert.equal(store[field], null)
 })

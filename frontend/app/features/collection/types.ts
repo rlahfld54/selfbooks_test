@@ -1,3 +1,5 @@
+import type { ClientRecord, AssignedClient } from '../clients/types'
+
 // 자료수집 현황 — 화면과 서비스가 함께 쓰는 모양.
 // 수집 종류는 팀장님 tax-platform `apps/api/src/lib/hometax.ts` 의 KINDS 8종을 그대로 따른다.
 // 「기본정보」는 국세청 공개 사업자상태조회라 홈택스 로그인이 필요 없다.
@@ -72,6 +74,8 @@ export interface CollectionCompany {
 }
 
 export interface CollectionStatus {
+  clients?: ClientRecord[]
+  assignedClients?: AssignedClient[]
   companies: CollectionCompany[]
   /** 실제 스크래핑 서버 대신 샘플로 도는지 */
   sample: boolean

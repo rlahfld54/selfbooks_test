@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/authStore'
+import { formatNumber } from '~/utils/number-validation'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { managementSession } from '~/features/management/session'
-import { roles } from '~/features/management/data'
+import { usePermissionStore } from '~/stores/permissionStore'
 import { assignmentRole } from '~/features/management/assignments'
 import type { Staff } from '~/features/management/data'
 import ManagementBadge from '~/features/management/ManagementBadge.vue'
@@ -14,10 +17,15 @@ import ManagementStaffDrawer from '~/features/management/components/ManagementSt
 import ManagementActionDialog from '~/features/management/components/ManagementActionDialog.vue'
 import type { ManagementFilters } from '~/features/management/view-types'
 
-definePageMeta({ workspaceTab: 'organization' })
+const authStore = useAuthStore()
+const { userInfo } = storeToRefs(authStore)
+const { pagesPreview } = useRuntimeConfig().public
 
+definePageMeta({ workspaceTab: 'organization' })
 const { state, activeTab, setDirty, density } = useWorkspaceContext()
 const data = managementSession(state)
+const permissions = usePermissionStore().forScope(state)
+const roles = permissions.roles
 const currentTab = activeTab.value
 const modal = ref('')
 const message = ref('')
@@ -92,12 +100,46 @@ function beginEdit() {
   message.value = ''
   Object.keys(form).forEach((key) => delete form[key])
   Object.assign(form, data.organization)
+  if (!pagesPreview) Object.assign(form, {
+    '회계법인명/사무소명': userInfo.value?.organization?.name ?? '',
+    '사업자등록번호': userInfo.value?.organization?.business_registration_number ?? '',
+    '법인등록번호': userInfo.value?.organization?.corporate_registration_number ?? '',
+    '대표자명': userInfo.value?.organization?.representative_name ?? '',
+    '사업장 주소': userInfo.value?.organization?.address ?? '',
+    '업태': userInfo.value?.organization?.business_type ?? '',
+    '종목': userInfo.value?.organization?.business_item ?? '',
+    '대표전화': userInfo.value?.organization?.phone ?? '',
+    '대표 이메일': userInfo.value?.organization?.email ?? '',
+  })
   editing.value = true
   setDirty(currentTab, true)
 }
 function endEdit(save: boolean) {
   if (save) {
-    Object.assign(data.organization, form)
+    Object.assign(data.organization, {
+      ...form,
+      '사업자등록번호': formatNumber('business', form['사업자등록번호']),
+      '법인등록번호': formatNumber('corporation', form['법인등록번호']),
+      '대표전화': formatNumber('phone', form['대표전화']),
+      '팩스번호': formatNumber('phone', form['팩스번호']),
+    })
+    if (!pagesPreview && userInfo.value?.organization) {
+      authStore.setUser({
+        ...userInfo.value,
+        organization: {
+          ...userInfo.value.organization,
+          name: data.organization['회계법인명/사무소명'] ?? '',
+          business_registration_number: data.organization['사업자등록번호'] ?? '',
+          corporate_registration_number: data.organization['법인등록번호'] ?? '',
+          representative_name: data.organization['대표자명'] ?? '',
+          address: data.organization['사업장 주소'] ?? '',
+          business_type: data.organization['업태'] ?? '',
+          business_item: data.organization['종목'] ?? '',
+          phone: data.organization['대표전화'] ?? '',
+          email: data.organization['대표 이메일'] ?? '',
+        },
+      })
+    }
     showToast('변경사항을 화면에 저장했습니다. 새로고침하면 초기화됩니다.')
   } else message.value = ''
   editing.value = false
@@ -191,16 +233,19 @@ onBeforeUnmount(() => {
       </div>
     </header>
     <section class="panel org-header">
-      <div class="org-emblem">원</div>
+      <div class="org-emblem">로고</div>
       <div>
         <h2>
-          {{ rows.organization['회계법인명/사무소명'] || '—' }}
+          {{ userInfo?.organization?.name || '—' }}
           <ManagementBadge value="활성" />
         </h2>
         <div class="org-meta">
-          <span>사업자등록번호 {{ rows.organization['사업자등록번호'] }}</span>
-          <span>대표 {{ rows.organization['대표자명'] }}</span>
-          <span>본사 · 서울특별시 금천구</span>
+          <span>
+            사업자등록번호
+            {{ formatNumber('business', userInfo?.organization?.business_registration_number) || '—' }}
+          </span>
+          <span>대표 {{ userInfo?.organization?.representative_name || '—' }}</span>
+          <span>{{ userInfo?.organization?.address || '—' }}</span>
         </div>
       </div>
       <span class="spacer"></span>
@@ -273,7 +318,7 @@ onBeforeUnmount(() => {
     <ManagementStaffDrawer
       v-if="selectedStaff"
       :staff="selectedStaff"
-      :organization-name="rows.organization['회계법인명/사무소명'] || '—'"
+      :organization-name="userInfo?.organization?.name || '—'"
       :assigned-clients="assignedClients"
       @close="selectedStaff = undefined"
       @role="open('직원 권한 변경')"

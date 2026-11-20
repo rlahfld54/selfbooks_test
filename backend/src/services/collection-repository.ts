@@ -90,7 +90,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
     try {
       await db.query('BEGIN READ ONLY')
       const policy = await db.query<{ blocked: boolean }>(`SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_policy
-        WHERE polrelid='public.clients'::regclass AND NOT pg_catalog.row_security_active(polrelid)) AS blocked`)
+        WHERE polrelid IN ('public.clients'::regclass, 'public.client_assignments'::regclass) AND NOT pg_catalog.row_security_active(polrelid)) AS blocked`)
       if (policy.rows[0]?.blocked !== false) throw new SalesError(503, 'COLLECTION_UNAVAILABLE', '수임 사업체 접근 정책을 확인하세요.')
       const result = await work(db)
       await db.query('COMMIT')
@@ -119,6 +119,14 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
         AND to_regclass('public.collection_rows') IS NOT NULL AS ready`)).rows[0]?.ready === true
       const { rows } = await db.query(`
         SELECT c.id, c.client_name, c.business_registration_number, c.representative_name,
+               to_jsonb(c) || jsonb_build_object('primaryAssignment',
+                 (SELECT jsonb_build_object('userId', a.user_id, 'name', u.name)
+                  FROM public.client_assignments a JOIN public.users u ON u.id = a.user_id
+                  WHERE a.office_id = c.office_id AND a.client_id = c.id AND a.assignment_role = 'PRIMARY'
+                  ORDER BY a.created_at, a.user_id LIMIT 1)) AS client,
+               (SELECT to_jsonb(a) FROM public.client_assignments a
+                 WHERE a.office_id = c.office_id AND a.client_id = c.id
+                   AND a.user_id = $2::uuid) AS assignment,
                ${ready ? 'h.hometax_id' : 'NULL::text AS hometax_id'},
                (SELECT u.name FROM public.client_assignments a JOIN public.users u ON u.id = a.user_id
                  WHERE a.client_id = c.id AND a.office_id = c.office_id AND a.assignment_role = 'PRIMARY'
@@ -126,9 +134,13 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
         FROM public.clients c
         ${ready ? 'LEFT JOIN public.client_hometax_accounts h ON h.client_id = c.id AND h.office_id = c.office_id' : ''}
         WHERE c.office_id = $1
-        ORDER BY c.client_name, c.id`, [officeId])
+        ORDER BY c.client_name, c.id`, [officeId, userId ?? null])
       const companies = rows.map(toCollectionCompany)
-      if (!ready) return { companies, sample: false }
+      const clients = rows.map(row => row.client)
+      const assignedClients = rows.filter(row => row.assignment !== null).map(row => ({
+        assignment: row.assignment, client: row.client,
+      }))
+      if (!ready) return { companies, clients, assignedClients, sample: false }
       const latest = await db.query(`
         SELECT DISTINCT ON (client_id, kind) client_id, kind, status, message, result_count,
                to_char(coalesce(finished_at, requested_at) AT TIME ZONE 'Asia/Seoul', 'YYYY-MM-DD') AS day
@@ -148,7 +160,7 @@ export function createCollectionRepository(pool: Pool, officeId: string, userId?
           count: done ? count : null, ...(row.message ? { message: row.message } : {}),
         }
       }
-      return { companies, sample: false }
+      return { companies, clients, assignedClients, sample: false }
     })
   }
 

@@ -1,5 +1,20 @@
 # SelfBooks 프런트엔드 아키텍처
 
+## 2026-11-20 업무 데이터 store 분리
+
+- 수임업체 원본과 본인 담당업체는 clientStore가 기존 collection/status 응답에서 읽는다. authStore와 인증 SQL에는 업체 목록을 보관·조회하지 않는다.
+- 계정과목과 적요 상태는 accountStore.ts, summaryStore.ts에서 각각 관리한다. API 조회·취소·오류 처리는 기존 composable에 유지하며 화면 입력은 store 상태에 연결한다. 탭 객체별 편집 수명을 유지한다.
+- 조직 기본정보, 직원, 권한 예시, 본사/지점은 organizationStore.ts, staffStore.ts, permissionStore.ts, branchStore.ts로 분리한다. 기존 작업 공간별 공유와 격리를 유지하며 각 store.state는 현재 연결한 범위의 상태다.
+- 조직 설정의 예시 데이터를 실제 DB 정보나 실제 권한으로 변경하지 않는다. 이번 범위는 상태 저장 위치 변경이며 새 API·DB 저장을 추가하지 않는다.
+- 정상·빈 목록·접근 정책 오류·작업 공간/탭 격리 테스트 작성. 실행: 미실행 — 사용자 요청 시 실행.
+
+## 2026-11-20 로그인 시 사용자·조직 통합 조회
+
+- 로그인·SNS 콜백·세션 복원에서 `/api/auth/me` 통합 응답을 `authStore.setUser()`로 그대로 저장한다. `profile`, `organization`, `membership`을 함께 보관하며 별도 조직 API를 호출하지 않는다. 실패·로그아웃 시 함께 비운다.
+- 마이페이지에서 별도 프로필 조회를 하지 않는다. ManagementProfilePanel은 authStore를 직접 참조하며 편집 시뮬레이션은 페이지의 별도 값으로 유지한다.
+- 조직 전체 컬럼은 통합 SQL의 `organization`에 포함된다. 보안 기기 정보는 이번 변경에서 추가 조회하지 않는다. `clients`, `assignedClients`는 `/api/collection/status`에서 조회하여 `clientStore`에 보관한다. 인증 쿼리는 업체 목록을 조회하지 않는다.
+- 테스트·타입 검사·빌드·브라우저/E2E: 미실행 — 사용자 요청 시 실행.
+
 ## 관리 화면 컴포넌트 구조 (2026-11-17)
 
 2026-11-20: 통합 `ManagementView.vue`와 `page` prop 분기를 제거하고 각 URL의 페이지가 해당 화면의 HTML과 상태·이벤트 처리를 직접 소유한다. 제목·설명·메뉴 문구는 각 템플릿에 직접 작성한다.

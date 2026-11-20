@@ -17,7 +17,36 @@ export interface UserProfile {
   mobile_phone: string | null
 }
 
+export interface AuthOrganization {
+  id: string
+  name: string
+  business_registration_number: string | null
+  representative_name: string | null
+  representative_phone: string | null
+  address: string | null
+  email?: string | null
+  phone?: string | null
+  corporate_registration_number?: string | null
+  business_type?: string | null
+  business_item?: string | null
+}
+
+export interface OfficeMembership {
+  id: string
+  office_id: string
+  user_id: string
+  role: 'OWNER' | 'ADMIN' | 'STAFF'
+  status: 'ACTIVE' | 'INACTIVE'
+  department_name: string | null
+  job_title: string | null
+  joined_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface AuthUser {
+  organization?: AuthOrganization
+  membership?: OfficeMembership
   id: string
   name: string
   email: string

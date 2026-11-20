@@ -1,5 +1,6 @@
-import { computed, watch, ref, onMounted, onBeforeUnmount } from 'vue'
-import { defineTabSession } from '~/composables/useTabSession'
+import { computed, watch, ref, reactive, toRefs, onMounted, onBeforeUnmount } from 'vue'
+import { useAccountStore } from '~/stores/accountStore'
+import { useSummaryStore } from '~/stores/summaryStore'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { createMockAccounting } from './mockAccounting'
 import { filterAccounts } from './logic'
@@ -9,38 +10,12 @@ import { mapClientSummaries } from './clientSummaries'
 import { useBackendApi } from '~/composables/useBackendApi'
 import type { MockAccount, MockSummary } from './types'
 
-const getSession = defineTabSession(() => ({
-  summaryAccounts: [] as MockAccount[],
-  summaryClientName: '',
-  summaryLoadError: '',
-  accounts: [] as MockAccount[],
-  summaries: [] as MockSummary[],
-  loaded: false,
-  section: 'accounts',
-  query: '',
-  category: '',
-  subcategory: '',
-  active: '',
-  selectedId: null as number | null,
-  checked: [] as number[],
-  compact: false,
-  sort: 'code' as keyof MockAccount,
-  descending: false,
-  detailTab: '기본정보',
-  summaryQuery: '',
-  summaryAccount: '',
-  summarySide: '',
-  summaryFixed: '',
-  accountDraft: null as MockAccount | null,
-  addingAccount: false,
-  summaryDraft: null as MockSummary | null,
-  originalAccount: '',
-  originalSummary: '',
-}))
 export function useAccountManagement() {
   const { activeTab, setDirty } = useWorkspaceContext()
   const tab = activeTab.value
-  const state = getSession(tab)
+  const accounts = useAccountStore().forScope(tab)
+  const summariesState = useSummaryStore().forScope(tab)
+  const state = reactive({ ...toRefs(accounts), ...toRefs(summariesState) })
   const preview = Boolean(useRuntimeConfig().public.pagesPreview)
   const service = createAccountDefaultsService(useBackendApi())
   const loading = ref(false)

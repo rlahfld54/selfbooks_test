@@ -15,7 +15,7 @@ export function useWorkspaceProvider() {
   const { pagesPreview } = useRuntimeConfig().public
   const store = createWorkspaceStore(useRoute().meta.workspaceTab ?? 'home', user.value?.id ?? 'demo-admin')
   const data = managementSession(store.state)
-  const directory = useManagedDirectory(data)
+  const directory = useManagedDirectory()
   const initialClient = useRoute().query.clientId
   if (typeof initialClient === 'string') store.clientId.value = initialClient
   const identity = () => user.value ?? (pagesPreview ? { ...data.staff[0]!, role: 'OWNER' } : null)

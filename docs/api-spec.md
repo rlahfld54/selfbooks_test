@@ -3,6 +3,7 @@
 ## Supabase 인증 적용 (2026-11-13, 이전 인증 설명보다 우선)
 
 - GET /api/auth/me → `{ data: { id, name, email, officeId, role } }`.
+- `/api/auth/me` 통합 응답은 기존 필드와 `profile`, `organization`, `membership`을 포함한다. `clients`, `assignedClients`는 `/api/collection/status`로 이동하여 `clientStore`에서 보관한다. 로그인·SNS 콜백·세션 복원에서 이 응답을 그대로 `authStore.user`에 저장하며 조직 API를 별도로 호출하지 않는다. 목록은 서버 지정 조직으로 제한하고 담당 목록은 인증 사용자로 제한한다.
 - `/api/health`와 CORS preflight를 제외한 등록된 API는 `Authorization: Bearer <access_token>`이 필요하다.
 - 토큰 누락·만료는 401, 활성 관리자 소속 없음은 403, 인증 설정/연결 실패는 503이다.
 - SUPABASE_URL 및 SUPABASE_PUBLISHABLE_KEY를 루트 .env에 설정한다. service_role 키는 사용하지 않는다.
