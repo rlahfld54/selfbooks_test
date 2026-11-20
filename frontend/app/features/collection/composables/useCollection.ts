@@ -105,10 +105,10 @@ export function useCollection(session: Session) {
   // 목록은 전역이라 화면을 떠나도 지우지 않는다(다른 화면 · 다시 들어올 때 캐시로 바로 보인다)
   onBeforeUnmount(() => { alive = false; stopPolling() })
 
-  const companies = computed(() => overlayRun(clients.companies, run.value))
+  const companies = computed(() => overlayRun(clients.state.companies, run.value))
   const running = computed(() => !!run.value && !runFinished(run.value))
-  const loading = computed(() => clients.loading)
-  const loadError = computed(() => clients.error)
+  const loading = computed(() => clients.state.loading)
+  const loadError = computed(() => clients.state.error)
 
   return { sample, companies, loading, loadError, run, running, actionError, start, retry, cancel, saveAccount, refresh: () => clients.refresh() }
 }
