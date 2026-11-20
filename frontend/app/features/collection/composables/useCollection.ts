@@ -22,17 +22,14 @@ const previewService = () => (preview ??= createPreviewCollectionService())
 
 type Session = ReturnType<typeof collectionSession>
 
-/** 자료수집 API — 미리보기면 브라우저 안 샘플, 아니면 Fastify. 전역 clientStore 도 이것을 쓴다 */
+// 미리보기면 샘플, 아니면 Fastify
 export function useCollectionService(timeout = 20000): Service {
   // runtimeConfig 는 setup 에서 바로 읽는다. 서비스는 Nuxt 전역에 기대지 않는다.
   const sample = useRuntimeConfig().public.pagesPreview
   return sample ? previewService() : createCollectionService(useBackendApi(timeout))
 }
 
-/*
- * 자료수집 화면 — 업체 목록은 전역 clientStore(Pinia)에서 읽고, 여기서는 수집 작업(진행 · 중단 · 재시도)만 다룬다.
- * 수집이 끝나면 clientStore.refresh() 로 목록을 다시 받아 다른 화면도 같은 상태를 본다.
- */
+// 업체 목록은 clientStore, 여기서는 수집 작업만 다룬다
 export function useCollection(session: Session) {
   const sample = useRuntimeConfig().public.pagesPreview
   const api = useCollectionService()

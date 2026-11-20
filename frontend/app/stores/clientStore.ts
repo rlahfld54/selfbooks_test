@@ -142,6 +142,8 @@ export const useClientStore = defineStore('clientStore', () => {
 
   return {
     state,
+    // 기존 수집 화면에서도 동일한 반응형 상태를 사용한다.
+    ...toRefs(state),
 
     // Getters
     loaded,
