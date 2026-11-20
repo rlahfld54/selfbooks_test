@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, toRef, watch } from 'vue'
 import type { AuthUser } from '../features/auth/user'
 
 // 상태 타입
@@ -15,6 +15,7 @@ const createInitialState = (): AuthState => ({
 export const useAuthStore = defineStore('authStore', () => {
   // 1. 상태
   const state = reactive<AuthState>(createInitialState())
+  const user = toRef(state, 'user')
 
   // 2. Getters
   const isLoggedIn = computed(() => !!state.user)
@@ -67,6 +68,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
   return {
     state,
+    user,
     isLoggedIn,
     isAdmin,
     userInfo,

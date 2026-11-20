@@ -3,6 +3,29 @@ import { test } from 'node:test'
 import { createPinia, setActivePinia, storeToRefs } from 'pinia'
 import { useAuthStore } from '../app/stores/authStore.ts'
 
+test('user ref exists before login and stays synchronized with nested state', () => {
+  const store = useAuthStore(createPinia())
+  const { user } = storeToRefs(store)
+  assert.ok(user)
+  assert.equal(user.value, null)
+
+  const account = { id: 'uuid', name: '사용자', email: 'user@example.test', officeId: 'office', role: 'ADMIN' }
+  store.state.user = account
+  assert.equal(user.value, store.state.user)
+  assert.equal(store.isLoggedIn, true)
+
+  user.value = null
+  assert.equal(store.state.user, null)
+  assert.equal(store.userInfo, null)
+  assert.equal(store.isAdmin, false)
+
+  user.value = account
+  assert.equal(store.state.user, user.value)
+  store.clear()
+  assert.equal(user.value, null)
+  assert.equal(store.state.user, null)
+})
+
 test('authenticated identity is shared through store refs and cleared on logout', () => {
   setActivePinia(createPinia())
   const store = useAuthStore()
