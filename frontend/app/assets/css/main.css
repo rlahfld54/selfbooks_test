@@ -3137,3 +3137,63 @@ textarea.input { height: auto; min-height: 96px; padding: var(--aat-space-3); re
 /* General voucher totals remain visible while scrolling. */
 .voucher-grid tfoot { position: sticky; bottom: 0; z-index: 3; background: var(--panel, #fff); font-weight: 700; }
 .voucher-grid tfoot td { background: var(--panel, #fff); border-top: 1px solid #aaa; }
+
+/* 회원가입 절차 · 2차 인증 (셀프북스 초기화면 v1-1) */
+.su-gate { display: grid; gap: 14px; }
+.su-gate-card { display: grid; gap: 10px; padding: 20px; border: 1px solid #dfe5ee; border-radius: 10px; background: #fff; }
+.su-gate-card h2 { font-size: 16px; font-weight: 700; color: #243b5b; }
+.su-gate-card p { font-size: 12px; line-height: 1.7; color: #718198; }
+.su-heading { margin-bottom: 18px; }
+.su-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0 0 24px; padding: 0; list-style: none; }
+.su-steps li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: #9aa6b8; }
+.su-steps li span { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid #dfe5ee; border-radius: 50%; background: #fff; font-size: 11px; font-weight: 700; }
+.su-steps li.current { color: var(--primary); font-weight: 700; }
+.su-steps li.current span { border-color: var(--primary); color: #fff; background: var(--primary); }
+.su-steps li.done { color: #319275; }
+.su-steps li.done span { border-color: #319275; color: #319275; }
+.su-title { font-size: 17px; font-weight: 700; color: #243b5b; }
+.su-sub { margin-top: 6px !important; font-size: 12px; line-height: 1.7; color: #718198; }
+.su-all { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border: 1px solid #dfe5ee; border-radius: 8px; background: #f6f9ff; font-size: 13px; font-weight: 700; color: #243b5b; cursor: pointer; }
+.su-terms { border: 1px solid #dfe5ee; border-radius: 8px; }
+.su-term { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 14px; border-bottom: 1px solid #eef2f7; font-size: 12px; color: #41536d; }
+.su-term:last-child { border-bottom: 0; }
+.su-term label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.su-term button { flex-shrink: 0; border: 0; background: none; color: #8c99ac; font-size: 11px; text-decoration: underline; cursor: pointer; }
+.su-req { color: var(--primary); font-weight: 600; }
+.su-opt { color: #9aa6b8; }
+.su-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.su-method { display: grid; gap: 6px; padding: 18px 12px; border: 1px solid #dfe5ee; border-radius: 10px; background: #fff; text-align: center; cursor: pointer; }
+.su-method:hover { border-color: var(--primary); background: #f6f9ff; }
+.su-method b { font-size: 13px; color: #243b5b; }
+.su-method span { font-size: 11px; line-height: 1.6; color: #8391a6; }
+.su-help { padding: 14px; border-radius: 8px; background: #f7f9fc; font-size: 12px; color: #41536d; }
+.su-help ul { margin: 8px 0 12px; padding-left: 18px; line-height: 1.8; color: #718198; }
+.su-alt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.su-note { padding: 11px 13px; border-radius: 7px; background: #f6f9ff; font-size: 11px; line-height: 1.8; color: #586c87; }
+.su-row { display: flex; gap: 8px; }
+.su-row input { flex: 1; }
+.su-row .entry-button { flex-shrink: 0; padding: 10px 14px; }
+.su-back { border: 0; padding: 0; background: none; color: #4773bb; font-size: 11px; cursor: pointer; }
+.su-skip { justify-self: center; border: 1px dashed #c9d4e4; border-radius: 7px; padding: 8px 14px; background: #fafbfd; color: #718198; font-size: 11px; cursor: pointer; }
+.su-skip:hover { color: var(--primary); border-color: var(--primary); }
+.su-foot { display: flex; justify-content: space-between; gap: 10px; }
+.su-foot .entry-button { flex: 1; }
+.su-done { display: grid; justify-items: center; gap: 4px; text-align: center; }
+.su-done-mark { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 8px; border-radius: 50%; background: #e8f6f0; color: #319275; font-size: 24px; font-weight: 700; }
+.su-summary { display: grid; grid-template-columns: 80px 1fr; gap: 10px 8px; margin: 0; padding: 14px 16px; border: 1px solid #dfe5ee; border-radius: 8px; font-size: 12px; }
+.su-summary dt { color: #8391a6; }
+.su-summary dd { margin: 0; color: #243b5b; overflow-wrap: anywhere; }
+.entry-form input[readonly] { background: #f5f7fa; color: #718198; }
+@media (max-width: 420px) { .su-methods, .su-alt { grid-template-columns: 1fr; } }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 28px; padding: 4px; border-radius: 9px; background: #eef2f8; }
+.auth-tabs a { padding: 9px 0; border-radius: 7px; color: #718198; font-size: 13px; font-weight: 600; text-align: center; }
+.auth-tabs a:hover { color: var(--primary); }
+.auth-tabs a.active { background: #fff; color: var(--primary); box-shadow: 0 1px 3px #1f3b6a1f; }
+
+/* 프로필 메뉴 (마이페이지 · 로그아웃) */
+.sidebar-user { position: relative; }
+.profile-menu { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 4px); z-index: 20; display: grid; padding: 4px; border: 1px solid var(--border); border-radius: 8px; background: #fff; box-shadow: 0 6px 20px #1f3b6a26; }
+.profile-menu button { padding: 8px 10px; border: 0; border-radius: 6px; background: none; color: var(--text); font-size: 12px; text-align: left; cursor: pointer; }
+.profile-menu button:hover { background: var(--primary-light); }
+.profile-menu button.danger { color: var(--danger); }
+.profile-menu button:disabled { opacity: .5; cursor: wait; }

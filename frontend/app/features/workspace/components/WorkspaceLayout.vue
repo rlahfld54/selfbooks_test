@@ -4,6 +4,7 @@ import WorkspaceConfirmation from './WorkspaceConfirmation.vue'
 import WorkspaceDetail from './WorkspaceDetail.vue'
 import { managementSession } from '~/features/management/session'
 import { tabInfo, type TabId } from '~/utils/workspace-routes'
+import { useAuth } from '~/features/auth/useAuth'
 const {
   state,
   navigate,
@@ -15,6 +16,29 @@ const {
   reloadDirectory,
 } = useWorkspaceProvider()
 const directoryData = managementSession(state)
+
+// 로그아웃
+const { logout } = useAuth()
+const router = useRouter()
+const loggingOut = ref(false)
+const profileMenu = ref(false)
+
+// 메뉴 밖으로 포커스가 나가면 닫는다
+function closeProfileMenu(event: FocusEvent) {
+  const box = event.currentTarget as HTMLElement
+  if (!box.contains(event.relatedTarget as Node | null)) profileMenu.value = false
+}
+async function signOut() {
+  if (loggingOut.value) return
+  loggingOut.value = true
+  profileMenu.value = false
+  try {
+    await logout()
+    await router.replace('/login')
+  } finally {
+    loggingOut.value = false
+  }
+}
 const selectedClient = computed(() =>
   directoryData.clients.find((client) => client.id === clientId.value),
 )
@@ -76,8 +100,12 @@ async function open(id: TabId) {
           </button>
         </template>
       </nav>
-      <div class="sidebar-user">
-        <button class="profile-mini" @click="open('mypage')">
+      <div class="sidebar-user" @focusout="closeProfileMenu">
+        <div v-if="profileMenu" class="profile-menu" role="menu">
+          <button type="button" role="menuitem" @click="profileMenu = false; open('mypage')">마이페이지</button>
+          <button type="button" role="menuitem" class="danger" :disabled="loggingOut" @click="signOut">로그아웃</button>
+        </div>
+        <button class="profile-mini" :aria-expanded="profileMenu" aria-haspopup="menu" @click="profileMenu = !profileMenu">
           <span class="avatar">김</span><span><b>김원지</b><small>조직 관리자</small></span
           ><span class="chev">⋯</span>
         </button>

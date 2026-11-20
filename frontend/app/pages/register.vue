@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import RegisterForm from '~/features/auth/RegisterForm.vue'
+import SignupFlow from '~/features/auth/SignupFlow.vue'
 definePageMeta({ layout: 'auth' })
 useHead({ title: '회원가입 · Accounting Pro' })
 </script>
-<template><RegisterForm /></template>
+<template><SignupFlow /></template>
