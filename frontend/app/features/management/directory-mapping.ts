@@ -21,9 +21,14 @@ export function mapDirectoryClients(records: ClientRecord[], previous: Client[] 
       company: '',
       environment: '',
       chart: '',
-      primaryId: assigned?.primaryId,
+      // A supplied DB assignment (including null) supersedes temporary screen state.
+      primaryId: record.primaryAssignment !== undefined
+        ? record.primaryAssignment?.userId
+        : assigned?.primaryId,
       secondaryIds: [...(assigned?.secondaryIds ?? [])],
-      primary: assigned?.primary ?? '',
+      primary: record.primaryAssignment !== undefined
+        ? record.primaryAssignment?.name ?? ''
+        : assigned?.primary ?? '',
       secondary: [...(assigned?.secondary ?? [])],
     }
   })

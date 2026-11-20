@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/authStore'
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig().public
@@ -15,7 +17,7 @@ export default defineNuxtPlugin(() => {
     ? createClient(config.supabaseUrl, config.supabasePublishableKey, {
       auth: { storage, storageKey: 'selfbooks:auth', flowType: 'pkce', detectSessionInUrl: false },
     }) : null
-  const user = useState<{ id: string } | null>('auth-user', () => null)
+  const { user } = storeToRefs(useAuthStore())
   const revision = useState('auth-revision', () => 0)
   const restoreIssue = useState('auth-restore-issue', () => '')
   authClient?.auth.onAuthStateChange((event, session) => {

@@ -1,5 +1,13 @@
 # 수임업체 담당 관리 및 업체별 업무 진입
 
+## 2026-11-20 DB 주담당 조회 연결
+
+- 기존 임시 배정 정책보다 우선하여 `GET /api/clients` 및 단일 업체 조회에 `primaryAssignment: { userId, name } | null`을 포함한다.
+- `public.client_assignments`의 `PRIMARY`와 `public.users`를 업체 ID·사무소 ID로 연결한다. DB 쓰기와 스키마 변경은 없다.
+- 내 담당 업체와 공통 요약은 로그인 사용자 UUID와 DB 주담당 UUID를 비교한다. 재조회 시 DB 주담당 변경·해제가 임시 주담당 상태보다 우선한다.
+- 보조담당의 DB 역할 코드와 조회 연결은 이번 변경에 포함하지 않으며 기존 임시 화면 상태를 유지한다.
+- 정상 조회, 사용자 UUID 구분, 재배정·해제, 조회 오류 및 정책 차단 테스트를 추가했다. 테스트·타입 검사·빌드·DB 통합·브라우저/E2E: 미실행 — 사용자 요청 시 실행.
+
 ## 실제 업체 조회 전환 (후속 요청, 아래 초기 목업 정책보다 우선)
 
 - 기본 수임업체 목록은 기존 인증 API `GET /api/clients` → Supabase PostgreSQL `public.clients` 조회 결과만 사용한다. `source=live` 쿼리가 없어도 같은 실제 데이터를 표시한다.

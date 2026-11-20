@@ -7,7 +7,6 @@ import VoucherTypeTabs from './VoucherTypeTabs.vue'
 import VoucherGridCell from './VoucherGridCell.vue'
 import WorkspaceVoucherNavigation from '~/features/workspace/components/WorkspaceVoucherNavigation.vue'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import '../vouchers/vouchers.css'
 const { density } = useWorkspaceContext()
 const detailOpen = ref(false)
 const journalOpen = ref(true)
@@ -510,7 +509,7 @@ function confirmPending() {
 </template>
 
 <style scoped>
-/* General-voucher typography, controls and grid come from vouchers.css. */
+/* General-voucher typography, controls and grid come from main.css. */
 .sales-journal { min-width: 0; color: var(--text); }
 .sales-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
 .sales-layout-wide { grid-template-columns: minmax(0, 1fr); }

@@ -26,3 +26,10 @@ test('mock instances and saved rows are independent; required and zero VAT check
   assert.equal(checks(rows, rows[0]!, 'sales').find(c => c.key === 'memo')?.ok, false)
   assert.equal(checks(rows, rows[0]!, 'sales').find(c => c.key === 'vat')?.ok, false)
 })
+
+ test('month editing accepts valid dates and rejects impossible dates', async () => {
+ const { dateWithMonth } = await import('../app/features/vouchers/model.ts')
+ assert.equal(dateWithMonth('2026-01-15', '2'), '2026-02-15')
+ assert.equal(dateWithMonth('2026-01-31', '2'), null)
+ assert.equal(dateWithMonth('2026-01-15', '13'), null)
+ })

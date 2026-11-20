@@ -4,6 +4,7 @@ export type ClientRecord = {
   name: string
   taxpayerKind: string
   status: string
+  primaryAssignment?: { userId: string; name: string | null } | null
   business_registration_number: string | null
   representative_name: string | null
   address: string | null

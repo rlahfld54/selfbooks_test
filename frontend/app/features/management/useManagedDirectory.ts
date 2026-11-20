@@ -18,7 +18,7 @@ export function useManagedDirectory(data: ReturnType<typeof createManagementData
       const result = await service.list(current.signal)
       // 브라우저 개발자도구 Console에 출력
       console.log('수임업체 API 응답:', result)
-      console.table(result.data)
+      // console.table(result.data)
       if (current.signal.aborted) {
         return
       }

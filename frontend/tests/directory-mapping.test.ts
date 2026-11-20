@@ -3,7 +3,28 @@ import { test } from 'node:test'
 import { mapDirectoryClients } from '../app/features/management/directory-mapping.ts'
 import { assignmentSummary, needsReview } from '../app/features/management/assignments.ts'
 
-const record = { id: 'db-uuid', officeId: 'office', name: 'DB 조회 업체', taxpayerKind: '법인', status: 'active' }
+const record = { id: 'db-uuid', officeId: 'office', name: 'DB 조회 업체', taxpayerKind: '법인', status: 'active',
+  business_registration_number: null, representative_name: null, address: null,
+  engagement_start_date: null, engagement_end_date: null }
+
+test('database primary assignment populates my clients using the authenticated UUID', () => {
+  const clients = mapDirectoryClients([{ ...record, primaryAssignment: { userId: 'onegi-uuid', name: '담당자' } }])
+  assert.equal(clients[0]!.primary, '담당자')
+  assert.deepEqual(assignmentSummary(clients, 'onegi-uuid'), { total: 1, primary: 1, secondary: 0, review: 0 })
+  assert.equal(assignmentSummary(clients, 'onegi').total, 0)
+  assert.equal(assignmentSummary(clients, 'other-user').total, 0)
+})
+
+test('refresh reflects database reassignment and removal instead of retaining stale primary assignments', () => {
+  const previous = mapDirectoryClients([{ ...record, primaryAssignment: { userId: 'old-user', name: '이전' } }])
+  const changed = mapDirectoryClients([{ ...record, primaryAssignment: { userId: 'new-user', name: null } }], previous)
+  assert.equal(changed[0]!.primaryId, 'new-user')
+  assert.equal(changed[0]!.primary, '')
+  const removed = mapDirectoryClients([{ ...record, primaryAssignment: null }], previous)
+  assert.equal(removed[0]!.primaryId, undefined)
+  assert.equal(removed[0]!.primary, '')
+  assert.equal(assignmentSummary(removed, 'old-user').total, 0)
+})
 test('maps API IDs and values without filling missing details or assignments with sample data', () => {
   const [client] = mapDirectoryClients([record])
   assert.equal(client!.id, record.id)

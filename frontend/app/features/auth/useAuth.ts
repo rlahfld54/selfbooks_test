@@ -1,13 +1,15 @@
 import type { NuxtApp } from '#app'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/authStore'
+import type { AuthUser } from './user'
 import { createPasswordLoginService } from './password-login'
 import { ApiRequestError, createApiClient } from '~/services/api-client'
 
-interface AuthUser { id: string; name: string; email: string; officeId: string; role: string }
 export type SocialProvider = 'kakao' | 'custom:naver' | 'google'
 const restores = new WeakMap<NuxtApp, { revision: number; promise: Promise<void> }>()
 
 export function useAuth() {
-  const user = useState<AuthUser | null>('auth-user', () => null)
+  const { user } = storeToRefs(useAuthStore())
   const warning = useState('auth-warning', () => '')
   const restoreIssue = useState('auth-restore-issue', () => '')
   const verifying = useState('auth-verifying', () => false)
@@ -54,6 +56,7 @@ export function useAuth() {
       restoreIssue.value = error instanceof ApiRequestError && error.status === 403
         ? error.message
         : '로그인 상태를 확인하지 못했습니다. 서버 연결을 확인한 뒤 다시 시도해 주세요.'
+      user.value = null
     }
   }
   function restore() {
@@ -129,8 +132,8 @@ export function useAuth() {
   async function logout() {
     revision.value++
     restoreIssue.value = ''
-    const result = await $authClient?.auth.signOut({ scope: 'local' })
     user.value = null
+    const result = await $authClient?.auth.signOut({ scope: 'local' })
     warning.value = result?.error ? '로그아웃을 완료하지 못했습니다. 다시 시도해 주세요.' : ''
   }
   return { user, warning, restoreIssue, verifying, revision, headers, restore, expireSession, login, logout, startSocialAuth, finishSocialAuth }

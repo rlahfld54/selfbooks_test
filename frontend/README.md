@@ -94,3 +94,14 @@ Remove-Item Env:NUXT_APP_BASE_URL, Env:NUXT_PUBLIC_PAGES_PREVIEW
 ```
 
 정적 생성 후 `node tests/pages-preview.browser.mjs`를 실행하면 브라우저가 `/selfbooks_test/`로 요청하는 파일을 `.output/public`에서 읽어 검증합니다. 실제 호스팅 주소를 검사하려면 `SELFBOOKS_TEST_URL`에 끝 슬래시를 포함한 URL을 설정합니다. Playwright Chromium을 설치하거나 `SELFBOOKS_BROWSER`에 설치된 Chromium 계열 브라우저의 실행 파일을 지정합니다.
+
+## 코드 포맷
+
+Prettier가 포맷을 담당하며 eslint-config-prettier를 ESLint 설정 마지막에 적용하여 겹치는 규칙을 끕니다. 기존 .prettierrc 설정을 사용합니다.
+
+- frontend에서 npm run format:check: 포맷 검사
+- frontend에서 npm run format: 전체 포맷 수정(명시적으로 실행할 때만)
+- VS Code에서 권장 Prettier 확장을 설치하면 Vue/TypeScript/JavaScript/CSS 저장 시 포맷합니다. 설정 파일이 있는 프런트엔드에 적용됩니다.
+- 생성 파일, 잠금 파일과 public 원본 자산은 포맷에서 제외합니다.
+
+설정 적용 시 검사·전체 포맷은 미실행 — 사용자 요청 시 실행.

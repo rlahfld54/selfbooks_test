@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@pinia/nuxt'],
+  modules: ['@pinia/nuxt'],
   // Nuxt 호환성 기준일
   compatibilityDate: '2025-07-15',
 
@@ -14,17 +14,7 @@ export default defineNuxtConfig({
   },
 
   // 전역 스타일
-  css: ['~/assets/main.css'],
-
-  eslint: {
-    config: {
-      stylistic: {
-        semi: false,
-        quotes: 'single',
-        commaDangle: 'always-multiline',
-      },
-    },
-  },
+  css: ['~/assets/css/main.css'],
 
   // API, GitHub Pages 미리보기, Supabase 로그인
   runtimeConfig: {

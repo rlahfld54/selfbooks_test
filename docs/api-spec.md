@@ -21,7 +21,7 @@ DB 누락/정책 우회는 503, 지정 사무소 없음은 404다. `/company`에
 | ------------------ | -------------------------------------------------------------------------------- |
 | `/api/health`      | `{ status: "ok" }`                                                               |
 | `/api/health/db`   | PostgreSQL에서 `SELECT 1` 실행 후 `{ status: "ok" }`                             |
-| `/api/clients`     | 수임업체 배열. 각 행에는 `id`, `officeId`, `name`, `taxpayerKind`, `status` 포함 |
+| `/api/clients`     | 수임업체 배열. 각 행에는 `id`, `officeId`, `name`, `taxpayerKind`, `status`, `primaryAssignment` 포함. `primaryAssignment`는 DB 주담당의 `{ userId, name }` 또는 `null`이며 단일 업체 조회도 동일하다. |
 | `/api/clients/:id` | UUID에 해당하는 수임업체 객체                                                    |
 | `/api/tax-offices` | `id`, `name`을 가진 세무회계사무소 배열                                          |
 
@@ -48,6 +48,7 @@ POST/PUT 본문: `id`(신규 UUID, 재시도 시 동일 값), `version`(신규 0
 ## 마이페이지 프로필 필드 확장
 - GET /api/auth/me에 userCode, loginId, phone, departmentName, jobTitle, joinedAt을 추가한다.
 - users.user_code/login_id, office_members.department_name/job_title/joined_at을 매핑한다.
+- `/api/auth/me`의 `data.profile`은 `public.users` 원본 컬럼 16개를 포함한다(`password_hash` 제외). 기존 최상위 필드는 호환성을 위해 유지하며 로그인 및 복원 시 Pinia `authStore.user`에 저장한다.
 - phone은 비어 있지 않은 users.mobile_phone을 우선하고 users.phone으로 대체한다.
 - 화면 사용자 ID는 users.id에 해당하는 인증 UUID인 id를 사용한다. userCode는 선택적 관리 코드이며 사용자 식별자 표시에 사용하지 않는다.
 - 기존 OWNER/ADMIN 인증 조건과 서버 지정 사무소 범위는 유지한다.
