@@ -3,18 +3,19 @@ import VoucherSearchModal from './VoucherSearchModal.vue'
 import { advancedSearch, type AdvancedFilter } from './services/voucherSearch'
 import VoucherEditorTools from './VoucherEditorTools.vue'
 import VoucherOperations from './VoucherOperations.vue'
-import VoucherTypeTabs from './VoucherTypeTabs.vue'
-import VoucherGridCell from './VoucherGridCell.vue'
+import SalesVoucherBoard from './SalesVoucherBoard.vue'
 import WorkspaceVoucherNavigation from '~/features/workspace/components/WorkspaceVoucherNavigation.vue'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import '../vouchers/vouchers.css'
 const { density } = useWorkspaceContext()
 const detailOpen = ref(false)
-const journalOpen = ref(true)
+// 상세 편집은 접어 두고, 상단 그리드 · 상시 입력행으로 입력한다(팀장님 화면 구성)
+const journalOpen = ref(false)
 import { formatAmount } from '~/utils/formatAmount'
-import { monthRange, payments, sumAmounts, transactionTypes } from './services/salesJournal'
+import { payments, sumAmounts, transactionTypes } from './services/salesJournal'
 import SalesAmountInput from './SalesAmountInput.vue'
 import { useSalesJournal } from './composables/useSalesJournal'
+const salesJournal = useSalesJournal()
 const {
   pagesPreview,
   tab,
@@ -49,41 +50,21 @@ const {
   partnerSelected,
   save,
   remove,
-} = useSalesJournal()
+} = salesJournal
+
 const editorTools=ref<InstanceType<typeof VoucherEditorTools>>()
-const typeTabs=ref<InstanceType<typeof VoucherTypeTabs>>()
-const selectedIds=ref<string[]>([]), electronic=ref(''), pinned=ref(false)
+const board=ref<InstanceType<typeof SalesVoucherBoard>>()
+const selectedIds=ref<string[]>([]), pinned=ref(false)
 const checkedRows=computed(()=>session.rows.filter(row=>selectedIds.value.includes(row.id)))
 const advancedOpen=ref(false), advanced=ref<AdvancedFilter>({})
-const visibleRows=computed(()=>advancedSearch(rows.value.filter(row=>!electronic.value||Boolean(row.electronic)===(electronic.value==='yes')),advanced.value))
+const visibleRows=computed(()=>board.value?.visibleRows ?? advancedSearch(rows.value,advanced.value))
 const availableTypes=computed(()=>meta.value?.vatTypes?.filter(t=>t.enabled).map(t=>({value:t.code,label:t.code+' · '+(t.direction==='sales'?'매출 ':'매입 ')+t.name}))??transactionTypes)
-function pick(row: typeof session.rows[number]){if(!pinned.value)select(row)}
 function focusSearch(){advancedOpen.value=true}
 const accountIndex=ref<number|null>(null)
 const accountSearchItems=computed(()=>(meta.value?.accounts??[]).map(row=>({...row,contact:'',status:'',amount:'',date:''})))
 function chooseAccount(row:{id:string}){if(accountIndex.value!==null&&session.draft.lines[accountIndex.value]){session.draft.lines[accountIndex.value]!.account=row.id;edit()}accountIndex.value=null}
-const dateMode = ref('period')
-const queryMonth = ref('')
 const selectedRecord = computed(() => session.rows.find(row => row.id === session.selected))
-function setDateMode(mode: string) {
-  dateMode.value = mode
-  if (mode === 'month') queryMonth.value = session.filter.from.slice(0, 7)
-}
-function prepareDateFilter() {
-  if (dateMode.value === 'month') {
-    const range = monthRange(queryMonth.value)
-    if (!range) {
-      filterError.value = '조회할 월을 선택하세요.'
-      return false
-    }
-    Object.assign(session.filter, range)
-  }
-  return true
-}
-function searchRecords() {
-  if (!prepareDateFilter()) return
-  return queryRecords()
-}
+function printPage() { window.print() }
 function addLine() {
   session.draft.lines.push({ side: 'debit', account: '', amount: '', memo: '' })
   edit()
@@ -103,13 +84,12 @@ function confirmPending() {
     <PageToolbar title="매입매출전표입력" description="거래 입력과 분개 내역을 한 화면에서 확인하세요.">
       <template #eyebrow>ACCOUNTING / VOUCHERS</template>
       <UiBadge tone="neutral">{{ pagesPreview ? '미리보기' : meta?.company ?? '연결 대기' }}</UiBadge>
+      <UiButton @click="printPage">인쇄</UiButton>
+      <UiButton :disabled="pagesPreview || !session.selected || busy || loading || locked" @click="deleting = true">삭제</UiButton>
       <UiButton :aria-expanded="detailOpen" aria-controls="sales-detail" @click="detailOpen = !detailOpen">{{ detailOpen ? '인사이트 닫기' : '인사이트 열기' }}</UiButton>
       <UiButton variant="primary" :disabled="pagesPreview || busy || loading || !meta || locked" @click="save">{{ busy ? '저장 중…' : '전표 저장' }}</UiButton>
     </PageToolbar>
     <WorkspaceVoucherNavigation />
-    <details class="sales-more"><summary>추가 기능 <span>복사 · 이동 · 집계 · 내보내기</span></summary>
-    <VoucherOperations :rows="visibleRows" :all-rows="session.rows" :selected="checkedRows.length?checkedRows:(selectedRecord?[selectedRecord]:[])" :meta="meta" :dirty="tab.dirty" :preview="!!pagesPreview" @refresh="load" @filter="type=>filterType(type)" @pin="pinned=!pinned" @items="editorTools?.openItems()" @search="focusSearch" @preferences="typeTabs?.open()" />
-    </details>
     <p v-if="pinned" role="status">하단 전표 고정 중 — 고정 전환 버튼으로 해제할 수 있습니다.</p>
     <div class="context-notice">
       <UiIcon name="document" :size="17" />
@@ -126,127 +106,26 @@ function confirmPending() {
     <p v-if="notice" class="result-notice" role="status">{{ notice }}</p>
     <div class="sales-layout" :class="{ 'sales-layout-wide': !detailOpen }" :inert="busy || loading">
       <div class="sales-main">
-        <section class="sales-card" aria-label="전표 조회">
-          <VoucherTypeTabs v-if="meta" ref="typeTabs" :meta="meta" :type="session.applied.type" :electronic="electronic" @filter="(type,value)=>{electronic=value;filterType(type)}" />
-          <form class="sales-filters voucher-toolbar" @submit.prevent="searchRecords">
-            <div class="period-toggle" aria-label="조회 방식">
-              <button type="button" :aria-pressed="dateMode === 'period'" @click="setDateMode('period')">기간</button>
-              <button type="button" :aria-pressed="dateMode === 'month'" @click="setDateMode('month')">월별</button>
+        <SalesVoucherBoard
+          ref="board"
+          v-model:checked="selectedIds"
+          v-model:density="density"
+          :journal="salesJournal"
+          :pinned="pinned"
+          :advanced="advanced"
+          @search="focusSearch"
+          @editor="journalOpen = true"
+        >
+          <template #more>
+            <VoucherOperations :rows="visibleRows" :all-rows="session.rows" :selected="checkedRows.length?checkedRows:(selectedRecord?[selectedRecord]:[])" :meta="meta" :dirty="tab.dirty" :preview="!!pagesPreview" @refresh="load" @filter="type=>filterType(type)" @pin="pinned=!pinned" @items="editorTools?.openItems()" @search="focusSearch" @preferences="() => {}" />
+            <div class="board-actions">
+              <UiButton :disabled="busy || loading || !meta" @click="protect(reset)">+ 신규 전표 (상세 입력)</UiButton>
             </div>
-            <input v-if="dateMode === 'month'" v-model="queryMonth" type="month" class="input" aria-label="조회 월" />
-            <template v-else>
-            <label
-              >조회기간
-              <input
-                v-model="session.filter.from"
-                type="date"
-                class="input"
-                aria-label="조회 시작일"
-            /></label>
-            <span>~</span
-            ><input
-              v-model="session.filter.to"
-              type="date"
-              class="input"
-              aria-label="조회 종료일"
-            />
-            </template>
-            <UiInput
-              v-model="session.filter.query"
-              aria-label="전표 검색"
-              placeholder="거래처·사업자번호·품명·적요 검색"
-              class="sales-search"
-            />
-            <UiButton type="submit">조회</UiButton>
-            <UiButton :disabled="busy || loading || !meta" @click="protect(reset)">+ 신규 전표</UiButton>
-            <UiButton :disabled="pagesPreview || !session.selected || busy || loading || locked" @click="deleting = true">전표 삭제</UiButton>
-            <UiBadge v-if="tab.dirty" tone="warning">미저장 변경</UiBadge>
-          </form>
-          <p v-if="filterError" class="field-error" role="alert">{{ filterError }}</p>
-          <div class="voucher-section-title">
-            <p class="voucher-help">행 선택 후 셀 편집 · Enter / Tab 이동 · Esc 취소 · F2 코드 검색</p>
-            <label>밀도 <select v-model="density" aria-label="테이블 밀도"><option value="normal">기본</option><option value="compact">좁게</option></select></label>
-          </div>
-          <div class="sales-grid-scroll record-scroll voucher-grid-wrap">
-            <table class="sales-grid voucher-grid">
-              <caption class="sr-only">
-                매입매출전표 목록
-              </caption>
-              <thead>
-                <tr>
-                  <th>선택</th>
-                  <th>년</th><th>월</th><th>일</th>
-                  <th>번호</th><th>사업자번호</th>
-                  <th>거래처</th>
-                  <th>유형</th>
-                  <th>품명</th><th>수량</th><th>단가</th>
-                  <th class="numeric">공급가액</th>
-                  <th class="numeric">부가세</th>
-                  <th class="numeric">합계</th>
-                  <th>전자</th><th>분개</th><th>상태</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="row in visibleRows"
-                  :key="row.id"
-                  :class="{ selected: session.selected === row.id }"
-                  @click="pick(row)"
-                >
-                  <td>
-                    <input
-                      type="checkbox"
-                      v-model="selectedIds"
-                      :value="row.id"
-                      :aria-label="`${row.date} ${row.partner} 전표 선택`"
-                      @click.stop
-                    />
-                  </td>
-                  <td class="date-cell">{{ row.date.slice(0, 4) }}</td><td class="date-cell">{{ row.date.slice(5, 7) }}</td><td class="date-cell">{{ row.date.slice(8, 10) }}</td>
-                  <td class="code">{{ row.entryNumber }}</td><td class="code">{{ row.partnerCode || '—' }}</td>
-                  <td class="partner-cell">{{ row.partner }}</td>
-                  <td>
-                    <select v-if="session.selected===row.id&&!locked" v-model="session.draft.type" aria-label="셀 유형" @change="taxEdit"><option v-for="type in availableTypes" :key="type.value" :value="type.value">{{ type.label }}</option></select><span v-else class="type-label" :class="{ purchase: Number(row.type) >= 50 }">{{
-                      availableTypes.find(type=>type.value===row.type)?.label??row.type
-                    }}</span>
-                  </td>
-                  <td><VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.item" label="셀 품목" @update:model-value="edit" /><span v-else>{{ row.item || '—' }}</span></td>
-                  <td><VoucherGridCell v-if="session.selected===row.id&&!locked" :model-value="session.draft.quantity??'1'" label="셀 수량" @update:model-value="value=>{session.draft.quantity=value;edit()}" /><span v-else>{{ row.quantity??'1' }}</span></td><td><VoucherGridCell v-if="session.selected===row.id&&!locked" :model-value="session.draft.unitPrice??'0'" label="셀 단가" @update:model-value="value=>{session.draft.unitPrice=value;edit()}" /><span v-else>{{ row.unitPrice??'0' }}</span></td><td class="numeric"><VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.supply" label="셀 공급가액" @update:model-value="taxEdit" /><span v-else>{{ formatAmount(row.supply) }}</span></td>
-                  <td class="numeric" :class="{ 'zero-vat': BigInt(row.vat) === 0n }">
-                    <VoucherGridCell v-if="session.selected===row.id&&!locked" v-model="session.draft.vat" label="셀 부가세" @update:model-value="taxEdit" /><span v-else>{{ formatAmount(row.vat) }}</span><span v-if="row.needsReview" class="review-label">확인요망 · 확인완료</span>
-                  </td>
-                  <td class="numeric total-cell">
-                    {{ formatAmount(sumAmounts([row.supply, row.vat])) }}
-                  </td>
-                  <td><input v-if="session.selected===row.id&&!locked" v-model="session.draft.electronic" type="checkbox" aria-label="셀 전자증빙" @change="edit" /><span v-else>{{ row.electronic?'전자':'종이' }}</span></td><td>{{ row.journalType??row.payment }}</td><td><span class="record-status" :class="{ posted: row.status === 'posted' }">{{ row.status === 'posted' ? '확정' : '미확정' }}</span></td>
-                </tr>
-                <tr v-if="!visibleRows.length">
-                  <td colspan="17" class="empty-cell">
-                    조회된 전표가 없습니다. 기간과 검색어를 확인하거나 신규 전표를 입력하세요.
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="11">
-                    조회 합계 <span>{{ visibleRows.length }}건</span>
-                  </td>
-                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.map(row=>row.supply))) }}</td>
-                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.map(row=>row.vat))) }}</td>
-                  <td class="numeric">{{ formatAmount(sumAmounts(visibleRows.flatMap(row=>[row.supply,row.vat]))) }}</td>
-                  <td colspan="3" />
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div class="list-footer">
-            <span>행을 선택하면 아래에서 내용을 수정할 수 있습니다.</span
-            ><span>{{ visibleRows.length }} / {{ session.rows.length }}건</span>
-          </div>
-        </section>
+          </template>
+        </SalesVoucherBoard>
 
         <div class="voucher-section-title">
-          <strong>선택 전표 {{ selectedRecord?.entryNumber ?? '신규' }} · {{ visibleRows.length }}건</strong>
+          <strong>분개 상세 · {{ selectedRecord?.entryNumber ?? '신규 전표' }}</strong><UiBadge v-if="tab.dirty" tone="warning">미저장 변경</UiBadge>
           <UiButton :aria-expanded="journalOpen" aria-controls="sales-journal-editor" @click="journalOpen = !journalOpen">{{ journalOpen ? '분개 상세 접기' : '분개 상세 펼치기' }}</UiButton>
         </div>
         <section v-show="journalOpen" id="sales-journal-editor" class="sales-card editor" aria-labelledby="sales-editor-heading">
@@ -546,6 +425,10 @@ function confirmPending() {
 .sales-grid .date-cell { text-align: center; }
 .sales-grid .code { color: var(--secondary); font-variant-numeric: tabular-nums; }
 .sales-grid .partner-cell { font-weight: 500; }
+.sales-grid .collect-chip { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+.sales-grid .collect-chip.is-electronic { background: #e8f1fd; color: #1d4f91; }
+.sales-grid .collect-chip.is-manual { background: #f1f3f6; color: #475569; }
+.sales-grid .collect-edit { display: inline-flex; gap: 4px; align-items: center; }
 .type-label { color: var(--primary); }
 .type-label.purchase { color: var(--text); }
 .review-label { display: block; font-size: 11px; color: var(--warning); }
@@ -596,6 +479,7 @@ function confirmPending() {
 .error-notice { color: var(--danger); background: #fff1f2; }
 .result-notice { color: var(--success); background: #eefaf3; }
 .field-error { color: var(--danger); font-size: 12px; }
+.board-actions { display: flex; gap: 8px; padding: 8px 0 0; border-top: 1px solid var(--border); margin-top: 8px; }
 @media (max-width: 1100px) { .sales-layout { grid-template-columns: minmax(0, 1fr); } .sales-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .sales-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } .memo-field { grid-column: span 2; } .sales-aside { grid-template-columns: minmax(0, 1fr); } .sales-more > summary span { display: none; } .sales-search { flex-basis: 100%; } }
 @media (max-width: 640px) { .sales-journal .voucher-help { font-size: 12px; } .sales-journal .voucher-help::after { content: none; } }
