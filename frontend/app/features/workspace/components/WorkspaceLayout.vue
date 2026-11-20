@@ -26,26 +26,20 @@ const clientWorkVisible = computed(
 )
 const notice = ref('')
 const groups: { title: string; items: { id: TabId; symbol: string }[] }[] = [
-  { title: 'WORKSPACE', items: [{ id: 'home', symbol: '▦' }] },
   {
-    title: 'ORGANIZATION',
+    title: 'MENU',
     items: [
-      { id: 'clients', symbol: '▤' },
-      { id: 'organization', symbol: '▧' },
-    ],
-  },
-  {
-    title: 'ACCOUNTING',
-    items: [
-      { id: 'company', symbol: '▣' },
+      { id: 'home', symbol: '▦' },
       { id: 'settings', symbol: '⚙' },
       { id: 'accounts', symbol: '▤' },
       { id: 'collection', symbol: '⇩' },
       { id: 'voucher', symbol: '▥' },
       { id: 'sales-journal', symbol: '▥' },
+      { id: 'mypage', symbol: '◉' },
+      { id: 'clients', symbol: '▤' },
+      { id: 'organization', symbol: '▧' },
     ],
   },
-  { title: 'PERSONAL', items: [{ id: 'mypage', symbol: '◉' }] },
 ]
 async function open(id: TabId) {
   if (await navigate(id)) mobileOpen.value = false
@@ -55,13 +49,7 @@ async function open(id: TabId) {
   <div class="reference-workspace app">
     <aside class="sidebar" :class="{ 'mobile-open': mobileOpen }">
       <div class="brand"><AatBrand /></div>
-      <div class="workspace-select">
-        <button class="org-switch" @click="open('organization')">
-          <span class="circle">원</span
-          ><span><strong>회계법인 원지</strong><small>관리자 워크스페이스</small></span
-          ><span class="chev">⌄</span>
-        </button>
-      </div>
+
       <nav class="nav" aria-label="업무 메뉴">
         <template v-for="group in groups" :key="group.title">
           <div class="nav-label">{{ group.title }}</div>
@@ -69,17 +57,20 @@ async function open(id: TabId) {
             v-for="item in group.items"
             :key="item.id"
             :class="{ active: state.active === item.id }"
-            @click="open(item.id)"
-          >
-            <span class="sym">{{ item.symbol }}</span
-            >{{ tabInfo(item.id).title }}
+            @click="open(item.id)">
+            <span class="sym">{{ item.symbol }}</span>
+            {{ tabInfo(item.id).title }}
           </button>
         </template>
       </nav>
       <div class="sidebar-user">
         <button class="profile-mini" @click="open('mypage')">
-          <span class="avatar">김</span><span><b>김원지</b><small>조직 관리자</small></span
-          ><span class="chev">⋯</span>
+          <span class="avatar">김</span>
+          <span>
+            <b>김원지</b>
+            <small>조직 관리자</small>
+          </span>
+          <span class="chev">⋯</span>
         </button>
       </div>
     </aside>
@@ -89,24 +80,27 @@ async function open(id: TabId) {
           <button
             class="icon-btn mobile-toggle"
             aria-label="메뉴 열기"
-            @click="mobileOpen = !mobileOpen"
-          >
-            ☰</button
-          >회계법인 원지 <span>›</span><strong>{{ tabInfo(state.active).title }}</strong>
+            @click="mobileOpen = !mobileOpen">
+            ☰
+          </button>
+          회계법인 원지
+          <span>›</span>
+          <strong>{{ tabInfo(state.active).title }}</strong>
         </div>
         <div class="top-right">
-          <span class="top-pill">{{
-            state.active === 'clients' ? '● 실제 업체 조회' : '● 업무 시안'
-          }}</span
-          ><button
+          <span class="top-pill">
+            {{ state.active === 'clients' ? '● 실제 업체 조회' : '● 업무 시안' }}
+          </span>
+          <button
             class="icon-btn"
             title="테이블 밀도 전환"
-            @click="density = density === 'normal' ? 'compact' : 'normal'"
-          >
-            ▤</button
-          ><button class="icon-btn" aria-label="알림" @click="notice = '새로운 알림이 없습니다.'">
-            ♧</button
-          ><button class="avatar" aria-label="마이페이지" @click="open('mypage')">김</button>
+            @click="density = density === 'normal' ? 'compact' : 'normal'">
+            ▤
+          </button>
+          <button class="icon-btn" aria-label="알림" @click="notice = '새로운 알림이 없습니다.'">
+            ♧
+          </button>
+          <button class="avatar" aria-label="마이페이지" @click="open('mypage')">김</button>
         </div>
       </header>
       <div class="workspace-tabs" role="tablist" aria-label="열린 업무">
@@ -114,16 +108,15 @@ async function open(id: TabId) {
           v-for="tab in state.tabs"
           :key="tab.id"
           class="ws-tab"
-          :class="{ active: state.active === tab.id }"
-        >
+          :class="{ active: state.active === tab.id }">
           <button role="tab" :aria-selected="state.active === tab.id" @click="open(tab.id)">
-            {{ tabInfo(tab.id).title }}{{ tab.dirty ? ' •' : '' }}</button
-          ><button
+            {{ tabInfo(tab.id).title }}{{ tab.dirty ? ' •' : '' }}
+          </button>
+          <button
             v-if="tab.id !== 'home'"
             class="x"
             :aria-label="tabInfo(tab.id).title + ' 닫기'"
-            @click="requestClose(tab.id)"
-          >
+            @click="requestClose(tab.id)">
             ×
           </button>
         </div>
@@ -139,8 +132,7 @@ async function open(id: TabId) {
             <slot v-if="routeAllowed" />
             <p
               v-else-if="['idle', 'pending'].includes(directoryData.directory.status)"
-              role="status"
-            >
+              role="status">
               업체 정보를 불러오는 중입니다.
             </p>
             <div v-else-if="directoryData.directory.error" role="alert">

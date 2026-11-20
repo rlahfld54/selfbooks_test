@@ -1,5 +1,12 @@
 # 공통 UI v1
 
+## 2026-11-20 관리 페이지 분리
+
+- 마이페이지, 조직 설정, 수임업체관리는 각각 `mypage.vue`, `organization.vue`, `client-directory.vue`에서 HTML과 해당 페이지 로직을 직접 관리한다.
+- 통합 `ManagementView.vue`의 `page` 기반 화면 분기를 제거한다. 정적 문구는 HTML에 직접 작성하고 기존 공통 상세·폼·다이얼로그와 데이터 세션은 재사용한다.
+- 로그인 사용자에 따라 서로 다른 페이지 템플릿을 만들지 않는다. 이번 변경에서는 기존 라우트 접근 정책·서버 권한 검증을 변경하지 않는다.
+- 상세 구조는 `frontend-architecture.md` 참고. 테스트 코드 보완; 실행은 미실행 — 사용자 요청 시 실행.
+
 ## 2026-11-20 로그인 사용자 authStore 통합
 
 - 로그인 및 세션 복원 시 `/api/auth/me` 응답을 Pinia `authStore.user`에 저장한다. 기존 `useAuth().user`도 같은 store ref를 사용한다.

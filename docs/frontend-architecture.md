@@ -2,7 +2,13 @@
 
 ## 관리 화면 컴포넌트 구조 (2026-11-17)
 
-`features/management/ManagementView.vue`는 조회, 작업 공간 상태, 검색 조건(`filters`), 저장 및 화면 연결을 담당한다. 표시 데이터는 `rows` 객체로 전달한다.
+2026-11-20: 통합 `ManagementView.vue`와 `page` prop 분기를 제거하고 각 URL의 페이지가 해당 화면의 HTML과 상태·이벤트 처리를 직접 소유한다. 제목·설명·메뉴 문구는 각 템플릿에 직접 작성한다.
+
+- `pages/mypage.vue`: 개인 프로필 조회·재시도·편집, 보안 시뮬레이션, 담당 업체 요약.
+- `pages/organization.vue`: 조직 정보 편집, 직원·권한·지점 관리.
+- `pages/client-directory.vue`: 업체 검색·내 담당/전체 조회·상세·담당자 지정·업무 진입.
+
+아래 재사용 컴포넌트와 `managementSession`은 유지하며 표시 데이터는 필요한 `rows` 필드로 전달한다. 기존 라우트, 업무 탭 키, 접근 제한 및 API 계약은 유지한다. 페이지별 직접 진입·화면 격리·불필요한 프로필 조회 방지 검증 코드를 기존 브라우저 회귀 테스트에 추가했다. 기존 프로필 실패·재시도 및 편집 예외 시나리오도 유지한다. 테스트·타입 검사·빌드·브라우저/E2E: **미실행 — 사용자 요청 시 실행**.
 
 - `components/ManagementProfilePanel.vue`, `ManagementOrganizationForm.vue`: 개인·조직 정보 표시와 편집 입력.
 - `ManagementClientList.vue`, `ManagementStaffList.vue`: 업체·직원 목록과 검색 입력.

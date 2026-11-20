@@ -11,16 +11,38 @@ try {
   await mockAuthenticatedContext(context)
   await context.route('**/api/clients', route => route.fulfill({ json: { data: clients.map(client => ({ id: client.id, officeId: testUser.officeId, name: client.name, taxpayerKind: client.type, status: 'active' })) } }))
   let profileFails = false
-  await context.route('**/api/office-registration', route => route.fulfill(profileFails
+  let profileRequests = 0
+  await context.route('**/api/office-registration', route => {
+    profileRequests++
+    return route.fulfill(profileFails
     ? { status: 503, json: { message: '조회 실패' } }
     : { json: { data: { id: testUser.officeId, name: '테스트 사무소', business_registration_number: null,
-      representative_name: null, representative_phone: null, address: null } } }))
+      representative_name: null, representative_phone: null, address: null } } })
+  })
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   async function visit(path) {
     await page.goto(base + path)
     await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
+    const management = page.locator('.page.management')
+    if (path === '/client-directory') {
+      await expect(management.getByRole('heading', { level: 1 })).toHaveText('수임업체 관리')
+      await expect(management.getByRole('navigation', { name: '수임업체 조회 범위' })).toBeVisible()
+      await expect(management.locator('.profile-banner, .org-header')).toHaveCount(0)
+      assert.equal(profileRequests, 0, '업체 화면은 프로필 API를 조회하지 않는다')
+    }
+    if (path === '/organization') {
+      await expect(management.getByRole('heading', { level: 1 })).toHaveText('조직 설정')
+      await expect(management.getByRole('navigation', { name: '조직 설정 메뉴' })).toBeVisible()
+      await expect(management.locator('.profile-banner')).toHaveCount(0)
+      assert.equal(profileRequests, 0, '조직 화면은 개인 프로필 API를 조회하지 않는다')
+    }
+    if (path === '/mypage') {
+      await expect(management.getByRole('heading', { level: 1 })).toHaveText('마이페이지')
+      await expect(management.getByRole('navigation', { name: '마이페이지 메뉴' })).toBeVisible()
+      await expect(management.locator('.org-header')).toHaveCount(0)
+    }
   }
 
   // Child filter events, empty results, reset, and drawer selection.
