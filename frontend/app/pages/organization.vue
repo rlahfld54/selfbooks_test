@@ -100,17 +100,18 @@ function beginEdit() {
   message.value = ''
   Object.keys(form).forEach((key) => delete form[key])
   Object.assign(form, data.organization)
-  if (!pagesPreview) Object.assign(form, {
-    '회계법인명/사무소명': userInfo.value?.organization?.name ?? '',
-    '사업자등록번호': userInfo.value?.organization?.business_registration_number ?? '',
-    '법인등록번호': userInfo.value?.organization?.corporate_registration_number ?? '',
-    '대표자명': userInfo.value?.organization?.representative_name ?? '',
-    '사업장 주소': userInfo.value?.organization?.address ?? '',
-    '업태': userInfo.value?.organization?.business_type ?? '',
-    '종목': userInfo.value?.organization?.business_item ?? '',
-    '대표전화': userInfo.value?.organization?.phone ?? '',
-    '대표 이메일': userInfo.value?.organization?.email ?? '',
-  })
+  if (!pagesPreview)
+    Object.assign(form, {
+      '회계법인명/사무소명': userInfo.value?.organization?.name ?? '',
+      사업자등록번호: userInfo.value?.organization?.business_registration_number ?? '',
+      법인등록번호: userInfo.value?.organization?.corporate_registration_number ?? '',
+      대표자명: userInfo.value?.organization?.representative_name ?? '',
+      '사업장 주소': userInfo.value?.organization?.address ?? '',
+      업태: userInfo.value?.organization?.business_type ?? '',
+      종목: userInfo.value?.organization?.business_item ?? '',
+      대표전화: userInfo.value?.organization?.phone ?? '',
+      '대표 이메일': userInfo.value?.organization?.email ?? '',
+    })
   editing.value = true
   setDirty(currentTab, true)
 }
@@ -118,10 +119,10 @@ function endEdit(save: boolean) {
   if (save) {
     Object.assign(data.organization, {
       ...form,
-      '사업자등록번호': formatNumber('business', form['사업자등록번호']),
-      '법인등록번호': formatNumber('corporation', form['법인등록번호']),
-      '대표전화': formatNumber('phone', form['대표전화']),
-      '팩스번호': formatNumber('phone', form['팩스번호']),
+      사업자등록번호: formatNumber('business', form['사업자등록번호']),
+      법인등록번호: formatNumber('corporation', form['법인등록번호']),
+      대표전화: formatNumber('phone', form['대표전화']),
+      팩스번호: formatNumber('phone', form['팩스번호']),
     })
     if (!pagesPreview && userInfo.value?.organization) {
       authStore.setUser({
@@ -225,13 +226,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="page management">
-    <header class="page-header">
-      <div>
-        <div class="eyebrow">ORGANIZATION</div>
-        <h1>조직 설정</h1>
-        <p class="sub">회계법인 정보, 구성원, 역할 및 사무소를 관리합니다.</p>
-      </div>
-    </header>
     <section class="panel org-header">
       <div class="org-emblem">로고</div>
       <div>
@@ -242,7 +236,9 @@ onBeforeUnmount(() => {
         <div class="org-meta">
           <span>
             사업자등록번호
-            {{ formatNumber('business', userInfo?.organization?.business_registration_number) || '—' }}
+            {{
+              formatNumber('business', userInfo?.organization?.business_registration_number) || '—'
+            }}
           </span>
           <span>대표 {{ userInfo?.organization?.representative_name || '—' }}</span>
           <span>{{ userInfo?.organization?.address || '—' }}</span>

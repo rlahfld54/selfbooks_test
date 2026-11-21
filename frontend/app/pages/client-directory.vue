@@ -184,11 +184,6 @@ onBeforeUnmount(() => clearTimeout(toastTimer))
 <template>
   <div class="page management">
     <header class="page-header">
-      <div>
-        <div class="eyebrow">CLIENT MANAGEMENT</div>
-        <h1>수임업체 관리</h1>
-        <p class="sub">수임업체를 조회하고 담당 업체의 업무를 관리합니다.</p>
-      </div>
       <div class="actions">
         <button
           class="btn"

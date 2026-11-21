@@ -39,13 +39,15 @@ const {
 } = useRuntimeConfig()
 const profileLive = computed(() => !pagesPreview)
 const { user } = storeToRefs(useAuthStore())
-const previewRows = computed(() => pagesPreview
-  ? { person: data.staff[0]!, organization: data.organization }
-  : undefined)
+const previewRows = computed(() =>
+  pagesPreview ? { person: data.staff[0]!, organization: data.organization } : undefined,
+)
 const rows = computed(() => {
-  const source = previewRows.value ?? mapProfile(user.value?.organization
-    ? { user: user.value, office: user.value.organization }
-    : undefined)
+  const source =
+    previewRows.value ??
+    mapProfile(
+      user.value?.organization ? { user: user.value, office: user.value.organization } : undefined,
+    )
   return { ...source, person: { ...source.person, ...pageState.profile.saved } }
 })
 function showToast(text: string) {
@@ -135,13 +137,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="page management narrow">
-    <header class="page-header">
-      <div>
-        <div class="eyebrow">MY ACCOUNT</div>
-        <h1>마이페이지</h1>
-        <p class="sub">내 계정 정보와 소속 조직, 보안 설정을 관리합니다.</p>
-      </div>
-    </header>
     <AssignedClientSummary />
     <section class="panel profile-banner">
       <span class="avatar big-avatar">

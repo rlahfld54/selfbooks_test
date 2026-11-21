@@ -21,10 +21,6 @@ const columns = [
 ]
 </script>
 <template>
-  <PageToolbar title="수임업체관리" description="개발용 수임업체의 목록과 상세 정보를 조회합니다.">
-    <template #eyebrow>WORKSPACE</template>
-    <UiBadge tone="neutral">{{ pagesPreview ? '샘플 데이터' : '로컬 개발' }}</UiBadge>
-  </PageToolbar>
   <UiCard title="수임업체 목록">
     <div class="search-toolbar">
       <div class="search-input">

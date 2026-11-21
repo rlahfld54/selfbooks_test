@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { pageActionsKey } from '~/composables/usePageActions'
+import type { Slots } from 'vue'
 import { useWorkspaceProvider } from '~/features/workspace/composables/useWorkspaceProvider'
 import WorkspaceConfirmation from './WorkspaceConfirmation.vue'
 import WorkspaceDetail from './WorkspaceDetail.vue'
@@ -10,10 +12,15 @@ const {
   requestClose,
   generation,
   density,
+  collapsed,
   clientId,
   routeAllowed,
   reloadDirectory,
 } = useWorkspaceProvider()
+const pageActions = shallowRef<Slots | null>(null)
+provide(pageActionsKey, pageActions)
+const PageDeleteAction = () => pageActions.value?.delete?.()
+const PageLastAction = () => pageActions.value?.last?.()
 const directoryData = managementSession(state)
 const selectedClient = computed(() =>
   directoryData.clients.find((client) => client.id === clientId.value),
@@ -47,8 +54,17 @@ async function open(id: TabId) {
 </script>
 <template>
   <div class="reference-workspace app">
-    <aside class="sidebar" :class="{ 'mobile-open': mobileOpen }">
-      <div class="brand"><AatBrand /></div>
+    <aside class="sidebar" :class="{ 'mobile-open': mobileOpen, collapsed }">
+      <div class="brand">
+        <AatBrand v-if="!collapsed" />
+        <button
+          class="sidebar-collapse"
+          :aria-label="collapsed ? '사이드바 펼치기' : '사이드바 접기'"
+          :aria-expanded="!collapsed"
+          @click="collapsed = !collapsed">
+          {{ collapsed ? '›' : '‹' }}
+        </button>
+      </div>
 
       <nav class="nav" aria-label="업무 메뉴">
         <template v-for="group in groups" :key="group.title">
@@ -56,10 +72,12 @@ async function open(id: TabId) {
           <button
             v-for="item in group.items"
             :key="item.id"
+            :title="tabInfo(item.id).title"
+            :aria-label="tabInfo(item.id).title"
             :class="{ active: state.active === item.id }"
             @click="open(item.id)">
             <span class="sym">{{ item.symbol }}</span>
-            {{ tabInfo(item.id).title }}
+            <span class="nav-text">{{ tabInfo(item.id).title }}</span>
           </button>
         </template>
       </nav>
@@ -88,19 +106,10 @@ async function open(id: TabId) {
           <strong>{{ tabInfo(state.active).title }}</strong>
         </div>
         <div class="top-right">
-          <span class="top-pill">
-            {{ state.active === 'clients' ? '● 실제 업체 조회' : '● 업무 시안' }}
-          </span>
-          <button
-            class="icon-btn"
-            title="테이블 밀도 전환"
-            @click="density = density === 'normal' ? 'compact' : 'normal'">
-            ▤
-          </button>
-          <button class="icon-btn" aria-label="알림" @click="notice = '새로운 알림이 없습니다.'">
-            ♧
-          </button>
-          <button class="avatar" aria-label="마이페이지" @click="open('mypage')">김</button>
+          <CommonPageActions>
+            <template v-if="pageActions?.delete" #delete><PageDeleteAction /></template>
+          </CommonPageActions>
+          <PageLastAction />
         </div>
       </header>
       <div class="workspace-tabs" role="tablist" aria-label="열린 업무">

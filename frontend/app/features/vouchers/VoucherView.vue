@@ -160,46 +160,61 @@ watch(
 </script>
 <template>
   <div class="voucher-screen" :class="{ 'voucher-compact': density === 'compact' }">
-    <PageToolbar
-      :title="mode === 'general' ? '일반전표입력' : '매입매출전표 입력 · Mock'"
-      description="연속 입력과 전표 인사이트를 한 화면에서 확인하세요."
-    />
+    <PageToolbar>
+      <template #delete>
+        <UiButton :disabled="!session.checked.length" @click="deleting = true">삭제</UiButton>
+      </template>
+      <template #last>
+        <details class="toolbar-more">
+          <summary>더보기</summary>
+          <div>
+            <UiButton @click="session.detail = !session.detail">
+              분개 상세 {{ session.detail ? '접기' : '펼치기' }}
+            </UiButton>
+          </div>
+        </details>
+      </template>
+    </PageToolbar>
     <div class="voucher-toolbar">
-      <label
-        >조회방식
+      <label>
+        조회방식
         <select v-model="queryMode">
           <option value="period">기간</option>
           <option value="month">월별</option>
-        </select></label
-      >
-      <label v-if="queryMode === 'month'"
-        >연·월 <input v-model="month" type="month" /><input
-          v-model="day"
-          aria-label="일자 선택"
-          type="number"
-          min="1"
-          max="31"
-      /></label>
-      <UiButton @click="shiftYear(-1)">◀ 전기</UiButton
-      ><UiButton @click="shiftYear(1)">차기 ▶</UiButton>
-      <label>검색 <input v-model="search" placeholder="번호·계정·거래처코드·적요" /></label>
+        </select>
+      </label>
+      <label v-if="queryMode === 'month'">
+        연·월
+        <input v-model="month" type="month" />
+        <input v-model="day" aria-label="일자 선택" type="number" min="1" max="31" />
+      </label>
+      <UiButton @click="shiftYear(-1)">◀ 전기</UiButton>
+      <UiButton @click="shiftYear(1)">차기 ▶</UiButton>
+      <label>
+        검색
+        <input v-model="search" placeholder="번호·계정·거래처코드·적요" />
+      </label>
 
-      <span>{{ company === 'demo-happy' ? '(주)행복상사' : '(주)우리상사' }} · 2026 회계연도</span
-      ><label>조회기간 <input v-model="session.from" type="date" aria-label="조회 시작일" /></label
-      ><span>~</span><input v-model="session.to" type="date" aria-label="조회 종료일" />
+      <span>{{ company === 'demo-happy' ? '(주)행복상사' : '(주)우리상사' }} · 2026 회계연도</span>
+      <label>
+        조회기간
+        <input v-model="session.from" type="date" aria-label="조회 시작일" />
+      </label>
+      <span>~</span>
+      <input v-model="session.to" type="date" aria-label="조회 종료일" />
     </div>
     <div class="voucher-section-title">
       <p class="voucher-help">
         셀 클릭 / F2 편집 · Enter / Tab 이동 · 방향키 탐색 · Esc 취소 · 코드 입력란에서 계정·거래처
         검색
       </p>
-      <label
-        >밀도
+      <label>
+        밀도
         <select v-model="density" aria-label="테이블 밀도">
           <option value="normal">기본</option>
           <option value="compact">좁게</option>
-        </select></label
-      >
+        </select>
+      </label>
     </div>
     <p v-if="notice" role="status" class="good">{{ notice }}</p>
     <VoucherGrid
@@ -211,13 +226,12 @@ watch(
       @edit="edit"
       @add="add"
       @select="select"
-      @check="checkGroup"
-    />
+      @check="checkGroup" />
     <div class="voucher-section-title">
-      <strong>선택 전표 {{ selected?.number || '—' }} · {{ filtered.length }}행</strong
-      ><UiButton @click="session.detail = !session.detail">{{
-        session.detail ? '분개 상세 접기' : '분개 상세 펼치기'
-      }}</UiButton>
+      <strong>선택 전표 {{ selected?.number || '—' }} · {{ filtered.length }}행</strong>
+      <UiButton @click="session.detail = !session.detail">
+        {{ session.detail ? '분개 상세 접기' : '분개 상세 펼치기' }}
+      </UiButton>
     </div>
     <VoucherDetail v-if="session.detail" :rows="group(session.rows, selected)" :mode="mode" />
     <p class="muted">
@@ -230,7 +244,7 @@ watch(
       :message="`선택한 ${session.checked.length}행을 삭제할까요? 같은 날짜·번호의 분개 전체를 함께 삭제합니다.`"
       confirm-label="삭제 확인"
       @cancel="deleting = false"
-      @confirm="remove"
-    />
+      @confirm="remove" />
   </div>
 </template>
+

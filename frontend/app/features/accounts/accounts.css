@@ -66,10 +66,9 @@
 .am-form-footer { display:flex; justify-content:flex-end; gap:8px; padding-top:12px; border-top:1px solid #e2e8f0; }
 .am-page input[type=checkbox] { accent-color:#2457c5; }
 .am-page button:focus-visible { outline:2px solid #2457c5; outline-offset:2px; }
-@media (max-width:1450px) {
-  .am-workspace.has-detail { grid-template-columns:210px minmax(0, 1fr); }
-  .am-detail { position:absolute; top:0; right:0; bottom:0; width:380px; max-width:100%; z-index:4; box-shadow:-8px 0 24px #172b4d15; overflow:auto; }
-}
+@media (max-width:1450px) { .am-workspace.has-detail { grid-template-columns:150px minmax(0, 1fr) 310px; } }
+.am-detail-placeholder { padding:24px; color:#64748b; font-size:13px; line-height:1.7; }
+.am-detail-placeholder h2, .am-detail-body h3 { font-size:14px; }
 @media (max-width:760px) {
   .am-workspace, .am-workspace.has-detail { grid-template-columns:minmax(0, 1fr); }
   .am-tree { max-height:210px; border-right:0; border-bottom:1px solid #e2e8f0; }

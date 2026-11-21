@@ -121,29 +121,30 @@ function selectRow(row: Record<string, unknown>) {
 
 <template>
   <div>
-    <PageToolbar :title="title" description="거래처 정보를 검색하고 상세 내용을 확인하세요.">
-      <template #eyebrow>WORKSPACE</template>
+    <PageToolbar>
       <UiBadge tone="neutral">{{ mode === 'partners' ? 'DB 거래처' : 'UI 샘플' }}</UiBadge>
       <UiButton
         v-if="mode === 'partners'"
         :disabled="loading || saving || pagesPreview"
-        @click="load"
-        >새로고침</UiButton
-      >
+        @click="load">
+        새로고침
+      </UiButton>
       <UiButton
         v-if="mode === 'partners'"
         variant="primary"
         :disabled="loading || saving || !session.loaded || pagesPreview"
-        @click="importing = true"
-        >엑셀 등록</UiButton
-      >
-      <UiButton @click="tab.panel = !tab.panel"
-        ><UiIcon name="document" :size="16" />상세 패널</UiButton
-      >
+        @click="importing = true">
+        엑셀 등록
+      </UiButton>
+      <UiButton @click="tab.panel = !tab.panel">
+        <UiIcon name="document" :size="16" />
+        상세 패널
+      </UiButton>
     </PageToolbar>
     <p v-if="notice" role="status" class="info-banner">{{ notice }}</p>
     <p v-if="error" role="alert" class="info-banner">
-      {{ error }} <UiButton @click="load">다시 시도</UiButton>
+      {{ error }}
+      <UiButton @click="load">다시 시도</UiButton>
     </p>
     <UiCard :title="mode === 'partners' ? '거래처 목록' : '전표 조회 레이아웃 샘플'">
       <div class="search-toolbar">
@@ -152,8 +153,7 @@ function selectRow(row: Record<string, unknown>) {
           <UiInput
             v-model="session.query"
             aria-label="거래처 검색"
-            placeholder="업체명, 사업자등록번호 또는 코드를 검색하세요"
-          />
+            placeholder="업체명, 사업자등록번호 또는 코드를 검색하세요" />
         </div>
         <span class="muted">행을 선택하면 상세 정보가 열립니다.</span>
       </div>
@@ -167,19 +167,16 @@ function selectRow(row: Record<string, unknown>) {
         :density="density"
         :view-state="session.table"
         @select="selectRow"
-        @update:density="density = $event"
-      >
+        @update:density="density = $event">
         <template
           v-for="key in ['registration', 'corporationNumber', 'phone', 'mobile', 'email']"
           :key="key"
-          #[`cell-${key}`]="{ row, value }"
-        >
+          #[`cell-${key}`]="{ row, value }">
           <span>{{ cellFormatters[key](String(value ?? '')) }}</span>
           <span
             v-if="partnerCellIssue(row, key)"
             class="number-issue"
-            :title="partnerCellIssue(row, key)"
-          >
+            :title="partnerCellIssue(row, key)">
             {{ partnerCellIssue(row, key) }}
           </span>
         </template>
@@ -195,8 +192,7 @@ function selectRow(row: Record<string, unknown>) {
       :save-error="saveError"
       @dirty="setDirty(tab)"
       @close="closeImport"
-      @register="register"
-    />
+      @register="register" />
   </div>
 </template>
 
