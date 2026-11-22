@@ -12,7 +12,7 @@ const rows = computed(() =>
 <template>
   <div>
     <UiCard>
-      <nav class="section-switcher" aria-label="계정과목 및 적요 구분">
+      <nav class="section-switcher" aria-label="계정별 적요 페이지">
         <UiButton
           v-for="section in sections"
           :key="section"

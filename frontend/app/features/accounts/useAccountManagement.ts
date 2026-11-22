@@ -2,7 +2,7 @@ import { computed, watch, ref, reactive, toRefs, onMounted, onBeforeUnmount } fr
 import { useAccountStore } from '~/stores/accountStore'
 import { useSummaryStore } from '~/stores/summaryStore'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
-import { createMockAccounting } from './mockAccounting'
+import { createReferenceAccounting } from './referenceAccounting'
 import { filterAccounts } from './logic'
 import { createAccountDefaultsService } from './accountDefaultsService'
 import { mapAccountDefaults } from './accountDefaults'
@@ -36,7 +36,7 @@ export function useAccountManagement() {
         summaryLoadError: string
       }
       if (preview) {
-        const mock = createMockAccounting()
+        const mock = createReferenceAccounting()
         data = {
           ...mock,
           summaryAccounts: mock.accounts,
@@ -123,7 +123,7 @@ export function useAccountManagement() {
         (state.descending ? -1 : 1),
     ),
   )
-  const selected = computed(() => state.accounts.find((a) => a.id === state.selectedId))
+  const selected = computed(() => summaryAccounts.value.find((a) => a.id === state.selectedId))
   const summaries = computed(() =>
     state.summaries.filter(
       (s) =>
@@ -166,6 +166,8 @@ export function useAccountManagement() {
           name: '',
           side: 'DEBIT',
           isFixed: false,
+          canExclude: true,
+          excluded: false,
           isActive: true,
         }
     state.originalSummary = JSON.stringify(state.summaryDraft)

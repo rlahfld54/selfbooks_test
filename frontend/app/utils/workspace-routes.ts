@@ -2,7 +2,7 @@ export const menu = [
   { id: 'client-work', path: '/client-work', title: '업체별 업무 홈', icon: 'users' },
   { id: 'home', path: '/dashboard', title: '대시보드', icon: 'home' },
   { id: 'company', path: '/company', title: '회사등록', icon: 'users' },
-  { id: 'accounts', path: '/accounts', title: '계정과목 및 적요관리', icon: 'document' },
+  { id: 'accounts', path: '/accounts', title: '계정별 적요 페이지', icon: 'document' },
   { id: 'opening-balances', path: '/opening-balances', title: '기초잔액관리', icon: 'wallet' },
   { id: 'collection', path: '/collection', title: '자료수집', icon: 'bag' },
   { id: 'closing', path: '/closing', title: '결산관리', icon: 'calendar' },
@@ -24,17 +24,28 @@ export type TabId = (typeof menu)[number]['id']
 export const tabInfo = (id: TabId) => menu.find((item) => item.id === id)!
 
 export const workspaceMenuGroups = [
-  { title: '기초정보관리', icon: 'settings', items: [
-    { id: 'company', label: '회사등록' },
-    { id: 'settings', label: '환경등록' },
-    { id: 'accounts', label: '계정과목 및 적요관리' },
-    { id: 'partners', label: '거래처등록' },
-    { id: 'opening-balances', label: '기초잔액관리' },
-  ] },
-  { title: '전표관리', icon: 'document', items: [
-    { id: 'voucher', label: '일반전표입력', short: '일반' },
-    { id: 'sales-journal', label: '매입매출전표입력', short: '매입출' },
-    { id: 'ledger', label: '전표조회 및 검증', short: '조회' },
-  ] },
-] as const satisfies readonly { title: string; icon: string; items: readonly { id: TabId; label: string; short?: string }[] }[]
-
+  {
+    title: '기초정보관리',
+    icon: 'settings',
+    items: [
+      { id: 'company', label: '회사등록' },
+      { id: 'settings', label: '환경등록' },
+      { id: 'accounts', label: '계정별 적요 페이지' },
+      { id: 'partners', label: '거래처등록' },
+      { id: 'opening-balances', label: '기초잔액관리' },
+    ],
+  },
+  {
+    title: '전표관리',
+    icon: 'document',
+    items: [
+      { id: 'voucher', label: '일반전표입력', short: '일반' },
+      { id: 'sales-journal', label: '매입매출전표입력', short: '매입출' },
+      { id: 'ledger', label: '전표조회 및 검증', short: '조회' },
+    ],
+  },
+] as const satisfies readonly {
+  title: string
+  icon: string
+  items: readonly { id: TabId; label: string; short?: string }[]
+}[]
