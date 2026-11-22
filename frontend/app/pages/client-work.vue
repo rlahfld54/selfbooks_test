@@ -19,52 +19,52 @@ async function switchClient(event: Event) {
 </script>
 
 <template>
-  <div class="page">
-    <header class="page-header">
-      <div>
-        <div class="eyebrow">
+  <div data-ui-client-work class="page">
+    <header data-ui-client-work class="page-header">
+      <div data-ui-client-work>
+        <div data-ui-client-work class="eyebrow">
           CLIENT WORKSPACE
-        </div><h1>업체별 업무 홈</h1><p class="sub">
+        </div><h1 data-ui-client-work>업체별 업무 홈</h1><p data-ui-client-work class="sub">
           담당 업체를 확인하고 업무를 시작합니다.
         </p>
-      </div><NuxtLink
+      </div><NuxtLink data-ui-client-work
         class="btn"
         to="/client-directory?tab=mine"
       >내 담당 업체 보기</NuxtLink>
     </header>
     <template v-if="client">
-      <section class="panel client-overview">
-        <div class="section-heading">
-          <h2>{{ client.name }}</h2><label>업체 전환 <select
+      <section data-ui-client-work class="panel client-overview">
+        <div data-ui-client-work class="section-heading">
+          <h2 data-ui-client-work>{{ client.name }}</h2><label data-ui-client-work>업체 전환 <select data-ui-client-work
             class="control"
             aria-label="업무 업체 선택"
             :value="client.id"
             @change="switchClient"
-          ><option
+          ><option data-ui-client-work
             v-for="item in accessible"
             :key="item.id"
             :value="item.id"
           >{{ item.name }}</option></select></label>
         </div>
-        <p>{{ client.biz || '사업자등록번호 정보 없음' }} · {{ client.type }} · {{ assignmentRole(client, user?.id || '') || '관리자 조회' }}</p>
-        <p><ManagementBadge :value="client.status" /> · 현재 회계연도 {{ year }}년 <span class="sub">(목업 · 달력 연도 기준)</span></p>
+        <p data-ui-client-work>{{ client.biz || '사업자등록번호 정보 없음' }} · {{ client.type }} · {{ assignmentRole(client, user?.id || '') || '관리자 조회' }}</p>
+        <p data-ui-client-work><ManagementBadge data-ui-client-work :value="client.status" /> · 현재 회계연도 {{ year }}년 <span data-ui-client-work class="sub">(목업 · 달력 연도 기준)</span></p>
       </section>
-      <div class="work-grid">
-        <button
+      <div data-ui-client-work class="work-grid">
+        <button data-ui-client-work
           v-for="link in clientWorkLinks"
           :key="link.id"
           class="panel work-card"
           :disabled="!link.enabled"
           @click="navigate(link.id)"
         >
-          <strong>{{ link.title }} ↗</strong><span class="sub">{{ link.description }}</span>
+          <strong data-ui-client-work>{{ link.title }} ↗</strong><span data-ui-client-work class="sub">{{ link.description }}</span>
         </button>
       </div>
-      <p class="sub">
+      <p data-ui-client-work class="sub">
         업체 전환 시 열린 업무 탭을 정리합니다. 업체 정보는 실제 조회값입니다. 임시 담당자 배정은 새로고침하면 초기화됩니다.
       </p>
     </template>
-    <p
+    <p data-ui-client-work
       v-else
       role="status"
     >
@@ -72,13 +72,3 @@ async function switchClient(event: Event) {
     </p>
   </div>
 </template>
-
-<style scoped>
-.client-overview { padding: 24px; margin-bottom: 20px; }
-.client-overview p { margin-top: 16px; }
-.section-heading { flex-wrap: wrap; gap: 16px; }
-.work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-bottom: 20px; }
-.work-card { padding: 24px; text-align: left; cursor: pointer; display: grid; gap: 12px; }
-.work-card:disabled { opacity: .6; cursor: not-allowed; }
-.work-card:not(:disabled):hover { border-color: #2457C5; background: #EAF1FF; }
-</style>

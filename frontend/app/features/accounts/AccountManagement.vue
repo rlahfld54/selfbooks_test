@@ -9,8 +9,6 @@ import AccountDetailPanel from './components/AccountDetailPanel.vue'
 import { useAccountManagement } from './useAccountManagement'
 import { validateAccount, validateSummary } from './logic'
 import type { MockSummary } from './types'
-import './accounts.css'
-import './accounts-page-refined.css'
 
 // 기존 데이터/업무 로직은 한 곳에서 관리합니다.
 const {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ProductBrand from '~/features/landing/ProductBrand.vue'
 import DashboardPreview from '~/features/landing/DashboardPreview.vue'
-import '~/features/landing/entry.css'
 const route = useRoute()
 </script>
 <template>

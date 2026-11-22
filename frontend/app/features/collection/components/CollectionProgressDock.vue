@@ -54,7 +54,7 @@ const label = (item: CollectionRunItem) => {
         aria-valuemin="0"
         aria-valuemax="100"
       >
-        <span :style="{ width: progress + '%' }" />
+        <span :style="{ '--collection-progress': progress + '%' }" />
       </div>
       <span class="dock-elapsed">{{ finished ? '전체' : '진행' }} {{ elapsed }}</span>
       <UiButton

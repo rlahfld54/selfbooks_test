@@ -52,3 +52,4 @@ Thumbs.db
 !/backend/migrations/010_sales_base.sql
 !/backend/tests/sales-workbench.integration.ts
 !/docs/sales-workbench.md
+!/docs/code-reuse-audit.md

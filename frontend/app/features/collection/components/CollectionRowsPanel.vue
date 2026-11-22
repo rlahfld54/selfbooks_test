@@ -116,29 +116,29 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
     placement="right"
     @close="emit('close')"
   >
-    <div
+    <div data-ui-collection-rows-panel
       v-if="company"
       class="rows-panel"
     >
-      <div class="rows-head">
-        <div>
-          <span class="sub">{{ company.bizNo }} · 대표 {{ company.ceo }} · 담당 {{ company.manager || '미지정' }}</span>
-          <UiBadge
+      <div data-ui-collection-rows-panel class="rows-head">
+        <div data-ui-collection-rows-panel>
+          <span data-ui-collection-rows-panel class="sub">{{ company.bizNo }} · 대표 {{ company.ceo }} · 담당 {{ company.manager || '미지정' }}</span>
+          <UiBadge data-ui-collection-rows-panel
             v-if="bizinfo"
             :tone="CELL_TONE[bizinfo.status]"
           >
             사업자 상태 · {{ bizinfo.status === 'done' ? bizinfo.message : CELL_LABEL[bizinfo.status] }}
           </UiBadge>
         </div>
-        <div class="rows-actions">
-          <UiButton
+        <div data-ui-collection-rows-panel class="rows-actions">
+          <UiButton data-ui-collection-rows-panel
             size="small"
             variant="outline"
             @click="reconcileNote = '국세청 「부가세 신고자료 통합조회」가 아직 연동되지 않아 대사할 수 없습니다. 비교 수치를 임의로 만들지 않습니다.'"
           >
             홈택스 자료 대사
           </UiButton>
-          <UiButton
+          <UiButton data-ui-collection-rows-panel
             size="small"
             variant="danger"
             @click="emit('collect', company)"
@@ -148,13 +148,13 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
         </div>
       </div>
 
-      <div class="pane-bar">
-        <div
+      <div data-ui-collection-rows-panel class="pane-bar">
+        <div data-ui-collection-rows-panel
           class="pane-tabs"
           role="tablist"
           aria-label="보기"
         >
-          <button
+          <button data-ui-collection-rows-panel
             v-for="item in ([['summary', '수집 현황'], ['rows', '수집 자료'], ['history', '수집 이력']] as [Tab, string][])"
             :key="item[0]"
             type="button"
@@ -166,15 +166,15 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
             {{ item[1] }}
           </button>
         </div>
-        <div
+        <div data-ui-collection-rows-panel
           v-if="tab !== 'history'"
           class="pane-period"
         >
-          <select
+          <select data-ui-collection-rows-panel
             v-model.number="year"
             aria-label="연도"
           >
-            <option
+            <option data-ui-collection-rows-panel
               v-for="value in years"
               :key="value"
               :value="value"
@@ -182,12 +182,12 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
               {{ value }}년
             </option>
           </select>
-          <div
+          <div data-ui-collection-rows-panel
             class="half"
             role="group"
             aria-label="과세기간"
           >
-            <button
+            <button data-ui-collection-rows-panel
               v-for="value in ([0, 1, 2] as const)"
               :key="value"
               type="button"
@@ -201,7 +201,7 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
         </div>
       </div>
 
-      <p
+      <p data-ui-collection-rows-panel
         v-if="reconcileNote"
         class="sum-note"
         role="status"
@@ -209,82 +209,82 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
         {{ reconcileNote }}
       </p>
 
-      <LoadingState v-if="tab !== 'history' && status === 'pending' && !rows.length" />
-      <ErrorState
+      <LoadingState data-ui-collection-rows-panel v-if="tab !== 'history' && status === 'pending' && !rows.length" />
+      <ErrorState data-ui-collection-rows-panel
         v-else-if="tab !== 'history' && error"
         :message="error.message"
         @retry="refresh()"
       />
 
       <!-- 수집 현황 -->
-      <section
+      <section data-ui-collection-rows-panel
         v-else-if="tab === 'summary' && summary"
         class="sum"
         aria-label="자료수집 현황 요약"
       >
-        <div class="sum-kpi">
-          <div><span>매출 수집건수</span><b>{{ formatAmount(summary.kpi.saleCount) }}<i>건</i></b><small>6종 합산</small></div>
-          <div><span>매출 수집금액</span><b>{{ formatAmount(summary.kpi.saleTotal) }}<i>원</i></b><small>6종 합산</small></div>
-          <div><span>매입 수집건수</span><b>{{ formatAmount(summary.kpi.purchaseCount) }}<i>건</i></b><small>5종 합산(통장 포함)</small></div>
-          <div><span>매입 수집금액</span><b>{{ formatAmount(summary.kpi.purchaseTotal) }}<i>원</i></b><small>통장 입출금 제외</small></div>
-          <div class="hot">
-            <span>확인필요</span><b>—</b><small>전송대기+추천확인요 · 전표 연동 후 표시</small>
+        <div data-ui-collection-rows-panel class="sum-kpi">
+          <div data-ui-collection-rows-panel><span data-ui-collection-rows-panel>매출 수집건수</span><b data-ui-collection-rows-panel>{{ formatAmount(summary.kpi.saleCount) }}<i data-ui-collection-rows-panel>건</i></b><small data-ui-collection-rows-panel>6종 합산</small></div>
+          <div data-ui-collection-rows-panel><span data-ui-collection-rows-panel>매출 수집금액</span><b data-ui-collection-rows-panel>{{ formatAmount(summary.kpi.saleTotal) }}<i data-ui-collection-rows-panel>원</i></b><small data-ui-collection-rows-panel>6종 합산</small></div>
+          <div data-ui-collection-rows-panel><span data-ui-collection-rows-panel>매입 수집건수</span><b data-ui-collection-rows-panel>{{ formatAmount(summary.kpi.purchaseCount) }}<i data-ui-collection-rows-panel>건</i></b><small data-ui-collection-rows-panel>5종 합산(통장 포함)</small></div>
+          <div data-ui-collection-rows-panel><span data-ui-collection-rows-panel>매입 수집금액</span><b data-ui-collection-rows-panel>{{ formatAmount(summary.kpi.purchaseTotal) }}<i data-ui-collection-rows-panel>원</i></b><small data-ui-collection-rows-panel>통장 입출금 제외</small></div>
+          <div data-ui-collection-rows-panel class="hot">
+            <span data-ui-collection-rows-panel>확인필요</span><b data-ui-collection-rows-panel>—</b><small data-ui-collection-rows-panel>전송대기+추천확인요 · 전표 연동 후 표시</small>
           </div>
         </div>
-        <div class="sum-board">
-          <div
+        <div data-ui-collection-rows-panel class="sum-board">
+          <div data-ui-collection-rows-panel
             v-for="side in sides"
             :key="side.flow"
             class="sum-side"
             :class="side.flow"
           >
-            <div class="sum-cap">
-              {{ side.title }}<span>총 {{ formatAmount(side.count) }}건 · {{ formatAmount(side.total) }}원{{ side.note }}</span>
+            <div data-ui-collection-rows-panel class="sum-cap">
+              {{ side.title }}<span data-ui-collection-rows-panel>총 {{ formatAmount(side.count) }}건 · {{ formatAmount(side.total) }}원{{ side.note }}</span>
             </div>
-            <div class="sum-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>종류</th><th class="num">
+            <div data-ui-collection-rows-panel class="sum-scroll">
+              <table data-ui-collection-rows-panel>
+                <thead data-ui-collection-rows-panel>
+                  <tr data-ui-collection-rows-panel>
+                    <th data-ui-collection-rows-panel>종류</th><th data-ui-collection-rows-panel class="num">
                       공급가액
-                    </th><th class="num">
+                    </th><th data-ui-collection-rows-panel class="num">
                       세액
-                    </th><th class="num">
+                    </th><th data-ui-collection-rows-panel class="num">
                       합계
-                    </th><th class="num">
+                    </th><th data-ui-collection-rows-panel class="num">
                       건수
-                    </th><th>상태</th><th />
+                    </th><th data-ui-collection-rows-panel>상태</th><th data-ui-collection-rows-panel />
                   </tr>
                 </thead>
-                <tbody>
-                  <tr
+                <tbody data-ui-collection-rows-panel>
+                  <tr data-ui-collection-rows-panel
                     v-for="line in side.lines"
                     :key="line.key"
                     :class="{ off: !line.linked }"
                   >
-                    <td>
-                      <b>{{ line.label }}</b>
-                      <small>{{ !line.linked ? '수집 경로 없음' : line.count ? `${line.dstart} ~ ${line.dend}` : '수집된 자료 없음' }}</small>
+                    <td data-ui-collection-rows-panel>
+                      <b data-ui-collection-rows-panel>{{ line.label }}</b>
+                      <small data-ui-collection-rows-panel>{{ !line.linked ? '수집 경로 없음' : line.count ? `${line.dstart} ~ ${line.dend}` : '수집된 자료 없음' }}</small>
                     </td>
-                    <td class="num">
+                    <td data-ui-collection-rows-panel class="num">
                       {{ line.isBank || !line.linked ? '—' : formatAmount(line.supply) }}
                     </td>
-                    <td class="num">
+                    <td data-ui-collection-rows-panel class="num">
                       {{ line.isBank || !line.linked ? '—' : formatAmount(line.tax) }}
                     </td>
-                    <td class="num">
+                    <td data-ui-collection-rows-panel class="num">
                       {{ line.total === null || !line.linked ? '—' : formatAmount(line.total) }}
                     </td>
-                    <td class="num">
+                    <td data-ui-collection-rows-panel class="num">
                       {{ line.linked ? formatAmount(line.count) : '—' }}
                     </td>
-                    <td>
-                      <UiBadge :tone="lineStatus(line).tone">
+                    <td data-ui-collection-rows-panel>
+                      <UiBadge data-ui-collection-rows-panel :tone="lineStatus(line).tone">
                         {{ lineStatus(line).text }}
                       </UiBadge>
                     </td>
-                    <td>
-                      <button
+                    <td data-ui-collection-rows-panel>
+                      <button data-ui-collection-rows-panel
                         v-if="line.linked"
                         type="button"
                         class="sum-lookup"
@@ -299,18 +299,18 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
             </div>
           </div>
         </div>
-        <p class="run-help">
+        <p data-ui-collection-rows-panel class="run-help">
           결제대행 2종은 신용카드 매출 수집에 같이 옵니다(월합계). 통장은 스크랩 API 에 수집 경로가 없어 「미연동」입니다. 통장은 공급가액 · 세액 구분이 없어 입금 · 출금으로 따로 다루고 홈택스 대사 대상이 아닙니다.
         </p>
       </section>
 
       <!-- 수집 자료 — 이지북스 「홈택스 매입매출 자료」 -->
-      <section
+      <section data-ui-collection-rows-panel
         v-else-if="tab === 'rows'"
         class="data"
         aria-label="수집 자료"
       >
-        <nav
+        <nav data-ui-collection-rows-panel
           class="data-cats"
           aria-label="자료 종류"
         >
@@ -318,8 +318,8 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
             v-for="flow in (['sale', 'purchase'] as const)"
             :key="flow"
           >
-            <h4>{{ flow === 'sale' ? '매출' : '매입' }}</h4>
-            <button
+            <h4 data-ui-collection-rows-panel>{{ flow === 'sale' ? '매출' : '매입' }}</h4>
+            <button data-ui-collection-rows-panel
               v-for="item in ROW_CATEGORIES.filter(row => row.flow === flow)"
               :key="item.type"
               type="button"
@@ -327,29 +327,29 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
               :aria-current="category === item.type"
               @click="category = item.type"
             >
-              <span>{{ item.label }}<small>{{ formatAmount((totals[item.type] ?? empty).total) }}원</small></span>
-              <b>{{ formatAmount((totals[item.type] ?? empty).count) }}</b>
+              <span data-ui-collection-rows-panel>{{ item.label }}<small data-ui-collection-rows-panel>{{ formatAmount((totals[item.type] ?? empty).total) }}원</small></span>
+              <b data-ui-collection-rows-panel>{{ formatAmount((totals[item.type] ?? empty).count) }}</b>
             </button>
           </template>
         </nav>
-        <div class="data-main">
-          <h3>{{ categoryLabel }} <small>{{ period.from.replaceAll('-', '.') }} ~ {{ period.to.replaceAll('-', '.') }} · {{ formatAmount(shown.length) }}건</small></h3>
-          <EmptyState
+        <div data-ui-collection-rows-panel class="data-main">
+          <h3 data-ui-collection-rows-panel>{{ categoryLabel }} <small data-ui-collection-rows-panel>{{ period.from.replaceAll('-', '.') }} ~ {{ period.to.replaceAll('-', '.') }} · {{ formatAmount(shown.length) }}건</small></h3>
+          <EmptyState data-ui-collection-rows-panel
             v-if="!shown.length"
             title="수집된 자료가 없습니다"
             :description="categoryCollected ? '연도나 과세기간을 바꿔 보세요.' : '홈택스 자료수집을 먼저 실행해 주세요.'"
           />
-          <div
+          <div data-ui-collection-rows-panel
             v-else
             class="rows-scroll"
           >
-            <table class="rows-table">
-              <caption class="sr-only">
+            <table data-ui-collection-rows-panel class="rows-table">
+              <caption data-ui-collection-rows-panel class="sr-only">
                 {{ company.name }} {{ categoryLabel }}
               </caption>
-              <thead>
-                <tr>
-                  <th
+              <thead data-ui-collection-rows-panel>
+                <tr data-ui-collection-rows-panel>
+                  <th data-ui-collection-rows-panel
                     v-for="column in columns"
                     :key="column.field + column.label"
                     :class="{ num: column.num }"
@@ -358,12 +358,12 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr
+              <tbody data-ui-collection-rows-panel>
+                <tr data-ui-collection-rows-panel
                   v-for="row in shown"
                   :key="row.id"
                 >
-                  <td
+                  <td data-ui-collection-rows-panel
                     v-for="column in columns"
                     :key="column.field + column.label"
                     :class="{ num: column.num, mono: column.field === 'date' || column.field === 'partnerBizNo', item: column.field === 'item' }"
@@ -374,36 +374,36 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
               </tbody>
             </table>
           </div>
-          <div
+          <div data-ui-collection-rows-panel
             v-if="shown.length"
             class="data-foot"
           >
-            <span><b>{{ formatAmount(shown.length) }}</b> (건)</span>
+            <span data-ui-collection-rows-panel><b data-ui-collection-rows-panel>{{ formatAmount(shown.length) }}</b> (건)</span>
             <template v-if="columns.some(column => column.field === 'supply')">
-              <span>공급가액 <b>{{ formatAmount(totals[category]?.supply ?? 0) }}</b></span>
-              <span>세액 <b>{{ formatAmount(totals[category]?.tax ?? 0) }}</b></span>
+              <span data-ui-collection-rows-panel>공급가액 <b data-ui-collection-rows-panel>{{ formatAmount(totals[category]?.supply ?? 0) }}</b></span>
+              <span data-ui-collection-rows-panel>세액 <b data-ui-collection-rows-panel>{{ formatAmount(totals[category]?.tax ?? 0) }}</b></span>
             </template>
-            <span>합계 <b>{{ formatAmount(totals[category]?.total ?? 0) }}</b></span>
+            <span data-ui-collection-rows-panel>합계 <b data-ui-collection-rows-panel>{{ formatAmount(totals[category]?.total ?? 0) }}</b></span>
           </div>
         </div>
       </section>
 
       <!-- 수집 이력 — 이지북스 「자료수집 이력」 -->
-      <section
+      <section data-ui-collection-rows-panel
         v-else-if="tab === 'history'"
         class="hist"
         aria-label="자료수집 이력"
       >
-        <div class="hist-head">
-          <h3>자료수집 이력 <small>{{ historyItems.length }}건</small></h3>
-          <select
+        <div data-ui-collection-rows-panel class="hist-head">
+          <h3 data-ui-collection-rows-panel>자료수집 이력 <small data-ui-collection-rows-panel>{{ historyItems.length }}건</small></h3>
+          <select data-ui-collection-rows-panel
             v-model="historyKind"
             aria-label="수집 항목"
           >
-            <option value="">
+            <option data-ui-collection-rows-panel value="">
               전체 항목
             </option>
-            <option
+            <option data-ui-collection-rows-panel
               v-for="kind in historyKinds"
               :key="kind"
               :value="kind"
@@ -412,52 +412,52 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
             </option>
           </select>
         </div>
-        <LoadingState v-if="history.status.value === 'pending' && !historyItems.length" />
-        <ErrorState
+        <LoadingState data-ui-collection-rows-panel v-if="history.status.value === 'pending' && !historyItems.length" />
+        <ErrorState data-ui-collection-rows-panel
           v-else-if="history.error.value"
           :message="history.error.value.message"
           @retry="history.refresh()"
         />
-        <EmptyState
+        <EmptyState data-ui-collection-rows-panel
           v-else-if="!historyItems.length"
           title="수집 이력이 없습니다"
           description="홈택스 자료수집을 실행하면 요청마다 한 줄씩 남습니다."
         />
-        <div
+        <div data-ui-collection-rows-panel
           v-else
           class="rows-scroll"
         >
-          <table class="rows-table hist-table">
-            <thead>
-              <tr>
-                <th>수집 항목</th><th>조회 기간</th><th>인증</th><th>상태</th><th class="num">
+          <table data-ui-collection-rows-panel class="rows-table hist-table">
+            <thead data-ui-collection-rows-panel>
+              <tr data-ui-collection-rows-panel>
+                <th data-ui-collection-rows-panel>수집 항목</th><th data-ui-collection-rows-panel>조회 기간</th><th data-ui-collection-rows-panel>인증</th><th data-ui-collection-rows-panel>상태</th><th data-ui-collection-rows-panel class="num">
                   수집 건수
-                </th><th>요청자</th><th>요청 시각</th><th>완료/오류</th>
+                </th><th data-ui-collection-rows-panel>요청자</th><th data-ui-collection-rows-panel>요청 시각</th><th data-ui-collection-rows-panel>완료/오류</th>
               </tr>
             </thead>
-            <tbody>
-              <tr
+            <tbody data-ui-collection-rows-panel>
+              <tr data-ui-collection-rows-panel
                 v-for="item in historyItems"
                 :key="item.id"
               >
-                <td>{{ kindOf(item.kind)?.label ?? item.kind }}</td>
-                <td class="mono">
+                <td data-ui-collection-rows-panel>{{ kindOf(item.kind)?.label ?? item.kind }}</td>
+                <td data-ui-collection-rows-panel class="mono">
                   {{ historyPeriod(item.from, item.to) }}
                 </td>
-                <td>{{ LOGIN_TYPE_LABEL[item.loginType] }}</td>
-                <td>
-                  <UiBadge :tone="CELL_TONE[item.status]">
+                <td data-ui-collection-rows-panel>{{ LOGIN_TYPE_LABEL[item.loginType] }}</td>
+                <td data-ui-collection-rows-panel>
+                  <UiBadge data-ui-collection-rows-panel :tone="CELL_TONE[item.status]">
                     {{ CELL_LABEL[item.status] }}
                   </UiBadge>
                 </td>
-                <td class="num">
+                <td data-ui-collection-rows-panel class="num">
                   {{ item.count === null ? '—' : formatAmount(item.count) }}
                 </td>
-                <td>{{ item.requester }}</td>
-                <td class="mono">
+                <td data-ui-collection-rows-panel>{{ item.requester }}</td>
+                <td data-ui-collection-rows-panel class="mono">
                   {{ item.requestedAt }}
                 </td>
-                <td :class="item.status === 'done' ? 'mono muted' : 'hist-error'">
+                <td data-ui-collection-rows-panel :class="item.status === 'done' ? 'mono muted' : 'hist-error'">
                   {{ item.status === 'done' ? item.finishedAt : item.message }}
                 </td>
               </tr>
@@ -468,76 +468,3 @@ const bizinfo = computed(() => props.company?.cells.bizinfo)
     </div>
   </UiModal>
 </template>
-
-<style scoped>
-.rows-head > div:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: var(--aat-space-2); }
-.pane-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--aat-space-2); border-bottom: 1px solid var(--aat-color-border); }
-.pane-tabs { display: flex; gap: var(--aat-space-1); }
-.pane-tabs button { padding: var(--aat-space-2) var(--aat-space-3); border: 0; border-bottom: 2px solid transparent; background: none; color: var(--aat-color-text-secondary); font: inherit; font-size: var(--aat-font-sm); font-weight: var(--aat-weight-medium); cursor: pointer; }
-.pane-tabs button.active { border-bottom-color: var(--aat-color-primary); color: var(--aat-color-primary); font-weight: var(--aat-weight-semibold); }
-.pane-period { display: flex; align-items: center; gap: var(--aat-space-2); padding-bottom: var(--aat-space-1); }
-.pane-period select, .hist-head select { height: 30px; padding: 0 var(--aat-space-2); border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-sm); background: var(--aat-color-surface); color: var(--aat-color-text); font: inherit; font-size: var(--aat-font-sm); }
-.half { display: inline-flex; padding: 2px; border-radius: var(--aat-radius-sm); background: var(--aat-color-subtle); }
-.half button { min-width: 44px; padding: 4px 10px; border: 0; border-radius: var(--aat-radius-sm); background: none; color: var(--aat-color-text-secondary); font: inherit; font-size: var(--aat-font-sm); cursor: pointer; }
-.half button.active { background: var(--aat-color-danger); color: #fff; font-weight: var(--aat-weight-semibold); }
-
-.sum { display: flex; flex-direction: column; gap: var(--aat-space-3); }
-.sum-kpi { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); background: var(--aat-color-surface); }
-.sum-kpi > div { display: flex; flex-direction: column; gap: 2px; padding: var(--aat-space-2) var(--aat-space-3); border-left: 1px solid var(--aat-color-border); min-width: 0; }
-.sum-kpi > div:first-child { border-left: 0; }
-.sum-kpi span { font-size: var(--aat-font-xs); color: var(--aat-color-text-secondary); }
-.sum-kpi b { font-size: var(--aat-font-lg); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sum-kpi b i { margin-left: 2px; font-style: normal; font-size: var(--aat-font-xs); font-weight: var(--aat-weight-medium); color: var(--aat-color-text-secondary); }
-.sum-kpi small { font-size: 10.5px; color: var(--aat-color-text-secondary); }
-.sum-kpi .hot { background: var(--aat-color-warning-soft, var(--aat-color-subtle)); }
-.sum-kpi .hot span { color: var(--aat-color-warning); font-weight: var(--aat-weight-semibold); }
-.sum-note { margin: 0; padding: var(--aat-space-2) var(--aat-space-3); border-left: 2px solid var(--aat-color-primary); background: var(--aat-color-subtle); font-size: var(--aat-font-sm); }
-.sum-board { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--aat-space-3); }
-.sum-side { min-width: 0; border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); overflow: hidden; }
-.sum-scroll { overflow-x: auto; }
-.sum-cap { display: flex; align-items: center; gap: var(--aat-space-2); padding: var(--aat-space-2) var(--aat-space-3); color: #fff; font-weight: var(--aat-weight-semibold); font-size: var(--aat-font-sm); background: var(--aat-color-primary); }
-.sum-side.purchase .sum-cap { background: #0F7F6A; }
-.sum-cap span { margin-left: auto; font-size: var(--aat-font-xs); font-weight: var(--aat-weight-medium); opacity: .92; font-variant-numeric: tabular-nums; }
-.sum-side table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: var(--aat-font-xs); }
-.sum-side th { padding: var(--aat-space-1) var(--aat-space-2); background: var(--aat-color-subtle); color: var(--aat-color-text-secondary); font-weight: var(--aat-weight-medium); text-align: left; white-space: nowrap; }
-.sum-side td { padding: var(--aat-space-1) var(--aat-space-2); border-top: 1px solid var(--aat-color-border); white-space: nowrap; }
-.sum-side .num { text-align: right; font-variant-numeric: tabular-nums; }
-.sum-side td b { display: block; font-weight: var(--aat-weight-semibold); color: var(--aat-color-text); }
-.sum-side td small { display: block; color: var(--aat-color-text-secondary); font-size: 10.5px; font-variant-numeric: tabular-nums; }
-.sum-side tr.off td { color: var(--aat-color-text-secondary); }
-.sum-lookup { padding: 2px 8px; border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-sm); background: var(--aat-color-surface); color: var(--aat-color-text); font: inherit; cursor: pointer; }
-.sum-lookup:hover { border-color: var(--aat-color-primary); color: var(--aat-color-primary); }
-
-.data { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--aat-space-3); align-items: start; }
-.data-cats { display: flex; flex-direction: column; border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); overflow: hidden; }
-.data-cats h4 { margin: 0; padding: var(--aat-space-2) var(--aat-space-3) var(--aat-space-1); font-size: var(--aat-font-xs); color: var(--aat-color-text-secondary); background: var(--aat-color-subtle); }
-.data-cats button { display: flex; align-items: center; justify-content: space-between; gap: var(--aat-space-2); padding: var(--aat-space-2) var(--aat-space-3); border: 0; border-left: 3px solid transparent; background: var(--aat-color-surface); color: var(--aat-color-text); font: inherit; font-size: var(--aat-font-sm); text-align: left; cursor: pointer; }
-.data-cats button span { display: flex; flex-direction: column; }
-.data-cats button small { color: var(--aat-color-text-secondary); font-size: 10.5px; font-variant-numeric: tabular-nums; }
-.data-cats button b { font-variant-numeric: tabular-nums; }
-.data-cats button.empty { color: var(--aat-color-text-secondary); }
-.data-cats button.active { border-left-color: var(--aat-color-primary); background: var(--aat-color-selected); font-weight: var(--aat-weight-semibold); }
-.data-main { min-width: 0; display: flex; flex-direction: column; gap: var(--aat-space-2); }
-.data-main h3 { margin: 0; font-size: var(--aat-font-md); }
-.data-main h3 small { margin-left: var(--aat-space-1); color: var(--aat-color-text-secondary); font-weight: var(--aat-weight-medium); font-size: var(--aat-font-xs); font-variant-numeric: tabular-nums; }
-.data-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--aat-space-4); padding: var(--aat-space-2) var(--aat-space-3); border-top: 1px solid var(--aat-color-border); font-size: var(--aat-font-sm); color: var(--aat-color-text-secondary); font-variant-numeric: tabular-nums; }
-.data-foot b { color: var(--aat-color-text); }
-
-/* 칸을 내용 너비로 두고 넘치면 가로로 스크롤한다 — 날짜 · 시각이 「2026-01…」로 잘리지 않게 */
-.rows-table { width: max-content; min-width: 100%; }
-.rows-table td:not(.item) { overflow: visible; text-overflow: clip; }
-
-.hist { display: flex; flex-direction: column; gap: var(--aat-space-2); }
-.hist-head { display: flex; align-items: center; justify-content: space-between; }
-.hist-head h3 { margin: 0; font-size: var(--aat-font-md); }
-.hist-head small { color: var(--aat-color-text-secondary); font-weight: var(--aat-weight-medium); }
-.hist-table td { white-space: nowrap; }
-.hist-table .muted { color: var(--aat-color-text-secondary); }
-.hist-error { color: var(--aat-color-danger); white-space: normal !important; min-width: 220px; }
-
-@media (max-width: 900px) {
-  .sum-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sum-kpi > div { border-left: 0; border-top: 1px solid var(--aat-color-border); }
-  .data { grid-template-columns: minmax(0, 1fr); }
-}
-</style>

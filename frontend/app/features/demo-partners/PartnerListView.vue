@@ -120,44 +120,44 @@ function selectRow(row: Record<string, unknown>) {
 </script>
 
 <template>
-  <div>
-    <PageToolbar>
-      <UiBadge tone="neutral">{{ mode === 'partners' ? 'DB 거래처' : 'UI 샘플' }}</UiBadge>
-      <UiButton
+  <div data-ui-partner-list-view>
+    <PageToolbar data-ui-partner-list-view>
+      <UiBadge data-ui-partner-list-view tone="neutral">{{ mode === 'partners' ? 'DB 거래처' : 'UI 샘플' }}</UiBadge>
+      <UiButton data-ui-partner-list-view
         v-if="mode === 'partners'"
         :disabled="loading || saving || pagesPreview"
         @click="load">
         새로고침
       </UiButton>
-      <UiButton
+      <UiButton data-ui-partner-list-view
         v-if="mode === 'partners'"
         variant="primary"
         :disabled="loading || saving || !session.loaded || pagesPreview"
         @click="importing = true">
         엑셀 등록
       </UiButton>
-      <UiButton @click="tab.panel = !tab.panel">
-        <UiIcon name="document" :size="16" />
+      <UiButton data-ui-partner-list-view @click="tab.panel = !tab.panel">
+        <UiIcon data-ui-partner-list-view name="document" :size="16" />
         상세 패널
       </UiButton>
     </PageToolbar>
-    <p v-if="notice" role="status" class="info-banner">{{ notice }}</p>
-    <p v-if="error" role="alert" class="info-banner">
+    <p data-ui-partner-list-view v-if="notice" role="status" class="info-banner">{{ notice }}</p>
+    <p data-ui-partner-list-view v-if="error" role="alert" class="info-banner">
       {{ error }}
-      <UiButton @click="load">다시 시도</UiButton>
+      <UiButton data-ui-partner-list-view @click="load">다시 시도</UiButton>
     </p>
-    <UiCard :title="mode === 'partners' ? '거래처 목록' : '전표 조회 레이아웃 샘플'">
-      <div class="search-toolbar">
-        <div class="search-input">
-          <UiIcon name="search" :size="18" />
-          <UiInput
+    <UiCard data-ui-partner-list-view :title="mode === 'partners' ? '거래처 목록' : '전표 조회 레이아웃 샘플'">
+      <div data-ui-partner-list-view class="search-toolbar">
+        <div data-ui-partner-list-view class="search-input">
+          <UiIcon data-ui-partner-list-view name="search" :size="18" />
+          <UiInput data-ui-partner-list-view
             v-model="session.query"
             aria-label="거래처 검색"
             placeholder="업체명, 사업자등록번호 또는 코드를 검색하세요" />
         </div>
-        <span class="muted">행을 선택하면 상세 정보가 열립니다.</span>
+        <span data-ui-partner-list-view class="muted">행을 선택하면 상세 정보가 열립니다.</span>
       </div>
-      <DataTable
+      <DataTable data-ui-partner-list-view
         :columns="columns"
         :loading="loading"
         :sample="mode !== 'partners'"
@@ -172,8 +172,8 @@ function selectRow(row: Record<string, unknown>) {
           v-for="key in ['registration', 'corporationNumber', 'phone', 'mobile', 'email']"
           :key="key"
           #[`cell-${key}`]="{ row, value }">
-          <span>{{ cellFormatters[key](String(value ?? '')) }}</span>
-          <span
+          <span data-ui-partner-list-view>{{ cellFormatters[key](String(value ?? '')) }}</span>
+          <span data-ui-partner-list-view
             v-if="partnerCellIssue(row, key)"
             class="number-issue"
             :title="partnerCellIssue(row, key)">
@@ -181,11 +181,11 @@ function selectRow(row: Record<string, unknown>) {
           </span>
         </template>
         <template #cell-status="{ value }">
-          <UiBadge :tone="value === '확인요망' ? 'warning' : 'success'">{{ value }}</UiBadge>
+          <UiBadge data-ui-partner-list-view :tone="value === '확인요망' ? 'warning' : 'success'">{{ value }}</UiBadge>
         </template>
       </DataTable>
     </UiCard>
-    <PartnerImportDialog
+    <PartnerImportDialog data-ui-partner-list-view
       v-if="importing"
       :existing="allRows"
       :saving="saving"
@@ -195,17 +195,3 @@ function selectRow(row: Record<string, unknown>) {
       @register="register" />
   </div>
 </template>
-
-<style scoped>
-.number-issue {
-  display: block;
-  color: var(--danger);
-  font-size: 12px;
-  white-space: normal;
-  max-width: 280px;
-}
-:deep(.table-scroll table) {
-  min-width: 100%;
-  width: max-content;
-}
-</style>

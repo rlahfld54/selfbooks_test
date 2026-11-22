@@ -9,7 +9,6 @@ import { CELL_LABEL, COLLECTION_KINDS, type CollectionCompany, type StartRunInpu
 import CollectionRunDialog from './components/CollectionRunDialog.vue'
 import CollectionProgressDock from './components/CollectionProgressDock.vue'
 import CollectionRowsPanel from './components/CollectionRowsPanel.vue'
-import './collection.css'
 
 const { activeTab } = useWorkspaceContext()
 const session = collectionSession(activeTab.value)

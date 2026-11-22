@@ -145,55 +145,55 @@ function submit() {
     size="large"
     @close="emit('close')"
   >
-    <form
+    <form data-ui-collection-run-dialog
       class="run-form run-form-wide"
       @submit.prevent="submit"
     >
       <!-- 대상 사업체 -->
-      <aside class="run-targets">
-        <div class="run-targets-head">
-          <h3>대상 사업체</h3>
-          <span>{{ picked.length }}개 선택</span>
+      <aside data-ui-collection-run-dialog class="run-targets">
+        <div data-ui-collection-run-dialog class="run-targets-head">
+          <h3 data-ui-collection-run-dialog>대상 사업체</h3>
+          <span data-ui-collection-run-dialog>{{ picked.length }}개 선택</span>
         </div>
-        <div class="search-input">
-          <UiIcon
+        <div data-ui-collection-run-dialog class="search-input">
+          <UiIcon data-ui-collection-run-dialog
             name="search"
             :size="16"
           />
-          <UiInput
+          <UiInput data-ui-collection-run-dialog
             v-model="search"
             aria-label="대상 사업체 검색"
             placeholder="상호·대표자·사업자번호 검색"
           />
         </div>
-        <div class="run-target-list">
-          <label class="run-target all">
-            <input
+        <div data-ui-collection-run-dialog class="run-target-list">
+          <label data-ui-collection-run-dialog class="run-target all">
+            <input data-ui-collection-run-dialog
               type="checkbox"
               :checked="listed.length > 0 && listedChecked === listed.length"
               :indeterminate="listedChecked > 0 && listedChecked < listed.length"
               aria-label="대상 사업체 모두 선택"
               @change="toggleListed(($event.target as HTMLInputElement).checked)"
             >
-            <b>상호</b>
+            <b data-ui-collection-run-dialog>상호</b>
           </label>
-          <div class="run-target-scroll">
-            <label
+          <div data-ui-collection-run-dialog class="run-target-scroll">
+            <label data-ui-collection-run-dialog
               v-for="row in listed"
               :key="row.clientId"
               class="run-target"
               :class="{ on: clientIds.includes(row.clientId) }"
             >
-              <input
+              <input data-ui-collection-run-dialog
                 type="checkbox"
                 :checked="clientIds.includes(row.clientId)"
                 @change="clientIds = toggle(clientIds, row.clientId, ($event.target as HTMLInputElement).checked)"
               >
-              <span>{{ row.name }}</span>
-              <i v-if="row.clientId === current">현재</i>
-              <em v-if="!row.hometaxReady">계정 미등록</em>
+              <span data-ui-collection-run-dialog>{{ row.name }}</span>
+              <i data-ui-collection-run-dialog v-if="row.clientId === current">현재</i>
+              <em data-ui-collection-run-dialog v-if="!row.hometaxReady">계정 미등록</em>
             </label>
-            <p
+            <p data-ui-collection-run-dialog
               v-if="!listed.length"
               class="run-help"
             >
@@ -203,17 +203,17 @@ function submit() {
         </div>
       </aside>
 
-      <div class="run-main">
+      <div data-ui-collection-run-dialog class="run-main">
         <!-- 인증 방식 -->
-        <section class="run-auth">
-          <div class="run-auth-head">
-            <h3>인증 방식</h3>
-            <div
+        <section data-ui-collection-run-dialog class="run-auth">
+          <div data-ui-collection-run-dialog class="run-auth-head">
+            <h3 data-ui-collection-run-dialog>인증 방식</h3>
+            <div data-ui-collection-run-dialog
               class="run-auth-tabs"
               role="tablist"
               aria-label="인증 방식"
             >
-              <button
+              <button data-ui-collection-run-dialog
                 v-for="type in (['idpw', 'cert'] as LoginType[])"
                 :key="type"
                 type="button"
@@ -229,25 +229,25 @@ function submit() {
             </div>
           </div>
           <template v-if="single">
-            <p class="run-auth-saved">
+            <p data-ui-collection-run-dialog class="run-auth-saved">
               저장된 계정
-              <UiBadge :tone="single.hometaxReady ? 'success' : 'danger'">
+              <UiBadge data-ui-collection-run-dialog :tone="single.hometaxReady ? 'success' : 'danger'">
                 {{ single.hometaxReady ? '등록됨' : '미등록' }}
               </UiBadge>
             </p>
-            <div class="run-auth-fields">
-              <label>
-                <span>홈택스 아이디</span>
-                <input
+            <div data-ui-collection-run-dialog class="run-auth-fields">
+              <label data-ui-collection-run-dialog>
+                <span data-ui-collection-run-dialog>홈택스 아이디</span>
+                <input data-ui-collection-run-dialog
                   v-model="account.hometaxId"
                   maxlength="50"
                   autocomplete="off"
                   placeholder="홈택스 아이디"
                 >
               </label>
-              <label>
-                <span>홈택스 비밀번호</span>
-                <input
+              <label data-ui-collection-run-dialog>
+                <span data-ui-collection-run-dialog>홈택스 비밀번호</span>
+                <input data-ui-collection-run-dialog
                   v-model="account.password"
                   type="password"
                   maxlength="100"
@@ -255,9 +255,9 @@ function submit() {
                   :placeholder="single.hometaxReady ? '········ (바꿀 때만 입력)' : '홈택스 비밀번호'"
                 >
               </label>
-              <label>
-                <span>주민번호 앞 6자리 <small>계정에 따라</small></span>
-                <input
+              <label data-ui-collection-run-dialog>
+                <span data-ui-collection-run-dialog>주민번호 앞 6자리 <small data-ui-collection-run-dialog>계정에 따라</small></span>
+                <input data-ui-collection-run-dialog
                   v-model="account.juminFront6"
                   inputmode="numeric"
                   maxlength="6"
@@ -265,9 +265,9 @@ function submit() {
                   placeholder="2차 인증이 필요한 계정만"
                 >
               </label>
-              <label>
-                <span>주민번호 뒤 1자리 <small>계정에 따라</small></span>
-                <input
+              <label data-ui-collection-run-dialog>
+                <span data-ui-collection-run-dialog>주민번호 뒤 1자리 <small data-ui-collection-run-dialog>계정에 따라</small></span>
+                <input data-ui-collection-run-dialog
                   v-model="account.juminLast1"
                   inputmode="numeric"
                   maxlength="1"
@@ -276,22 +276,22 @@ function submit() {
                 >
               </label>
             </div>
-            <div class="run-auth-save">
-              <span
+            <div data-ui-collection-run-dialog class="run-auth-save">
+              <span data-ui-collection-run-dialog
                 v-if="accountError"
                 class="collection-invalid"
                 role="alert"
               >{{ accountError }}</span>
-              <span
+              <span data-ui-collection-run-dialog
                 v-else-if="accountMessage"
                 class="run-auth-ok"
                 role="status"
               >{{ accountMessage }}</span>
-              <span
+              <span data-ui-collection-run-dialog
                 v-else
                 class="run-help"
               >비밀번호는 서버에만 암호화해 두고 화면에는 다시 보이지 않습니다.</span>
-              <UiButton
+              <UiButton data-ui-collection-run-dialog
                 size="small"
                 variant="outline"
                 :disabled="!accountDirty || !account.hometaxId.trim() || !saveAccount"
@@ -302,7 +302,7 @@ function submit() {
               </UiButton>
             </div>
           </template>
-          <p
+          <p data-ui-collection-run-dialog
             v-else
             class="run-help"
           >
@@ -311,23 +311,23 @@ function submit() {
         </section>
 
         <!-- 수집 항목 -->
-        <section>
-          <div class="run-section-head">
-            <h3>수집 항목</h3>
-            <label class="run-full">
-              <input
+        <section data-ui-collection-run-dialog>
+          <div data-ui-collection-run-dialog class="run-section-head">
+            <h3 data-ui-collection-run-dialog>수집 항목</h3>
+            <label data-ui-collection-run-dialog class="run-full">
+              <input data-ui-collection-run-dialog
                 v-model="full"
                 type="checkbox"
               >
               기간 전체 재수집
             </label>
           </div>
-          <div class="run-kind-scroll">
-            <table class="run-kind-table">
-              <thead>
-                <tr>
-                  <th class="check">
-                    <input
+          <div data-ui-collection-run-dialog class="run-kind-scroll">
+            <table data-ui-collection-run-dialog class="run-kind-table">
+              <thead data-ui-collection-run-dialog>
+                <tr data-ui-collection-run-dialog>
+                  <th data-ui-collection-run-dialog class="check">
+                    <input data-ui-collection-run-dialog
                       type="checkbox"
                       :checked="allOn"
                       :indeterminate="items.length > 0 && !allOn"
@@ -335,18 +335,18 @@ function submit() {
                       @change="items = ($event.target as HTMLInputElement).checked ? readyItems.map(item => item.key) : []"
                     >
                   </th>
-                  <th>수집 항목</th>
-                  <th>조회 기간</th>
-                  <th>기수집 안내</th>
+                  <th data-ui-collection-run-dialog>수집 항목</th>
+                  <th data-ui-collection-run-dialog>조회 기간</th>
+                  <th data-ui-collection-run-dialog>기수집 안내</th>
                 </tr>
               </thead>
-              <tbody
+              <tbody data-ui-collection-run-dialog
                 v-for="group in groups"
                 :key="group.key"
               >
-                <tr class="group">
-                  <td class="check">
-                    <input
+                <tr data-ui-collection-run-dialog class="group">
+                  <td data-ui-collection-run-dialog class="check">
+                    <input data-ui-collection-run-dialog
                       type="checkbox"
                       :checked="groupState(group).all"
                       :indeterminate="groupState(group).some"
@@ -355,17 +355,17 @@ function submit() {
                       @change="toggleGroup(group, ($event.target as HTMLInputElement).checked)"
                     >
                   </td>
-                  <td colspan="3">
+                  <td data-ui-collection-run-dialog colspan="3">
                     {{ group.label }}
                   </td>
                 </tr>
-                <tr
+                <tr data-ui-collection-run-dialog
                   v-for="item in group.items"
                   :key="item.key"
                   :class="{ soon: !item.ready }"
                 >
-                  <td class="check">
-                    <input
+                  <td data-ui-collection-run-dialog class="check">
+                    <input data-ui-collection-run-dialog
                       type="checkbox"
                       :checked="items.includes(item.key)"
                       :disabled="!item.ready"
@@ -373,47 +373,47 @@ function submit() {
                       @change="items = toggle(items, item.key, ($event.target as HTMLInputElement).checked)"
                     >
                   </td>
-                  <td>
+                  <td data-ui-collection-run-dialog>
                     {{ item.label }}
-                    <small
+                    <small data-ui-collection-run-dialog
                       v-if="!item.ready"
                       title="팀장님 스크랩 API 에 아직 없는 자료입니다"
                     >준비 중</small>
                   </td>
-                  <td class="muted">
+                  <td data-ui-collection-run-dialog class="muted">
                     {{ item.period }}
                   </td>
-                  <td class="muted">
+                  <td data-ui-collection-run-dialog class="muted">
                     {{ notice(item) }}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="run-help">
+          <p data-ui-collection-run-dialog class="run-help">
             매입매출은 세금계산서 · 계산서 · 현금영수증 · 신용카드 매출/매입을 한 번에 받습니다(신용카드 매출은 분기별 월합계, 판매대행 포함).
             「기간 전체 재수집」을 끄면 종류마다 이미 받은 마지막 날 이후만 받습니다.
           </p>
         </section>
 
-        <p
+        <p data-ui-collection-run-dialog
           v-if="maintenance"
           class="run-warning"
           role="note"
         >
           지금은 홈택스 점검시간(한국시간 00~06시)이라 홈택스 자료는 실패합니다. 06시 이후에 시작해 주세요.
         </p>
-        <p
+        <p data-ui-collection-run-dialog
           v-if="missing.length && needsLogin"
           class="run-warning"
           role="note"
         >
-          <b>{{ missing.map(row => row.name).join(', ') }}</b>은(는) 홈택스 계정이 등록되어 있지 않아 기본정보 말고는 실패합니다.
+          <b data-ui-collection-run-dialog>{{ missing.map(row => row.name).join(', ') }}</b>은(는) 홈택스 계정이 등록되어 있지 않아 기본정보 말고는 실패합니다.
         </p>
-        <p class="run-help">
+        <p data-ui-collection-run-dialog class="run-help">
           홈택스는 비밀번호를 5회 틀리면 계정을 잠그므로 인증 오류는 자동으로 다시 시도하지 않습니다. 한 사업체는 한 번에 한 작업만 돕니다.
         </p>
-        <p
+        <p data-ui-collection-run-dialog
           v-if="error"
           class="collection-alert"
           role="alert"
@@ -423,14 +423,14 @@ function submit() {
       </div>
     </form>
     <template #footer>
-      <UiButton
+      <UiButton data-ui-collection-run-dialog
         variant="outline"
         class="run-close"
         @click="emit('close')"
       >
         닫기
       </UiButton>
-      <UiButton
+      <UiButton data-ui-collection-run-dialog
         variant="danger"
         :disabled="invalid"
         :loading="starting"
@@ -441,56 +441,3 @@ function submit() {
     </template>
   </UiModal>
 </template>
-
-<style scoped>
-.run-form-wide { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--aat-space-5); align-items: start; }
-.run-form-wide input[type=checkbox] { accent-color: var(--aat-color-danger); width: 16px; height: 16px; }
-.run-targets { display: flex; flex-direction: column; gap: var(--aat-space-2); position: sticky; top: 0; }
-.run-targets-head { display: flex; align-items: baseline; justify-content: space-between; }
-.run-targets-head h3 { margin: 0; }
-.run-targets-head span { font-size: var(--aat-font-sm); color: var(--aat-color-text-secondary); }
-.run-target-list { border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); overflow: hidden; }
-.run-target-scroll { max-height: 460px; overflow-y: auto; }
-.run-target { display: flex; align-items: center; gap: var(--aat-space-2); padding: 10px var(--aat-space-3); border-top: 1px solid var(--aat-color-border); font-size: var(--aat-font-sm); cursor: pointer; }
-.run-target.all { border-top: 0; background: var(--aat-color-subtle); }
-.run-target.on { background: var(--aat-color-danger-soft); }
-.run-target span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.run-target i { padding: 1px 7px; border-radius: var(--aat-radius-sm); background: var(--aat-color-danger); color: #fff; font-size: 11px; font-style: normal; font-weight: var(--aat-weight-semibold); white-space: nowrap; }
-.run-target em { margin-left: auto; padding: 1px 6px; border-radius: var(--aat-radius-sm); background: var(--aat-color-danger-soft); color: var(--aat-color-danger); font-size: 11px; font-style: normal; white-space: nowrap; }
-
-.run-main { display: flex; flex-direction: column; gap: var(--aat-space-4); min-width: 0; }
-.run-auth { padding: var(--aat-space-4); border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); background: var(--aat-color-subtle); }
-.run-auth-head { display: flex; align-items: center; justify-content: space-between; gap: var(--aat-space-2); }
-.run-auth-head h3 { margin: 0; }
-.run-auth-tabs { display: flex; gap: var(--aat-space-4); }
-.run-auth-tabs button { padding: 6px 4px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--aat-color-text); font: inherit; font-size: var(--aat-font-sm); cursor: pointer; }
-.run-auth-tabs button.active { border-bottom-color: var(--aat-color-danger); color: var(--aat-color-danger); font-weight: var(--aat-weight-semibold); }
-.run-auth-tabs button:disabled { cursor: not-allowed; }
-.run-auth-saved { display: flex; align-items: center; gap: var(--aat-space-2); margin: var(--aat-space-3) 0 var(--aat-space-2); font-size: var(--aat-font-sm); font-weight: var(--aat-weight-semibold); }
-.run-auth-fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--aat-space-3); }
-.run-auth-fields label { display: flex; flex-direction: column; gap: 4px; font-size: var(--aat-font-sm); font-weight: var(--aat-weight-semibold); color: var(--aat-color-text); }
-.run-auth-fields input { height: 40px; padding: 0 var(--aat-space-3); border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); background: var(--aat-color-surface); color: var(--aat-color-text); font: inherit; font-weight: var(--aat-weight-regular); }
-
-.run-auth-fields small { margin-left: 4px; font-weight: var(--aat-weight-regular); color: var(--aat-color-text-secondary); font-size: 11px; }
-.run-auth-save { display: flex; align-items: center; justify-content: space-between; gap: var(--aat-space-3); margin-top: var(--aat-space-3); }
-.run-auth-save .run-help { margin: 0; }
-.run-auth-ok { color: var(--aat-color-success); font-size: var(--aat-font-sm); }
-.run-full { display: inline-flex; align-items: center; gap: 6px; font-size: var(--aat-font-sm); color: var(--aat-color-text-secondary); cursor: pointer; }
-.run-kind-scroll { overflow-x: auto; border: 1px solid var(--aat-color-border); border-radius: var(--aat-radius-md); }
-.run-kind-table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: var(--aat-font-sm); }
-.run-kind-table th { padding: var(--aat-space-2); background: var(--aat-color-subtle); color: var(--aat-color-text-secondary); font-weight: var(--aat-weight-medium); font-size: var(--aat-font-xs); text-align: left; }
-.run-kind-table td { padding: 9px var(--aat-space-2); border-top: 1px solid var(--aat-color-border); overflow: visible; text-overflow: clip; }
-.run-kind-table .check { width: 40px; text-align: center; }
-.run-kind-table tr.group td { padding: 6px var(--aat-space-2); background: var(--aat-color-subtle); color: var(--aat-color-text-secondary); font-size: var(--aat-font-xs); font-weight: var(--aat-weight-semibold); }
-.run-kind-table .muted { color: var(--aat-color-text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.run-kind-table tr.soon td:not(.check) { color: var(--aat-color-text-secondary); }
-.run-kind-table small { margin-left: 6px; padding: 1px 6px; border-radius: var(--aat-radius-sm); background: var(--aat-color-subtle); border: 1px solid var(--aat-color-border); font-size: 10.5px; }
-:global(.modal-footer .run-close) { color: var(--aat-color-danger); border-color: var(--aat-color-danger); }
-
-@media (max-width: 860px) {
-  .run-form-wide { grid-template-columns: minmax(0, 1fr); }
-  .run-targets { position: static; }
-  .run-target-scroll { max-height: 200px; }
-  .run-auth-fields { grid-template-columns: 1fr; }
-}
-</style>

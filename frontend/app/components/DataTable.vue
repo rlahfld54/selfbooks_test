@@ -84,8 +84,8 @@ function sort(key: string) {
           }}
         </caption>
         <colgroup>
-          <col style="width: 44px" />
-          <col v-for="column in columns" :key="column.key" :style="{ width: column.width }" />
+          <col class="column-width-44" />
+          <col v-for="column in columns" :key="column.key" :style="{ '--column-width': column.width }" />
         </colgroup>
         <thead>
           <tr>

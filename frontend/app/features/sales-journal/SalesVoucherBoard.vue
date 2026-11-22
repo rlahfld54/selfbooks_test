@@ -381,247 +381,247 @@ const datePart = (part: string) => String(Number(part))
 </script>
 
 <template>
-  <section class="vb" aria-label="매입매출전표 조회">
-    <form class="vb-query" @submit.prevent="search">
-      <div class="vb-toggle" role="group" aria-label="조회 방식">
-        <button type="button" :aria-pressed="mode === 'range'" @click="mode = 'range'">기간</button>
-        <button type="button" :aria-pressed="mode === 'month'" @click="mode = 'month'">월별</button>
+  <section data-ui-sales-voucher-board class="vb" aria-label="매입매출전표 조회">
+    <form data-ui-sales-voucher-board class="vb-query" @submit.prevent="search">
+      <div data-ui-sales-voucher-board class="vb-toggle" role="group" aria-label="조회 방식">
+        <button data-ui-sales-voucher-board type="button" :aria-pressed="mode === 'range'" @click="mode = 'range'">기간</button>
+        <button data-ui-sales-voucher-board type="button" :aria-pressed="mode === 'month'" @click="mode = 'month'">월별</button>
       </div>
       <template v-if="mode === 'range'">
-        <span class="vb-caption">조회기간</span>
-        <input v-model="range.fromYear" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 시작 년" /><i>년</i>
-        <input v-model="range.fromMonth" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 시작 월" /><i>월</i>
-        <input v-model="range.fromDay" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 시작 일" /><i>일</i>
-        <span class="vb-tilde">~</span>
-        <input v-model="range.toYear" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 종료 년" /><i>년</i>
-        <input v-model="range.toMonth" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 종료 월" /><i>월</i>
-        <input v-model="range.toDay" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 종료 일" /><i>일</i>
+        <span data-ui-sales-voucher-board class="vb-caption">조회기간</span>
+        <input data-ui-sales-voucher-board v-model="range.fromYear" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 시작 년" /><i data-ui-sales-voucher-board>년</i>
+        <input data-ui-sales-voucher-board v-model="range.fromMonth" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 시작 월" /><i data-ui-sales-voucher-board>월</i>
+        <input data-ui-sales-voucher-board v-model="range.fromDay" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 시작 일" /><i data-ui-sales-voucher-board>일</i>
+        <span data-ui-sales-voucher-board class="vb-tilde">~</span>
+        <input data-ui-sales-voucher-board v-model="range.toYear" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 종료 년" /><i data-ui-sales-voucher-board>년</i>
+        <input data-ui-sales-voucher-board v-model="range.toMonth" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 종료 월" /><i data-ui-sales-voucher-board>월</i>
+        <input data-ui-sales-voucher-board v-model="range.toDay" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 종료 일" /><i data-ui-sales-voucher-board>일</i>
       </template>
       <template v-else>
-        <button type="button" class="vb-btn icon" aria-label="이전 달" @click="shiftMonth(-1)">◀</button>
-        <input v-model="month.year" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 년" /><i>년</i>
-        <input v-model="month.month" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 월" /><i>월</i>
-        <button type="button" class="vb-btn icon" aria-label="다음 달" @click="shiftMonth(1)">▶</button>
-        <input v-model="month.day" class="vb-num" maxlength="2" inputmode="numeric" placeholder="일자" aria-label="일자(선택)" /><i>일</i>
+        <button data-ui-sales-voucher-board type="button" class="vb-btn icon" aria-label="이전 달" @click="shiftMonth(-1)">◀</button>
+        <input data-ui-sales-voucher-board v-model="month.year" class="vb-num y" maxlength="4" inputmode="numeric" aria-label="조회 년" /><i data-ui-sales-voucher-board>년</i>
+        <input data-ui-sales-voucher-board v-model="month.month" class="vb-num" maxlength="2" inputmode="numeric" aria-label="조회 월" /><i data-ui-sales-voucher-board>월</i>
+        <button data-ui-sales-voucher-board type="button" class="vb-btn icon" aria-label="다음 달" @click="shiftMonth(1)">▶</button>
+        <input data-ui-sales-voucher-board v-model="month.day" class="vb-num" maxlength="2" inputmode="numeric" placeholder="일자" aria-label="일자(선택)" /><i data-ui-sales-voucher-board>일</i>
       </template>
-      <button type="submit" class="vb-btn">조회</button>
-      <span class="vb-nav" role="group" aria-label="전기 차기">
-        <button type="button" :disabled="viewYear <= thisYear - 2" @click="shiftYear(-1)">◀ 전기</button>
-        <button type="button" :disabled="viewYear >= thisYear" @click="shiftYear(1)">차기 ▶</button>
+      <button data-ui-sales-voucher-board type="submit" class="vb-btn">조회</button>
+      <span data-ui-sales-voucher-board class="vb-nav" role="group" aria-label="전기 차기">
+        <button data-ui-sales-voucher-board type="button" :disabled="viewYear <= thisYear - 2" @click="shiftYear(-1)">◀ 전기</button>
+        <button data-ui-sales-voucher-board type="button" :disabled="viewYear >= thisYear" @click="shiftYear(1)">차기 ▶</button>
       </span>
-      <span v-if="navBadge" class="vb-nav-badge" :class="nav.dir">{{ navBadge }}</span>
-      <button type="button" class="vb-btn" aria-label="상세검색" @click="emit('search')">▾</button>
-      <span class="vb-spacer" />
-      <span class="vb-pop-anchor">
-        <button type="button" class="vb-btn" @click="sortChoice = order; sortOpen = !sortOpen">↕ 데이터정렬</button>
-        <div v-if="sortOpen" class="vb-pop" role="dialog" aria-label="데이터정렬" @keydown.enter.prevent="applyOrder" @keydown.esc="sortOpen = false">
-          <label><input v-model="sortChoice" type="radio" value="input" /> 입력순 <small>등록된 원래 순서</small></label>
-          <label><input v-model="sortChoice" type="radio" value="date" /> 날짜순 <small>오래된 날짜부터</small></label>
-          <div class="vb-pop-actions"><button type="button" class="vb-btn" @click="applyOrder">확인(Enter)</button></div>
+      <span data-ui-sales-voucher-board v-if="navBadge" class="vb-nav-badge" :class="nav.dir">{{ navBadge }}</span>
+      <button data-ui-sales-voucher-board type="button" class="vb-btn" aria-label="상세검색" @click="emit('search')">▾</button>
+      <span data-ui-sales-voucher-board class="vb-spacer" />
+      <span data-ui-sales-voucher-board class="vb-pop-anchor">
+        <button data-ui-sales-voucher-board type="button" class="vb-btn" @click="sortChoice = order; sortOpen = !sortOpen">↕ 데이터정렬</button>
+        <div data-ui-sales-voucher-board v-if="sortOpen" class="vb-pop" role="dialog" aria-label="데이터정렬" @keydown.enter.prevent="applyOrder" @keydown.esc="sortOpen = false">
+          <label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="sortChoice" type="radio" value="input" /> 입력순 <small data-ui-sales-voucher-board>등록된 원래 순서</small></label>
+          <label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="sortChoice" type="radio" value="date" /> 날짜순 <small data-ui-sales-voucher-board>오래된 날짜부터</small></label>
+          <div data-ui-sales-voucher-board class="vb-pop-actions"><button data-ui-sales-voucher-board type="button" class="vb-btn" @click="applyOrder">확인(Enter)</button></div>
         </div>
       </span>
-      <button type="button" class="vb-btn" @click="openBulk">일괄변경</button>
-      <details class="vb-more">
-        <summary aria-label="더보기">⋯</summary>
-        <div class="vb-more-panel">
-          <label class="vb-sort">밀도
-            <select v-model="density" aria-label="테이블 밀도"><option value="normal">기본</option><option value="compact">좁게</option></select>
+      <button data-ui-sales-voucher-board type="button" class="vb-btn" @click="openBulk">일괄변경</button>
+      <details data-ui-sales-voucher-board class="vb-more">
+        <summary data-ui-sales-voucher-board aria-label="더보기">⋯</summary>
+        <div data-ui-sales-voucher-board class="vb-more-panel">
+          <label data-ui-sales-voucher-board class="vb-sort">밀도
+            <select data-ui-sales-voucher-board v-model="density" aria-label="테이블 밀도"><option data-ui-sales-voucher-board value="normal">기본</option><option data-ui-sales-voucher-board value="compact">좁게</option></select>
           </label>
           <slot name="more" />
         </div>
       </details>
     </form>
-    <p v-if="filterError" class="vb-error" role="alert">{{ filterError }}</p>
+    <p data-ui-sales-voucher-board v-if="filterError" class="vb-error" role="alert">{{ filterError }}</p>
 
-    <div class="vb-tabs">
-      <button type="button" class="vb-all" :class="{ on: activeTab === 'all' }" @click="activeTab = 'all'">전체</button>
-      <div class="vb-tab-lines">
-        <div v-for="line in tabLines" :key="line.flow" class="vb-tab-line" :class="line.flow">
-          <button
+    <div data-ui-sales-voucher-board class="vb-tabs">
+      <button data-ui-sales-voucher-board type="button" class="vb-all" :class="{ on: activeTab === 'all' }" @click="activeTab = 'all'">전체</button>
+      <div data-ui-sales-voucher-board class="vb-tab-lines">
+        <div data-ui-sales-voucher-board v-for="line in tabLines" :key="line.flow" class="vb-tab-line" :class="line.flow">
+          <button data-ui-sales-voucher-board
             v-for="def in line.defs" :key="def.key" type="button" class="vb-tab"
             :class="{ on: activeTab === def.key, empty: def.empty }"
             :title="def.empty ? '아직 이 경로로 들어오는 자료가 없습니다' : undefined"
             @click="activeTab = def.key"
-          >{{ def.label }}<b v-if="tabCount[def.key]">{{ tabCount[def.key] }}</b></button>
-          <button type="button" class="vb-tab-toggle" :aria-expanded="tabsOpen" :title="tabsOpen ? '나머지 탭 접기' : '나머지 탭 펼치기'" @click="tabsOpen = !tabsOpen">{{ tabsOpen ? '▲ 접기' : '▼' }}</button>
+          >{{ def.label }}<b data-ui-sales-voucher-board v-if="tabCount[def.key]">{{ tabCount[def.key] }}</b></button>
+          <button data-ui-sales-voucher-board type="button" class="vb-tab-toggle" :aria-expanded="tabsOpen" :title="tabsOpen ? '나머지 탭 접기' : '나머지 탭 펼치기'" @click="tabsOpen = !tabsOpen">{{ tabsOpen ? '▲ 접기' : '▼' }}</button>
         </div>
       </div>
     </div>
 
-    <div class="vb-main">
-      <div class="vb-left">
-        <div class="vb-grid-wrap">
-          <table class="vb-grid">
-            <caption class="sr-only">매입매출전표 목록</caption>
-            <colgroup>
-              <col style="width:30px"><col style="width:44px"><col style="width:28px"><col style="width:28px">
-              <col style="width:104px"><col><col style="width:44px"><col style="width:80px">
-              <col style="width:92px"><col style="width:84px"><col style="width:96px">
-              <col style="width:64px"><col style="width:112px"><col style="width:100px">
-              <col style="width:62px"><col style="width:62px">
+    <div data-ui-sales-voucher-board class="vb-main">
+      <div data-ui-sales-voucher-board class="vb-left">
+        <div data-ui-sales-voucher-board class="vb-grid-wrap">
+          <table data-ui-sales-voucher-board class="vb-grid">
+            <caption data-ui-sales-voucher-board class="sr-only">매입매출전표 목록</caption>
+            <colgroup data-ui-sales-voucher-board>
+              <col data-ui-sales-voucher-board class="column-width-30"><col data-ui-sales-voucher-board class="column-width-44"><col data-ui-sales-voucher-board class="column-width-28"><col data-ui-sales-voucher-board class="column-width-28">
+              <col data-ui-sales-voucher-board class="column-width-104"><col data-ui-sales-voucher-board><col data-ui-sales-voucher-board class="column-width-44"><col data-ui-sales-voucher-board class="column-width-80">
+              <col data-ui-sales-voucher-board class="column-width-92"><col data-ui-sales-voucher-board class="column-width-84"><col data-ui-sales-voucher-board class="column-width-96">
+              <col data-ui-sales-voucher-board class="column-width-64"><col data-ui-sales-voucher-board class="column-width-112"><col data-ui-sales-voucher-board class="column-width-100">
+              <col data-ui-sales-voucher-board class="column-width-62"><col data-ui-sales-voucher-board class="column-width-62">
             </colgroup>
-            <thead>
-              <tr>
-                <th><input type="checkbox" aria-label="전체 선택" :checked="allChecked" @change="toggleAll" /></th>
-                <th class="sortable" @click="toggleSort('date')">년<i v-if="sort.key === 'date'">{{ sort.dir === 1 ? '▲' : '▼' }}</i></th>
-                <th>월</th><th>일</th>
-                <th v-for="col in columns" :key="col.key" class="sortable" @click="toggleSort(col.key)">
-                  {{ col.label }}<i v-if="sort.key === col.key">{{ sort.dir === 1 ? '▲' : '▼' }}</i>
+            <thead data-ui-sales-voucher-board>
+              <tr data-ui-sales-voucher-board>
+                <th data-ui-sales-voucher-board><input data-ui-sales-voucher-board type="checkbox" aria-label="전체 선택" :checked="allChecked" @change="toggleAll" /></th>
+                <th data-ui-sales-voucher-board class="sortable" @click="toggleSort('date')">년<i data-ui-sales-voucher-board v-if="sort.key === 'date'">{{ sort.dir === 1 ? '▲' : '▼' }}</i></th>
+                <th data-ui-sales-voucher-board>월</th><th data-ui-sales-voucher-board>일</th>
+                <th data-ui-sales-voucher-board v-for="col in columns" :key="col.key" class="sortable" @click="toggleSort(col.key)">
+                  {{ col.label }}<i data-ui-sales-voucher-board v-if="sort.key === col.key">{{ sort.dir === 1 ? '▲' : '▼' }}</i>
                 </th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-for="row in visibleRows" :key="row.id" :class="{ sel: isSelected(row) }" @click="pick(row)">
-                <td class="c" @click.stop><input v-model="checked" type="checkbox" :value="row.id" :aria-label="`${row.date} ${row.partner} 전표 선택`" /></td>
-                <td v-for="(part, index) in row.date.split('-')" :key="index" class="c num" :class="dayKind(row.date)" :title="dayTitle(row.date) || undefined">{{ index ? datePart(part) : part }}</td>
-                <td class="c type">
-                  <select v-if="editable(row)" v-model="session.draft.type" aria-label="셀 유형" @click.stop @change="typeChanged">
-                    <optgroup label="매출"><option v-for="type in types.filter(item => item.direction === 'sales')" :key="type.code" :value="type.code">{{ label(type.code) }}</option></optgroup>
-                    <optgroup label="매입"><option v-for="type in types.filter(item => item.direction !== 'sales')" :key="type.code" :value="type.code">{{ label(type.code) }}</option></optgroup>
+            <tbody data-ui-sales-voucher-board>
+              <tr data-ui-sales-voucher-board v-for="row in visibleRows" :key="row.id" :class="{ sel: isSelected(row) }" @click="pick(row)">
+                <td data-ui-sales-voucher-board class="c" @click.stop><input data-ui-sales-voucher-board v-model="checked" type="checkbox" :value="row.id" :aria-label="`${row.date} ${row.partner} 전표 선택`" /></td>
+                <td data-ui-sales-voucher-board v-for="(part, index) in row.date.split('-')" :key="index" class="c num" :class="dayKind(row.date)" :title="dayTitle(row.date) || undefined">{{ index ? datePart(part) : part }}</td>
+                <td data-ui-sales-voucher-board class="c type">
+                  <select data-ui-sales-voucher-board v-if="editable(row)" v-model="session.draft.type" aria-label="셀 유형" @click.stop @change="typeChanged">
+                    <optgroup data-ui-sales-voucher-board label="매출"><option data-ui-sales-voucher-board v-for="type in types.filter(item => item.direction === 'sales')" :key="type.code" :value="type.code">{{ label(type.code) }}</option></optgroup>
+                    <optgroup data-ui-sales-voucher-board label="매입"><option data-ui-sales-voucher-board v-for="type in types.filter(item => item.direction !== 'sales')" :key="type.code" :value="type.code">{{ label(type.code) }}</option></optgroup>
                   </select>
-                  <span v-else class="vb-type"><span class="vb-flow-badge" :class="flowOf(shown(row).type)">{{ flowOf(shown(row).type) === 'sale' ? '매출' : '매입' }}</span><span class="vb-code" :class="flowOf(shown(row).type)">{{ label(shown(row).type) }}</span></span>
+                  <span data-ui-sales-voucher-board v-else class="vb-type"><span data-ui-sales-voucher-board class="vb-flow-badge" :class="flowOf(shown(row).type)">{{ flowOf(shown(row).type) === 'sale' ? '매출' : '매입' }}</span><span data-ui-sales-voucher-board class="vb-code" :class="flowOf(shown(row).type)">{{ label(shown(row).type) }}</span></span>
                 </td>
-                <td class="ell" :class="{ wrap: !editable(row) }" :title="row.item">
-                  <input v-if="editable(row)" v-model="session.draft.item" class="vb-cell" aria-label="셀 품목" @click.stop @input="journal.edit()" />
+                <td data-ui-sales-voucher-board class="ell" :class="{ wrap: !editable(row) }" :title="row.item">
+                  <input data-ui-sales-voucher-board v-if="editable(row)" v-model="session.draft.item" class="vb-cell" aria-label="셀 품목" @click.stop @input="journal.edit()" />
                   <template v-else>{{ row.item }}</template>
                 </td>
-                <td class="r num">{{ formatAmount(row.quantity ?? '1') }}</td>
-                <td class="r num">{{ formatAmount(row.unitPrice ?? '0') }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(row.quantity ?? '1') }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(row.unitPrice ?? '0') }}</td>
                 <!-- 전자(홈택스) 자료는 원본과 같아야 하므로 금액 입력칸을 만들지 않는다(설계 amountEditable) -->
-                <td class="r num">
-                  <input v-if="editable(row) && collectOf(shown(row)) !== 'e'" class="vb-cell r num" :value="formatAmount(session.draft.supply)" aria-label="셀 공급가액" @click.stop @change="amountInput('supply', $event)" />
+                <td data-ui-sales-voucher-board class="r num">
+                  <input data-ui-sales-voucher-board v-if="editable(row) && collectOf(shown(row)) !== 'e'" class="vb-cell r num" :value="formatAmount(session.draft.supply)" aria-label="셀 공급가액" @click.stop @change="amountInput('supply', $event)" />
                   <template v-else>{{ formatAmount(shown(row).supply) }}</template>
                 </td>
-                <td class="r num" :class="{ zerovat: zeroVatWarning(shown(row), meta?.vatTypes) }" :title="zeroVatWarning(shown(row), meta?.vatTypes) ? '과세 유형인데 세액이 0원입니다 — 확인요망' : undefined">
-                  <input v-if="editable(row) && collectOf(shown(row)) !== 'e'" class="vb-cell r num" :value="formatAmount(session.draft.vat)" aria-label="셀 세액" @click.stop @change="amountInput('vat', $event)" />
+                <td data-ui-sales-voucher-board class="r num" :class="{ zerovat: zeroVatWarning(shown(row), meta?.vatTypes) }" :title="zeroVatWarning(shown(row), meta?.vatTypes) ? '과세 유형인데 세액이 0원입니다 — 확인요망' : undefined">
+                  <input data-ui-sales-voucher-board v-if="editable(row) && collectOf(shown(row)) !== 'e'" class="vb-cell r num" :value="formatAmount(session.draft.vat)" aria-label="셀 세액" @click.stop @change="amountInput('vat', $event)" />
                   <template v-else>{{ formatAmount(shown(row).vat) }}</template>
-                  <span v-if="zeroVatWarning(shown(row), meta?.vatTypes)" class="vb-review">확인요망</span>
+                  <span data-ui-sales-voucher-board v-if="zeroVatWarning(shown(row), meta?.vatTypes)" class="vb-review">확인요망</span>
                 </td>
-                <td class="r num strong">{{ formatAmount(sumAmounts([shown(row).supply, shown(row).vat])) }}</td>
-                <td
+                <td data-ui-sales-voucher-board class="r num strong">{{ formatAmount(sumAmounts([shown(row).supply, shown(row).vat])) }}</td>
+                <td data-ui-sales-voucher-board
                   class="c num dim" :class="{ codecell: editable(row) }" :tabindex="editable(row) ? 0 : undefined"
                   :title="editable(row) ? '클릭 · F2 → 거래처 도움' : undefined"
                   @click="editable(row) && (journal.searchOpen.value = true)"
                   @keydown.f2.prevent="editable(row) && (journal.searchOpen.value = true)"
                 >{{ shown(row).partnerCode || '—' }}</td>
-                <td class="wrap">{{ shown(row).partner }}</td>
-                <td class="c num dim">{{ bizNo(shown(row)) }}</td>
-                <td class="c"><span class="vb-chip" :class="'c-' + collectOf(shown(row))">{{ COLLECT_LABEL[collectOf(shown(row))] }}</span></td>
-                <td class="c">
-                  <input
+                <td data-ui-sales-voucher-board class="wrap">{{ shown(row).partner }}</td>
+                <td data-ui-sales-voucher-board class="c num dim">{{ bizNo(shown(row)) }}</td>
+                <td data-ui-sales-voucher-board class="c"><span data-ui-sales-voucher-board class="vb-chip" :class="'c-' + collectOf(shown(row))">{{ COLLECT_LABEL[collectOf(shown(row))] }}</span></td>
+                <td data-ui-sales-voucher-board class="c">
+                  <input data-ui-sales-voucher-board
                     v-if="editable(row)" class="vb-cell c num" maxlength="1" inputmode="numeric" :placeholder="BUNGE_NAME[session.draft.journalType ?? ''] ?? '#'"
                     aria-label="셀 분개 (1현금 2외상 3혼합 4카드 5분개없음 · F2 목록)" @click.stop
                     @change="setRowBunge(($event.target as HTMLInputElement).value)" @keydown.f2.prevent="bungeOpen = 'row'"
                   />
-                  <span v-else class="vb-bunge" :class="'b-' + (shown(row).journalType ?? '')">{{ BUNGE_NAME[shown(row).journalType ?? ''] ?? row.payment }}</span>
+                  <span data-ui-sales-voucher-board v-else class="vb-bunge" :class="'b-' + (shown(row).journalType ?? '')">{{ BUNGE_NAME[shown(row).journalType ?? ''] ?? row.payment }}</span>
                 </td>
               </tr>
-              <tr v-if="!visibleRows.length && !loading">
-                <td colspan="16" class="vb-empty">{{ TAB_DEFS.find(def => def.key === activeTab)?.empty ? '이 경로로 들어온 자료가 아직 없습니다' : '표시할 전표가 없습니다' }}</td>
+              <tr data-ui-sales-voucher-board v-if="!visibleRows.length && !loading">
+                <td data-ui-sales-voucher-board colspan="16" class="vb-empty">{{ TAB_DEFS.find(def => def.key === activeTab)?.empty ? '이 경로로 들어온 자료가 아직 없습니다' : '표시할 전표가 없습니다' }}</td>
               </tr>
               <!-- 상시 빈 입력행 — 어느 탭 · 조회조건이든 맨 아래 -->
-              <tr class="vb-draft">
-                <td class="c">＋</td>
-                <td class="c num dim">{{ draftYear }}</td>
-                <td><input v-model="draft.month" data-df="month" class="vb-cell c num" maxlength="2" inputmode="numeric" aria-label="입력 월" @keydown="draftKey($event, 'month')" /></td>
-                <td><input v-model="draft.day" data-df="day" class="vb-cell c num" maxlength="2" inputmode="numeric" aria-label="입력 일" @keydown="draftKey($event, 'day')" /></td>
-                <td>
-                  <input v-model="draft.type" data-df="type" class="vb-cell c num" list="vb-type-codes" maxlength="2" placeholder="선택" aria-label="입력 유형코드" @keydown="draftKey($event, 'type')" />
-                  <datalist id="vb-type-codes"><option v-for="type in types" :key="type.code" :value="type.code">{{ label(type.code) }}</option></datalist>
+              <tr data-ui-sales-voucher-board class="vb-draft">
+                <td data-ui-sales-voucher-board class="c">＋</td>
+                <td data-ui-sales-voucher-board class="c num dim">{{ draftYear }}</td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.month" data-df="month" class="vb-cell c num" maxlength="2" inputmode="numeric" aria-label="입력 월" @keydown="draftKey($event, 'month')" /></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.day" data-df="day" class="vb-cell c num" maxlength="2" inputmode="numeric" aria-label="입력 일" @keydown="draftKey($event, 'day')" /></td>
+                <td data-ui-sales-voucher-board>
+                  <input data-ui-sales-voucher-board v-model="draft.type" data-df="type" class="vb-cell c num" list="vb-type-codes" maxlength="2" placeholder="선택" aria-label="입력 유형코드" @keydown="draftKey($event, 'type')" />
+                  <datalist data-ui-sales-voucher-board id="vb-type-codes"><option data-ui-sales-voucher-board v-for="type in types" :key="type.code" :value="type.code">{{ label(type.code) }}</option></datalist>
                 </td>
-                <td><input v-model="draft.item" data-df="item" class="vb-cell" placeholder="품목 입력 후 Enter" aria-label="입력 품목" @keydown="draftKey($event, 'item')" /></td>
-                <td><input v-model="draft.qty" data-df="qty" class="vb-cell r num" inputmode="decimal" aria-label="입력 수량" @keydown="draftKey($event, 'qty')" /></td>
-                <td><input v-model="draft.unit" data-df="unit" class="vb-cell r num" inputmode="decimal" aria-label="입력 단가" @keydown="draftKey($event, 'unit')" /></td>
-                <td><input v-model="draft.supply" data-df="supply" class="vb-cell r num" inputmode="numeric" :placeholder="draftSupply && !draft.supply ? formatAmount(draftSupply) : ''" aria-label="입력 공급가액" @keydown="draftKey($event, 'supply')" /></td>
-                <td class="r num dim">{{ draftVat ? formatAmount(draftVat) : '자동' }}</td>
-                <td class="r num dim">{{ draftSupply && draftVat ? formatAmount(sumAmounts([draftSupply, draftVat])) : '자동' }}</td>
-                <td><input :value="draftPartner?.code ?? ''" data-df="partner" class="vb-cell c num" readonly placeholder="선택" aria-label="입력 거래처코드 (F2 도움)" @click="draftPartnerOpen = true" @keydown="draftKey($event, 'partner')" /></td>
-                <td class="ell dim">{{ draftPartner?.name ?? '' }}</td>
-                <td class="c num dim">{{ draftPartner?.businessNumber ?? '' }}</td>
-                <td class="c"><span class="vb-chip c-m">수기입력</span></td>
-                <td><input v-model="draft.bunge" data-df="bunge" class="vb-cell c num" maxlength="1" inputmode="numeric" :placeholder="draftType ? BUNGE_NAME[defaultJournalType(draftType.code)] : '선택'" aria-label="입력 분개 (1현금 2외상 3혼합 4카드 5분개없음 · F2 목록 · Enter 저장)" @keydown="draftKey($event, 'bunge')" /></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.item" data-df="item" class="vb-cell" placeholder="품목 입력 후 Enter" aria-label="입력 품목" @keydown="draftKey($event, 'item')" /></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.qty" data-df="qty" class="vb-cell r num" inputmode="decimal" aria-label="입력 수량" @keydown="draftKey($event, 'qty')" /></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.unit" data-df="unit" class="vb-cell r num" inputmode="decimal" aria-label="입력 단가" @keydown="draftKey($event, 'unit')" /></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.supply" data-df="supply" class="vb-cell r num" inputmode="numeric" :placeholder="draftSupply && !draft.supply ? formatAmount(draftSupply) : ''" aria-label="입력 공급가액" @keydown="draftKey($event, 'supply')" /></td>
+                <td data-ui-sales-voucher-board class="r num dim">{{ draftVat ? formatAmount(draftVat) : '자동' }}</td>
+                <td data-ui-sales-voucher-board class="r num dim">{{ draftSupply && draftVat ? formatAmount(sumAmounts([draftSupply, draftVat])) : '자동' }}</td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board :value="draftPartner?.code ?? ''" data-df="partner" class="vb-cell c num" readonly placeholder="선택" aria-label="입력 거래처코드 (F2 도움)" @click="draftPartnerOpen = true" @keydown="draftKey($event, 'partner')" /></td>
+                <td data-ui-sales-voucher-board class="ell dim">{{ draftPartner?.name ?? '' }}</td>
+                <td data-ui-sales-voucher-board class="c num dim">{{ draftPartner?.businessNumber ?? '' }}</td>
+                <td data-ui-sales-voucher-board class="c"><span data-ui-sales-voucher-board class="vb-chip c-m">수기입력</span></td>
+                <td data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="draft.bunge" data-df="bunge" class="vb-cell c num" maxlength="1" inputmode="numeric" :placeholder="draftType ? BUNGE_NAME[defaultJournalType(draftType.code)] : '선택'" aria-label="입력 분개 (1현금 2외상 3혼합 4카드 5분개없음 · F2 목록 · Enter 저장)" @keydown="draftKey($event, 'bunge')" /></td>
               </tr>
             </tbody>
-            <tfoot>
-              <tr class="vb-sub">
-                <td colspan="8"><b>같은 거래처 합계</b> <span class="dim">{{ selectedRow ? `${selectedRow.partner} [ ${samePartnerRows.length} ]건` : '행을 선택하세요' }}</span></td>
-                <td class="r num">{{ formatAmount(total(samePartnerRows).supply) }}</td>
-                <td class="r num">{{ formatAmount(total(samePartnerRows).vat) }}</td>
-                <td class="r num">{{ formatAmount(total(samePartnerRows).sum) }}</td>
-                <td colspan="5" />
+            <tfoot data-ui-sales-voucher-board>
+              <tr data-ui-sales-voucher-board class="vb-sub">
+                <td data-ui-sales-voucher-board colspan="8"><b data-ui-sales-voucher-board>같은 거래처 합계</b> <span data-ui-sales-voucher-board class="dim">{{ selectedRow ? `${selectedRow.partner} [ ${samePartnerRows.length} ]건` : '행을 선택하세요' }}</span></td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(samePartnerRows).supply) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(samePartnerRows).vat) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(samePartnerRows).sum) }}</td>
+                <td data-ui-sales-voucher-board colspan="5" />
               </tr>
-              <tr class="vb-sub">
-                <td colspan="8"><b class="gold">체크 선택합계</b> <span class="dim">[ {{ checkedRows.length }} ]건</span></td>
-                <td class="r num">{{ formatAmount(total(checkedRows).supply) }}</td>
-                <td class="r num">{{ formatAmount(total(checkedRows).vat) }}</td>
-                <td class="r num">{{ formatAmount(total(checkedRows).sum) }}</td>
-                <td colspan="5" />
+              <tr data-ui-sales-voucher-board class="vb-sub">
+                <td data-ui-sales-voucher-board colspan="8"><b data-ui-sales-voucher-board class="gold">체크 선택합계</b> <span data-ui-sales-voucher-board class="dim">[ {{ checkedRows.length }} ]건</span></td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(checkedRows).supply) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(checkedRows).vat) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(checkedRows).sum) }}</td>
+                <td data-ui-sales-voucher-board colspan="5" />
               </tr>
-              <tr>
-                <td colspan="8"><b>합계</b> <span class="dim">[ {{ visibleRows.length }} ]건</span></td>
-                <td class="r num">{{ formatAmount(total(visibleRows).supply) }}</td>
-                <td class="r num">{{ formatAmount(total(visibleRows).vat) }}</td>
-                <td class="r num">{{ formatAmount(total(visibleRows).sum) }}</td>
-                <td colspan="5" />
+              <tr data-ui-sales-voucher-board>
+                <td data-ui-sales-voucher-board colspan="8"><b data-ui-sales-voucher-board>합계</b> <span data-ui-sales-voucher-board class="dim">[ {{ visibleRows.length }} ]건</span></td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(visibleRows).supply) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(visibleRows).vat) }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ formatAmount(total(visibleRows).sum) }}</td>
+                <td data-ui-sales-voucher-board colspan="5" />
               </tr>
             </tfoot>
           </table>
         </div>
-        <p v-if="draftError || rowError" class="vb-error" role="alert">{{ draftError || rowError }}</p>
+        <p data-ui-sales-voucher-board v-if="draftError || rowError" class="vb-error" role="alert">{{ draftError || rowError }}</p>
 
-        <section class="vb-lines" aria-label="분개">
-          <table class="vb-grid">
-            <thead><tr><th>구분</th><th>계정코드</th><th>계정과목</th><th>차변(출금)</th><th>대변(입금)</th><th>거래처코드</th><th>거래처</th><th>적요코드</th><th>적요</th></tr></thead>
-            <tbody>
-              <tr v-for="(line, index) in lineRows" :key="index">
-                <td class="c">{{ line.side === 'debit' ? '차변' : '대변' }}</td>
-                <td class="c num">{{ account(line.account)?.code ?? '' }}</td>
-                <td :class="{ warn: !account(line.account) }">{{ account(line.account)?.name ?? '(계정과목 미지정)' }}</td>
-                <td class="r num">{{ line.side === 'debit' ? formatAmount(line.amount) : '' }}</td>
-                <td class="r num">{{ line.side === 'credit' ? formatAmount(line.amount) : '' }}</td>
-                <td class="c num dim">{{ isCounterpart(line.side) ? sideInfo?.code : '' }}</td>
-                <td>{{ isCounterpart(line.side) ? sideInfo?.name : '' }}</td>
-                <td class="c num dim">{{ meta?.summaries?.find(summary => summary.accountId === line.account && summary.text === line.memo)?.id ?? '' }}</td>
-                <td class="ell dim">{{ line.memo }}</td>
+        <section data-ui-sales-voucher-board class="vb-lines" aria-label="분개">
+          <table data-ui-sales-voucher-board class="vb-grid">
+            <thead data-ui-sales-voucher-board><tr data-ui-sales-voucher-board><th data-ui-sales-voucher-board>구분</th><th data-ui-sales-voucher-board>계정코드</th><th data-ui-sales-voucher-board>계정과목</th><th data-ui-sales-voucher-board>차변(출금)</th><th data-ui-sales-voucher-board>대변(입금)</th><th data-ui-sales-voucher-board>거래처코드</th><th data-ui-sales-voucher-board>거래처</th><th data-ui-sales-voucher-board>적요코드</th><th data-ui-sales-voucher-board>적요</th></tr></thead>
+            <tbody data-ui-sales-voucher-board>
+              <tr data-ui-sales-voucher-board v-for="(line, index) in lineRows" :key="index">
+                <td data-ui-sales-voucher-board class="c">{{ line.side === 'debit' ? '차변' : '대변' }}</td>
+                <td data-ui-sales-voucher-board class="c num">{{ account(line.account)?.code ?? '' }}</td>
+                <td data-ui-sales-voucher-board :class="{ warn: !account(line.account) }">{{ account(line.account)?.name ?? '(계정과목 미지정)' }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ line.side === 'debit' ? formatAmount(line.amount) : '' }}</td>
+                <td data-ui-sales-voucher-board class="r num">{{ line.side === 'credit' ? formatAmount(line.amount) : '' }}</td>
+                <td data-ui-sales-voucher-board class="c num dim">{{ isCounterpart(line.side) ? sideInfo?.code : '' }}</td>
+                <td data-ui-sales-voucher-board>{{ isCounterpart(line.side) ? sideInfo?.name : '' }}</td>
+                <td data-ui-sales-voucher-board class="c num dim">{{ meta?.summaries?.find(summary => summary.accountId === line.account && summary.text === line.memo)?.id ?? '' }}</td>
+                <td data-ui-sales-voucher-board class="ell dim">{{ line.memo }}</td>
               </tr>
-              <tr v-if="!lineRows.length"><td colspan="9" class="vb-empty small">{{ session.selected ? '분개가 없습니다 (분개없음 또는 미입력)' : '위에서 행을 선택하면 분개가 표시됩니다' }}</td></tr>
+              <tr data-ui-sales-voucher-board v-if="!lineRows.length"><td data-ui-sales-voucher-board colspan="9" class="vb-empty small">{{ session.selected ? '분개가 없습니다 (분개없음 또는 미입력)' : '위에서 행을 선택하면 분개가 표시됩니다' }}</td></tr>
             </tbody>
-            <tfoot>
-              <tr><td colspan="3"><b>합계</b></td><td class="r num">{{ lineRows.length ? formatAmount(lineTotals.debit) : '' }}</td><td class="r num">{{ lineRows.length ? formatAmount(lineTotals.credit) : '' }}</td><td colspan="4" :class="{ warn: lineTotals.debit !== lineTotals.credit }">{{ lineTotals.debit === lineTotals.credit ? '' : '대차 불일치' }}</td></tr>
+            <tfoot data-ui-sales-voucher-board>
+              <tr data-ui-sales-voucher-board><td data-ui-sales-voucher-board colspan="3"><b data-ui-sales-voucher-board>합계</b></td><td data-ui-sales-voucher-board class="r num">{{ lineRows.length ? formatAmount(lineTotals.debit) : '' }}</td><td data-ui-sales-voucher-board class="r num">{{ lineRows.length ? formatAmount(lineTotals.credit) : '' }}</td><td data-ui-sales-voucher-board colspan="4" :class="{ warn: lineTotals.debit !== lineTotals.credit }">{{ lineTotals.debit === lineTotals.credit ? '' : '대차 불일치' }}</td></tr>
             </tfoot>
           </table>
         </section>
       </div>
 
-      <aside class="vb-side" aria-label="전표 상세">
-        <section class="vb-panel">
-          <button type="button" class="vb-panel-head" :aria-expanded="panels.meta" @click="panels.meta = !panels.meta">🧾 전표정보<span>▾</span></button>
-          <div v-show="panels.meta" class="vb-panel-body">
-            <dl v-if="sideInfo">
-              <dt>전표번호</dt><dd>{{ sideInfo.entry }}</dd>
-              <dt>출처</dt><dd>{{ sideInfo.source }}</dd>
-              <dt>자료수집</dt><dd>{{ sideInfo.collect }}</dd>
-              <dt>상태</dt><dd>{{ sideInfo.status }}<span v-if="sideInfo.review" class="vb-review inline">확인요망</span></dd>
+      <aside data-ui-sales-voucher-board class="vb-side" aria-label="전표 상세">
+        <section data-ui-sales-voucher-board class="vb-panel">
+          <button data-ui-sales-voucher-board type="button" class="vb-panel-head" :aria-expanded="panels.meta" @click="panels.meta = !panels.meta">🧾 전표정보<span data-ui-sales-voucher-board>▾</span></button>
+          <div data-ui-sales-voucher-board v-show="panels.meta" class="vb-panel-body">
+            <dl data-ui-sales-voucher-board v-if="sideInfo">
+              <dt data-ui-sales-voucher-board>전표번호</dt><dd data-ui-sales-voucher-board>{{ sideInfo.entry }}</dd>
+              <dt data-ui-sales-voucher-board>출처</dt><dd data-ui-sales-voucher-board>{{ sideInfo.source }}</dd>
+              <dt data-ui-sales-voucher-board>자료수집</dt><dd data-ui-sales-voucher-board>{{ sideInfo.collect }}</dd>
+              <dt data-ui-sales-voucher-board>상태</dt><dd data-ui-sales-voucher-board>{{ sideInfo.status }}<span data-ui-sales-voucher-board v-if="sideInfo.review" class="vb-review inline">확인요망</span></dd>
             </dl>
-            <p v-else class="dim">행을 선택하면 표시됩니다</p>
+            <p data-ui-sales-voucher-board v-else class="dim">행을 선택하면 표시됩니다</p>
           </div>
         </section>
-        <section class="vb-panel">
-          <button type="button" class="vb-panel-head" :aria-expanded="panels.partner" @click="panels.partner = !panels.partner">🏢 거래처정보<span>▾</span></button>
-          <div v-show="panels.partner" class="vb-panel-body">
-            <dl v-if="sideInfo">
-              <dt>거래처코드</dt><dd>{{ sideInfo.code || '—' }}</dd>
-              <dt>거래처명</dt><dd>{{ sideInfo.name || '—' }}</dd>
-              <dt>사업자번호</dt><dd>{{ sideInfo.bizNo || '—' }}</dd>
+        <section data-ui-sales-voucher-board class="vb-panel">
+          <button data-ui-sales-voucher-board type="button" class="vb-panel-head" :aria-expanded="panels.partner" @click="panels.partner = !panels.partner">🏢 거래처정보<span data-ui-sales-voucher-board>▾</span></button>
+          <div data-ui-sales-voucher-board v-show="panels.partner" class="vb-panel-body">
+            <dl data-ui-sales-voucher-board v-if="sideInfo">
+              <dt data-ui-sales-voucher-board>거래처코드</dt><dd data-ui-sales-voucher-board>{{ sideInfo.code || '—' }}</dd>
+              <dt data-ui-sales-voucher-board>거래처명</dt><dd data-ui-sales-voucher-board>{{ sideInfo.name || '—' }}</dd>
+              <dt data-ui-sales-voucher-board>사업자번호</dt><dd data-ui-sales-voucher-board>{{ sideInfo.bizNo || '—' }}</dd>
             </dl>
-            <p v-else class="dim">행을 선택하면 표시됩니다</p>
+            <p data-ui-sales-voucher-board v-else class="dim">행을 선택하면 표시됩니다</p>
           </div>
         </section>
-        <section class="vb-panel">
-          <button type="button" class="vb-panel-head" :aria-expanded="panels.reason" @click="panels.reason = !panels.reason">🚫 불공사유<span>▾</span></button>
-          <div v-show="panels.reason" class="vb-panel-body">
-            <label class="vb-field">불공사유 선택 <small>F2 도움</small>
-              <input
+        <section data-ui-sales-voucher-board class="vb-panel">
+          <button data-ui-sales-voucher-board type="button" class="vb-panel-head" :aria-expanded="panels.reason" @click="panels.reason = !panels.reason">🚫 불공사유<span data-ui-sales-voucher-board>▾</span></button>
+          <div data-ui-sales-voucher-board v-show="panels.reason" class="vb-panel-body">
+            <label data-ui-sales-voucher-board class="vb-field">불공사유 선택 <small data-ui-sales-voucher-board>F2 도움</small>
+              <input data-ui-sales-voucher-board
                 class="vb-cell" :value="session.selected ? session.draft.nonDeductionReason ?? '' : ''" :disabled="!session.selected || locked"
                 placeholder="F2로 팝업 선택 또는 직접입력" aria-label="불공사유 (F2 도움)"
                 @input="session.draft.nonDeductionReason = ($event.target as HTMLInputElement).value; journal.edit()"
@@ -630,199 +630,74 @@ const datePart = (part: string) => String(Number(part))
             </label>
           </div>
         </section>
-        <section class="vb-panel">
-          <button type="button" class="vb-panel-head" :aria-expanded="panels.history" @click="panels.history = !panels.history">🕓 상태이력<span>▾</span></button>
-          <div v-show="panels.history" class="vb-panel-body">
-            <ul v-if="sideInfo" class="vb-history">
-              <li><time>{{ selectedRow?.date }}</time>{{ collectOf(selectedRow!) === 'e' ? '홈택스 자동수집으로 등록' : collectOf(selectedRow!) === 'n' ? '비전자증빙 등록' : '수기입력으로 등록' }}</li>
-              <li v-for="(item, index) in history" :key="index"><time>{{ item.createdAt.slice(0, 16).replace('T', ' ') }}</time>{{ ACTION_LABEL[item.action] ?? item.action }} · {{ item.actor }}</li>
+        <section data-ui-sales-voucher-board class="vb-panel">
+          <button data-ui-sales-voucher-board type="button" class="vb-panel-head" :aria-expanded="panels.history" @click="panels.history = !panels.history">🕓 상태이력<span data-ui-sales-voucher-board>▾</span></button>
+          <div data-ui-sales-voucher-board v-show="panels.history" class="vb-panel-body">
+            <ul data-ui-sales-voucher-board v-if="sideInfo" class="vb-history">
+              <li data-ui-sales-voucher-board><time data-ui-sales-voucher-board>{{ selectedRow?.date }}</time>{{ collectOf(selectedRow!) === 'e' ? '홈택스 자동수집으로 등록' : collectOf(selectedRow!) === 'n' ? '비전자증빙 등록' : '수기입력으로 등록' }}</li>
+              <li data-ui-sales-voucher-board v-for="(item, index) in history" :key="index"><time data-ui-sales-voucher-board>{{ item.createdAt.slice(0, 16).replace('T', ' ') }}</time>{{ ACTION_LABEL[item.action] ?? item.action }} · {{ item.actor }}</li>
             </ul>
-            <p v-else class="dim">행을 선택하면 표시됩니다</p>
-            <p v-if="historyError" class="vb-error">{{ historyError }}</p>
+            <p data-ui-sales-voucher-board v-else class="dim">행을 선택하면 표시됩니다</p>
+            <p data-ui-sales-voucher-board v-if="historyError" class="vb-error">{{ historyError }}</p>
           </div>
         </section>
       </aside>
     </div>
 
-    <SearchDialog :open="draftPartnerOpen" :items="journal.partners.value" @close="draftPartnerOpen = false" @select="pickDraftPartner" />
+    <SearchDialog data-ui-sales-voucher-board :open="draftPartnerOpen" :items="journal.partners.value" @close="draftPartnerOpen = false" @select="pickDraftPartner" />
 
     <UiModal :open="!!bungeOpen" title="분개 선택" size="confirm" @close="bungeOpen = ''">
-      <div class="vb-choice">
-        <button v-for="no in ['1', '2', '3', '4', '5']" :key="no" type="button" class="vb-btn" @click="pickBunge(no)">{{ BUNGE_LABEL[SCREEN_TO_JOURNAL[no] ?? ''] }}</button>
+      <div data-ui-sales-voucher-board class="vb-choice">
+        <button data-ui-sales-voucher-board v-for="no in ['1', '2', '3', '4', '5']" :key="no" type="button" class="vb-btn" @click="pickBunge(no)">{{ BUNGE_LABEL[SCREEN_TO_JOURNAL[no] ?? ''] }}</button>
       </div>
     </UiModal>
 
     <UiModal :open="!!reasonTarget" title="불공제사유선택" @close="reasonTarget = ''">
-      <div class="vb-reasons" @keydown.enter.prevent="confirmReason">
-        <label v-for="reason in NONDEDUCT_REASONS" :key="reason.code"><input v-model="reasonPick" type="radio" :value="reason.code" /> <b>{{ reason.code }}</b> {{ reason.name }}</label>
+      <div data-ui-sales-voucher-board class="vb-reasons" @keydown.enter.prevent="confirmReason">
+        <label data-ui-sales-voucher-board v-for="reason in NONDEDUCT_REASONS" :key="reason.code"><input data-ui-sales-voucher-board v-model="reasonPick" type="radio" :value="reason.code" /> <b data-ui-sales-voucher-board>{{ reason.code }}</b> {{ reason.name }}</label>
       </div>
-      <template #footer><UiButton :disabled="!reasonPick" @click="confirmReason">확인</UiButton><UiButton @click="reasonTarget = ''">닫기(esc)</UiButton></template>
+      <template #footer><UiButton data-ui-sales-voucher-board :disabled="!reasonPick" @click="confirmReason">확인</UiButton><UiButton data-ui-sales-voucher-board @click="reasonTarget = ''">닫기(esc)</UiButton></template>
     </UiModal>
 
     <UiModal :open="bulkOpen" title="일괄변경" size="large" @close="!bulkBusy && (bulkOpen = false)">
-      <p class="dim">대상 {{ bulkTargets.length }}건 (체크한 전표, 없으면 선택한 전표) · 왼쪽 체크박스를 켠 항목만 변경합니다.</p>
-      <div class="vb-bulk">
-        <fieldset :class="{ off: !bulk.s1 }">
-          <legend><label><input v-model="bulk.s1" type="checkbox" /> 1. 계정과목 및 적요/품목</label></legend>
-          <div class="vb-bulk-grid" :inert="!bulk.s1">
-            <label>차변<select v-model="bulk.debit"><option value="">변경 안 함</option><option v-for="item in meta?.accounts" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
-            <label>대변<select v-model="bulk.credit"><option value="">변경 안 함</option><option v-for="item in meta?.accounts" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
-            <label>품목<select v-model="bulk.itemMode"><option value="0">0.없음</option><option value="1">1.품목지정</option></select><input v-model="bulk.item" :disabled="bulk.itemMode !== '1'" maxlength="200" aria-label="일괄 품목" /></label>
-            <label>적요<select v-model="bulk.memoMode"><option value="0">0.없음</option><option value="1">1.적요지정</option></select><input v-model="bulk.memo" :disabled="bulk.memoMode !== '1'" maxlength="500" aria-label="일괄 적요" /></label>
+      <p data-ui-sales-voucher-board class="dim">대상 {{ bulkTargets.length }}건 (체크한 전표, 없으면 선택한 전표) · 왼쪽 체크박스를 켠 항목만 변경합니다.</p>
+      <div data-ui-sales-voucher-board class="vb-bulk">
+        <fieldset data-ui-sales-voucher-board :class="{ off: !bulk.s1 }">
+          <legend data-ui-sales-voucher-board><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.s1" type="checkbox" /> 1. 계정과목 및 적요/품목</label></legend>
+          <div data-ui-sales-voucher-board class="vb-bulk-grid" :inert="!bulk.s1">
+            <label data-ui-sales-voucher-board>차변<select data-ui-sales-voucher-board v-model="bulk.debit"><option data-ui-sales-voucher-board value="">변경 안 함</option><option data-ui-sales-voucher-board v-for="item in meta?.accounts" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
+            <label data-ui-sales-voucher-board>대변<select data-ui-sales-voucher-board v-model="bulk.credit"><option data-ui-sales-voucher-board value="">변경 안 함</option><option data-ui-sales-voucher-board v-for="item in meta?.accounts" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
+            <label data-ui-sales-voucher-board>품목<select data-ui-sales-voucher-board v-model="bulk.itemMode"><option data-ui-sales-voucher-board value="0">0.없음</option><option data-ui-sales-voucher-board value="1">1.품목지정</option></select><input data-ui-sales-voucher-board v-model="bulk.item" :disabled="bulk.itemMode !== '1'" maxlength="200" aria-label="일괄 품목" /></label>
+            <label data-ui-sales-voucher-board>적요<select data-ui-sales-voucher-board v-model="bulk.memoMode"><option data-ui-sales-voucher-board value="0">0.없음</option><option data-ui-sales-voucher-board value="1">1.적요지정</option></select><input data-ui-sales-voucher-board v-model="bulk.memo" :disabled="bulk.memoMode !== '1'" maxlength="500" aria-label="일괄 적요" /></label>
           </div>
-          <small>※ 차변계정은 재고자산(0146~0175), 제조원가 ~ 판매/관리비(0501~0900) 계정만 사용 가능합니다.</small>
+          <small data-ui-sales-voucher-board>※ 차변계정은 재고자산(0146~0175), 제조원가 ~ 판매/관리비(0501~0900) 계정만 사용 가능합니다.</small>
         </fieldset>
-        <fieldset :class="{ off: !bulk.s2 }">
-          <legend><label><input v-model="bulk.s2" type="checkbox" /> 2. 공제여부 일괄변경</label></legend>
-          <div :inert="!bulk.s2" class="vb-radios"><label><input v-model="bulk.deduct" type="radio" value="1" /> 1.불공제</label><label><input v-model="bulk.deduct" type="radio" value="2" /> 2.공제</label></div>
-          <small>※ 불공제 → 일반전표로 이동, 공제 → 57.카과 · 58.카면 · 59.카영 유형으로 자동 반영됩니다.</small>
+        <fieldset data-ui-sales-voucher-board :class="{ off: !bulk.s2 }">
+          <legend data-ui-sales-voucher-board><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.s2" type="checkbox" /> 2. 공제여부 일괄변경</label></legend>
+          <div data-ui-sales-voucher-board :inert="!bulk.s2" class="vb-radios"><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.deduct" type="radio" value="1" /> 1.불공제</label><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.deduct" type="radio" value="2" /> 2.공제</label></div>
+          <small data-ui-sales-voucher-board>※ 불공제 → 일반전표로 이동, 공제 → 57.카과 · 58.카면 · 59.카영 유형으로 자동 반영됩니다.</small>
         </fieldset>
-        <fieldset :class="{ off: !bulk.s3 }">
-          <legend><label><input v-model="bulk.s3" type="checkbox" /> 3. 유형 일괄변경</label></legend>
-          <div :inert="!bulk.s3" class="vb-radios">
-            <label v-for="item in ['57.카과', '58.카면', '58.카면(의제)', '59.카영', '공통매입세액안분']" :key="item"><input v-model="bulk.type" type="radio" :value="item" /> {{ item }}</label>
+        <fieldset data-ui-sales-voucher-board :class="{ off: !bulk.s3 }">
+          <legend data-ui-sales-voucher-board><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.s3" type="checkbox" /> 3. 유형 일괄변경</label></legend>
+          <div data-ui-sales-voucher-board :inert="!bulk.s3" class="vb-radios">
+            <label data-ui-sales-voucher-board v-for="item in ['57.카과', '58.카면', '58.카면(의제)', '59.카영', '공통매입세액안분']" :key="item"><input data-ui-sales-voucher-board v-model="bulk.type" type="radio" :value="item" /> {{ item }}</label>
           </div>
-          <small>※ 유형변경은 공제 수정이 「공제」인 경우만 가능합니다.</small>
+          <small data-ui-sales-voucher-board>※ 유형변경은 공제 수정이 「공제」인 경우만 가능합니다.</small>
         </fieldset>
-        <fieldset :class="{ off: !bulk.s4 }">
-          <legend><label><input v-model="bulk.s4" type="checkbox" /> 4. 분개 일괄변경</label></legend>
-          <div :inert="!bulk.s4" class="vb-radios"><label v-for="item in [['0', '0.분개없음'], ['1', '1.현금'], ['4', '4.카드']]" :key="item[0]"><input v-model="bulk.journal" type="radio" :value="item[0]" /> {{ item[1] }}</label></div>
+        <fieldset data-ui-sales-voucher-board :class="{ off: !bulk.s4 }">
+          <legend data-ui-sales-voucher-board><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.s4" type="checkbox" /> 4. 분개 일괄변경</label></legend>
+          <div data-ui-sales-voucher-board :inert="!bulk.s4" class="vb-radios"><label data-ui-sales-voucher-board v-for="item in [['0', '0.분개없음'], ['1', '1.현금'], ['4', '4.카드']]" :key="item[0]"><input data-ui-sales-voucher-board v-model="bulk.journal" type="radio" :value="item[0]" /> {{ item[1] }}</label></div>
         </fieldset>
-        <fieldset :class="{ off: !bulk.s5 }">
-          <legend><label><input v-model="bulk.s5" type="checkbox" /> 5. 거래처 일괄변경</label></legend>
-          <div class="vb-bulk-grid" :inert="!bulk.s5">
-            <label>차변<select v-model="bulk.debitPartner"><option value="">선택</option><option v-for="item in meta?.partners" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
-            <label>대변<select v-model="bulk.creditPartner"><option value="">선택</option><option v-for="item in meta?.partners" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
+        <fieldset data-ui-sales-voucher-board :class="{ off: !bulk.s5 }">
+          <legend data-ui-sales-voucher-board><label data-ui-sales-voucher-board><input data-ui-sales-voucher-board v-model="bulk.s5" type="checkbox" /> 5. 거래처 일괄변경</label></legend>
+          <div data-ui-sales-voucher-board class="vb-bulk-grid" :inert="!bulk.s5">
+            <label data-ui-sales-voucher-board>차변<select data-ui-sales-voucher-board v-model="bulk.debitPartner"><option data-ui-sales-voucher-board value="">선택</option><option data-ui-sales-voucher-board v-for="item in meta?.partners" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
+            <label data-ui-sales-voucher-board>대변<select data-ui-sales-voucher-board v-model="bulk.creditPartner"><option data-ui-sales-voucher-board value="">선택</option><option data-ui-sales-voucher-board v-for="item in meta?.partners" :key="item.id" :value="item.id">{{ item.code }} {{ item.name }}</option></select></label>
           </div>
         </fieldset>
       </div>
-      <p v-if="bulkMessage" class="vb-error" role="alert">{{ bulkMessage }}</p>
-      <template #footer><UiButton variant="primary" :disabled="bulkBusy" @click="applyBulk">{{ bulkBusy ? '적용 중…' : '확인' }}</UiButton><UiButton :disabled="bulkBusy" @click="bulkOpen = false">닫기(esc)</UiButton></template>
+      <p data-ui-sales-voucher-board v-if="bulkMessage" class="vb-error" role="alert">{{ bulkMessage }}</p>
+      <template #footer><UiButton data-ui-sales-voucher-board variant="primary" :disabled="bulkBusy" @click="applyBulk">{{ bulkBusy ? '적용 중…' : '확인' }}</UiButton><UiButton data-ui-sales-voucher-board :disabled="bulkBusy" @click="bulkOpen = false">닫기(esc)</UiButton></template>
     </UiModal>
   </section>
 </template>
-
-<style scoped>
-.vb { --vb-line: #e3e8ef; --vb-head: #f1f4f8; --vb-sale: #dc2626; --vb-purchase: #2563eb; --vb-gold: #b7791f; font-size: 12px; color: var(--text); min-width: 0; }
-.vb-query { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 0; }
-.vb-query i { font-style: normal; color: var(--secondary); margin-right: 2px; }
-.vb-caption { color: var(--secondary); margin: 0 4px 0 8px; }
-.vb-tilde { margin: 0 6px; color: var(--secondary); }
-.vb-num { width: 34px; height: 28px; padding: 0 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center; font: inherit; font-variant-numeric: tabular-nums; background: var(--surface); color: var(--text); }
-.vb-num.y { width: 52px; }
-.vb-toggle, .vb-nav { display: inline-flex; }
-.vb-toggle button, .vb-nav button { height: 28px; padding: 0 12px; border: 1px solid var(--border); background: var(--surface); color: var(--secondary); font: inherit; cursor: pointer; }
-.vb-toggle button:first-child, .vb-nav button:first-child { border-radius: 4px 0 0 4px; }
-.vb-toggle button:last-child, .vb-nav button:last-child { border-radius: 0 4px 4px 0; border-left: 0; }
-.vb-toggle button[aria-pressed='true'] { background: #1e3a5f; border-color: #1e3a5f; color: #fff; font-weight: 600; }
-.vb-nav { margin-left: 4px; }
-.vb-nav button:not(:disabled) { color: var(--text); }
-.vb-nav button:disabled { opacity: .45; cursor: not-allowed; }
-.vb-nav-badge { padding: 3px 8px; border-radius: 10px; font-weight: 600; font-size: 11px; }
-.vb-nav-badge.prev { background: #fef3c7; color: #92400e; }
-.vb-nav-badge.next { background: #dbeafe; color: #1e40af; }
-.vb-btn { height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; cursor: pointer; margin-left: 4px; white-space: nowrap; }
-.vb-btn.icon { padding: 0 8px; margin: 0 2px; }
-.vb-btn:hover { border-color: var(--primary); color: var(--primary); }
-.vb-spacer { flex: 1; }
-.vb-pop-anchor { position: relative; }
-.vb-pop { position: absolute; right: 0; top: 32px; z-index: 30; width: 220px; display: grid; gap: 8px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgb(15 23 42 / 14%); }
-.vb-pop label { display: flex; gap: 6px; align-items: center; }
-.vb-pop small { color: var(--secondary); }
-.vb-pop-actions { display: flex; justify-content: flex-end; }
-.vb-sort { display: inline-flex; align-items: center; gap: 4px; color: var(--secondary); margin-bottom: 8px; }
-.vb-sort select { height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; }
-.vb-more { position: relative; margin-left: 4px; }
-.vb-more > summary { list-style: none; height: 28px; width: 32px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; background: var(--surface); }
-.vb-more > summary::-webkit-details-marker { display: none; }
-.vb-more-panel { position: absolute; right: 0; top: 32px; z-index: 30; width: min(720px, 90vw); max-height: 70vh; overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 8px 24px rgb(15 23 42 / 14%); padding: 8px; }
-.vb-error { margin: 4px 0; color: var(--danger); }
-.vb-tabs { display: flex; gap: 8px; align-items: stretch; padding: 8px 0; }
-.vb-all { width: 52px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
-.vb-all.on { background: #fff7e6; border-color: var(--vb-gold); color: var(--vb-gold); }
-.vb-tab-lines { flex: 1; display: grid; gap: 4px; min-width: 0; }
-.vb-tab-line { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 3px 4px; border-radius: 4px; }
-.vb-tab-line.sale { background: #fdf2f2; }
-.vb-tab-line.purchase { background: #eff5ff; }
-.vb-tab { height: 24px; padding: 0 8px; border: 1px solid transparent; border-radius: 3px; background: var(--surface); color: #334155; font: inherit; cursor: pointer; white-space: nowrap; }
-.vb-tab b { margin-left: 4px; font-weight: 600; color: var(--secondary); }
-.vb-tab.empty { color: #94a3b8; }
-.vb-tab.on { border-color: var(--primary); color: var(--primary); font-weight: 600; }
-.vb-tab-toggle { height: 24px; padding: 0 8px; border: 0; background: transparent; color: var(--secondary); font: inherit; cursor: pointer; }
-.vb-main { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 12px; align-items: start; }
-.vb-left { min-width: 0; display: grid; gap: 10px; }
-.vb-grid-wrap { overflow: auto; max-height: 520px; min-height: 260px; border: 1px solid var(--vb-line); border-radius: 6px; }
-.vb-grid { width: 100%; min-width: 1120px; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-.vb-grid th { position: sticky; top: 0; z-index: 2; height: 30px; padding: 0 4px; background: var(--vb-head); color: #475569; font-weight: 600; text-align: center; border-bottom: 1px solid var(--vb-line); white-space: nowrap; }
-.vb-grid th.sortable { cursor: pointer; }
-.vb-grid th i { font-style: normal; font-size: 9px; margin-left: 2px; color: var(--primary); }
-.vb-grid td { height: 30px; padding: 0 5px; border-bottom: 1px solid #edf0f4; border-right: 1px solid #f1f3f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--surface); }
-.vb-grid tbody tr { cursor: pointer; }
-.vb-grid tbody tr:hover td { background: #f8fafc; }
-.vb-grid tbody tr.sel td { background: #fff7e6; }
-.vb-grid .c { text-align: center; }
-.vb-grid .r { text-align: right; }
-.vb-grid .num { font-variant-numeric: tabular-nums; }
-.vb-grid .strong { font-weight: 700; }
-.vb-grid .dim, .vb .dim { color: var(--secondary); }
-.vb-grid .ell { overflow: hidden; text-overflow: ellipsis; }
-.vb-grid tbody td.wrap { white-space: normal; line-height: 1.3; padding-top: 3px; padding-bottom: 3px; word-break: keep-all; overflow-wrap: anywhere; }
-.vb-grid td.sat { color: #2563eb; }
-.vb-grid td.sun, .vb-grid td.holiday { color: #dc2626; }
-.vb-grid td.zerovat { background: #e0f2fe !important; }
-.vb-grid .codecell { cursor: pointer; text-decoration: underline dotted; }
-.vb-grid .warn, .vb .warn { color: #c2410c; }
-.vb-type { display: inline-flex; gap: 4px; align-items: center; }
-.vb-flow-badge { padding: 0 4px; border-radius: 3px; font-size: 10px; font-weight: 700; color: #fff; }
-.vb-flow-badge.sale { background: var(--vb-sale); }
-.vb-flow-badge.purchase { background: var(--vb-purchase); }
-.vb-code { padding: 1px 6px; border-radius: 3px; font-weight: 600; }
-.vb-code.sale { background: #fee2e2; color: #b91c1c; }
-.vb-code.purchase { background: #dbeafe; color: #1d4ed8; }
-.vb-review { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 3px; background: #bae6fd; color: #075985; font-size: 10px; }
-.vb-review.inline { margin-left: 6px; }
-.vb-cell { width: 100%; height: 22px; padding: 0 4px; border: 1px solid var(--border); border-radius: 3px; background: var(--surface); color: var(--text); font: inherit; }
-.vb-grid select { width: 100%; height: 22px; border: 1px solid var(--border); border-radius: 3px; background: var(--surface); color: var(--text); font: inherit; }
-.vb-chip { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 600; }
-.vb-chip.c-e { background: #dcfce7; color: #15803d; }
-.vb-chip.c-n { background: #fef3c7; color: #b45309; }
-.vb-chip.c-m { background: #e0e7ff; color: #4338ca; }
-.vb-bunge { font-weight: 600; color: #6d28d9; }
-.vb-bunge.b-1 { color: #15803d; }
-.vb-bunge.b-4 { color: #7c3aed; }
-.vb-draft td { background: #fff8eb; }
-.vb-empty { height: 120px; text-align: center; color: var(--secondary); white-space: normal; }
-.vb-empty.small { height: 60px; }
-.vb-grid tfoot td { position: sticky; bottom: 0; z-index: 1; height: 28px; background: #f6f8fb; border-top: 1px solid var(--vb-line); }
-.vb-grid tfoot tr.vb-sub td { background: #fbfcfe; }
-.vb-grid tfoot .gold { color: var(--vb-gold); }
-.vb-lines { overflow: auto; border: 1px solid var(--vb-line); border-radius: 6px; }
-.vb-lines .vb-grid { min-width: 820px; }
-.vb-side { display: grid; gap: 10px; }
-.vb-panel { border: 1px solid var(--vb-line); border-radius: 6px; background: var(--surface); overflow: hidden; }
-.vb-panel-head { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 0; background: #f8fafc; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
-.vb-panel-head[aria-expanded='false'] span { transform: rotate(-90deg); }
-.vb-panel-body { padding: 10px 12px; }
-.vb-panel-body dl { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 6px 8px; margin: 0; }
-.vb-panel-body dt { color: var(--secondary); }
-.vb-panel-body dd { margin: 0; overflow-wrap: anywhere; }
-.vb-panel-body p { margin: 4px 0; text-align: center; }
-.vb-field { display: grid; gap: 6px; color: var(--secondary); }
-.vb-field small { color: var(--primary); font-weight: 600; }
-.vb-field .vb-cell { height: 28px; }
-.vb-history { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
-.vb-history time { display: block; color: var(--secondary); font-size: 11px; }
-.vb-choice { display: grid; gap: 6px; }
-.vb-reasons { display: grid; gap: 6px; max-height: 50vh; overflow: auto; }
-.vb-reasons label { display: flex; gap: 6px; align-items: baseline; }
-.vb-bulk { display: grid; gap: 10px; }
-.vb-bulk fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; display: grid; gap: 6px; }
-.vb-bulk fieldset.off > div, .vb-bulk fieldset.off > small { opacity: .45; }
-.vb-bulk legend { font-weight: 700; padding: 0 4px; }
-.vb-bulk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.vb-bulk-grid label { display: grid; gap: 4px; }
-.vb-bulk select, .vb-bulk input:not([type]) { height: 28px; border: 1px solid var(--border); border-radius: 4px; padding: 0 6px; font: inherit; background: var(--surface); color: var(--text); }
-.vb-radios { display: flex; flex-wrap: wrap; gap: 12px; }
-.vb-bulk small { color: var(--secondary); }
-@media (max-width: 1100px) { .vb-main { grid-template-columns: minmax(0, 1fr); } }
-</style>

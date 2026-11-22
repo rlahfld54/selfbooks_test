@@ -57,46 +57,33 @@ function register() {
 
 <template>
   <UiModal :open="true" title="거래처 엑셀 등록" size="large" @close="!saving && emit('close')">
-    <div class="import-content">
-      <p class="info-banner">검사 결과를 확인한 뒤 전체 행을 DB에 저장합니다. 오류·경고 사유와 원문도 보존하며, 저장한 거래처는 새로고침 후에도 유지됩니다.</p>
-      <p>필수 컬럼: {{ requiredFields.map(([, label]) => label).join(', ') }}. 나머지 컬럼은 생략하거나 비워도 등록할 수 있습니다. 법인등록번호는 빈 값을 허용합니다. 사업자 구분: 1 개인 / 2 법인. 번호·코드는 엑셀에서 텍스트로 입력하세요.</p>
-      <label>엑셀 파일 (.xls / .xlsx, 최대 5MB)<input type="file" :disabled="saving" accept=".xls,.xlsx" aria-label="거래처 엑셀 파일" @change="selectFile" /></label>
-      <p v-if="busy" role="status">파일을 읽는 중입니다.</p>
-      <p v-if="error" role="alert" class="import-error">{{ error }}</p>
-      <p v-if="saveError" role="alert" class="import-error">{{ saveError }} 파일을 유지했습니다. 다시 저장할 수 있습니다.</p>
+    <div data-ui-partner-import-dialog class="import-content">
+      <p data-ui-partner-import-dialog class="info-banner">검사 결과를 확인한 뒤 전체 행을 DB에 저장합니다. 오류·경고 사유와 원문도 보존하며, 저장한 거래처는 새로고침 후에도 유지됩니다.</p>
+      <p data-ui-partner-import-dialog>필수 컬럼: {{ requiredFields.map(([, label]) => label).join(', ') }}. 나머지 컬럼은 생략하거나 비워도 등록할 수 있습니다. 법인등록번호는 빈 값을 허용합니다. 사업자 구분: 1 개인 / 2 법인. 번호·코드는 엑셀에서 텍스트로 입력하세요.</p>
+      <label data-ui-partner-import-dialog>엑셀 파일 (.xls / .xlsx, 최대 5MB)<input data-ui-partner-import-dialog type="file" :disabled="saving" accept=".xls,.xlsx" aria-label="거래처 엑셀 파일" @change="selectFile" /></label>
+      <p data-ui-partner-import-dialog v-if="busy" role="status">파일을 읽는 중입니다.</p>
+      <p data-ui-partner-import-dialog v-if="error" role="alert" class="import-error">{{ error }}</p>
+      <p data-ui-partner-import-dialog v-if="saveError" role="alert" class="import-error">{{ saveError }} 파일을 유지했습니다. 다시 저장할 수 있습니다.</p>
       <template v-if="workbook">
-        <label>시트 선택 <select v-model="selectedSheet" :disabled="saving" aria-label="시트 선택" @change="inspect"><option v-for="name in workbook.SheetNames" :key="name">{{ name }}</option></select></label>
-        <p>{{ filename }}</p>
+        <label data-ui-partner-import-dialog>시트 선택 <select data-ui-partner-import-dialog v-model="selectedSheet" :disabled="saving" aria-label="시트 선택" @change="inspect"><option data-ui-partner-import-dialog v-for="name in workbook.SheetNames" :key="name">{{ name }}</option></select></label>
+        <p data-ui-partner-import-dialog>{{ filename }}</p>
       </template>
       <template v-if="preview">
-        <p role="status">총 {{ preview.rows.length }}건 · 오류 {{ errorCount }}건 · 확인요망 {{ warningCount }}건</p>
-        <p v-if="preview.unknown.length">추가 컬럼도 상세 정보에 보존합니다: {{ preview.unknown.join(', ') }}</p>
-        <p v-if="errorCount" class="import-error">오류가 있어도 전체 행을 등록할 수 있습니다. 오류 내용은 등록 후 상세 정보에 남습니다.</p>
-        <label><input v-model="errorsOnly" type="checkbox" />오류 행만 보기</label>
-        <p>표시 {{ filteredRows.length }}건 / 전체 {{ preview.rows.length }}건 · 필터와 관계없이 전체 행을 등록합니다.</p>
-        <p v-if="!filteredRows.length" role="status">오류 행이 없습니다.</p>
-        <div class="import-table" tabindex="0" aria-label="엑셀 미리보기 스크롤">
-          <table><caption class="sr-only">거래처 엑셀 미리보기</caption><thead><tr><th>엑셀 행</th><th>검사 결과</th><th v-for="field in fields" :key="field[0]">{{ field[1] }}</th><th v-for="(header, i) in preview.headers" v-show="preview.unknown.includes(header)" :key="i">{{ header }}</th></tr></thead>
-            <tbody><tr v-for="row in visible" :key="row.line"><td>{{ row.line }}</td><td><span v-if="!row.errors.length && !row.warnings.length">정상</span><div v-for="message in row.errors" :key="message" class="import-error">{{ message }}</div><div v-for="message in row.warnings" :key="message">확인요망: {{ message }}</div></td><td v-for="field in fields" :key="field[0]">{{ row.values[field[0]] || '—' }}</td><td v-for="(header, i) in preview.headers" v-show="preview.unknown.includes(header)" :key="i">{{ row.values[`extra:${i}:${header}`] }}</td></tr></tbody>
+        <p data-ui-partner-import-dialog role="status">총 {{ preview.rows.length }}건 · 오류 {{ errorCount }}건 · 확인요망 {{ warningCount }}건</p>
+        <p data-ui-partner-import-dialog v-if="preview.unknown.length">추가 컬럼도 상세 정보에 보존합니다: {{ preview.unknown.join(', ') }}</p>
+        <p data-ui-partner-import-dialog v-if="errorCount" class="import-error">오류가 있어도 전체 행을 등록할 수 있습니다. 오류 내용은 등록 후 상세 정보에 남습니다.</p>
+        <label data-ui-partner-import-dialog><input data-ui-partner-import-dialog v-model="errorsOnly" type="checkbox" />오류 행만 보기</label>
+        <p data-ui-partner-import-dialog>표시 {{ filteredRows.length }}건 / 전체 {{ preview.rows.length }}건 · 필터와 관계없이 전체 행을 등록합니다.</p>
+        <p data-ui-partner-import-dialog v-if="!filteredRows.length" role="status">오류 행이 없습니다.</p>
+        <div data-ui-partner-import-dialog class="import-table" tabindex="0" aria-label="엑셀 미리보기 스크롤">
+          <table data-ui-partner-import-dialog><caption data-ui-partner-import-dialog class="sr-only">거래처 엑셀 미리보기</caption><thead data-ui-partner-import-dialog><tr data-ui-partner-import-dialog><th data-ui-partner-import-dialog>엑셀 행</th><th data-ui-partner-import-dialog>검사 결과</th><th data-ui-partner-import-dialog v-for="field in fields" :key="field[0]">{{ field[1] }}</th><th data-ui-partner-import-dialog v-for="(header, i) in preview.headers" v-show="preview.unknown.includes(header)" :key="i">{{ header }}</th></tr></thead>
+            <tbody data-ui-partner-import-dialog><tr data-ui-partner-import-dialog v-for="row in visible" :key="row.line"><td data-ui-partner-import-dialog>{{ row.line }}</td><td data-ui-partner-import-dialog><span data-ui-partner-import-dialog v-if="!row.errors.length && !row.warnings.length">정상</span><div data-ui-partner-import-dialog v-for="message in row.errors" :key="message" class="import-error">{{ message }}</div><div data-ui-partner-import-dialog v-for="message in row.warnings" :key="message">확인요망: {{ message }}</div></td><td data-ui-partner-import-dialog v-for="field in fields" :key="field[0]">{{ row.values[field[0]] || '—' }}</td><td data-ui-partner-import-dialog v-for="(header, i) in preview.headers" v-show="preview.unknown.includes(header)" :key="i">{{ row.values[`extra:${i}:${header}`] }}</td></tr></tbody>
           </table>
         </div>
-        <div class="import-pages"><UiButton :disabled="page === 1" @click="page--">이전</UiButton><span>{{ page }} / {{ pageCount }}</span><UiButton :disabled="page >= pageCount" @click="page++">다음</UiButton></div>
+        <div data-ui-partner-import-dialog class="import-pages"><UiButton data-ui-partner-import-dialog :disabled="page === 1" @click="page--">이전</UiButton><span data-ui-partner-import-dialog>{{ page }} / {{ pageCount }}</span><UiButton data-ui-partner-import-dialog :disabled="page >= pageCount" @click="page++">다음</UiButton></div>
 
       </template>
     </div>
-    <template #footer><UiButton :disabled="saving" @click="emit('close')">취소</UiButton><UiButton variant="primary" :disabled="busy || saving || !preview" @click="register">{{ saving ? '저장 중…' : `${preview?.rows.length || 0}건 DB에 저장` }}</UiButton></template>
+    <template #footer><UiButton data-ui-partner-import-dialog :disabled="saving" @click="emit('close')">취소</UiButton><UiButton data-ui-partner-import-dialog variant="primary" :disabled="busy || saving || !preview" @click="register">{{ saving ? '저장 중…' : `${preview?.rows.length || 0}건 DB에 저장` }}</UiButton></template>
   </UiModal>
 </template>
-
-<style scoped>
-.import-content { display: grid; gap: 14px; }
-.import-content p { margin: 0; }
-.import-content label { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.import-content input[type=file] { max-width: 100%; }
-.import-table { overflow: auto; max-height: 380px; border: 1px solid var(--border); }
-table { border-collapse: collapse; font-size: 13px; width: max-content; }
-th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); max-width: 280px; overflow-wrap: anywhere; }
-th { position: sticky; top: 0; background: var(--surface, white); }
-.import-error { color: #b42318; }
-.import-pages { display: flex; justify-content: center; align-items: center; gap: 16px; }
-</style>
