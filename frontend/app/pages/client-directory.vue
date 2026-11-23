@@ -2,7 +2,7 @@
 import { useClientStore } from '~/stores/clientStore'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
 import { managementSession } from '~/features/management/session'
-import { filterClients } from '~/features/management/management'
+import { filterClients, createManagementFilters, resetManagementFilters } from '~/features/management/management'
 import { clientWorkLinks } from '~/features/management/client-work'
 import { assignById, assignmentRole, canOpenClient } from '~/features/management/assignments'
 import { useClientAssignments } from '~/features/management/useClientAssignments'
@@ -29,30 +29,16 @@ const filteredActiveStaff = computed(() =>
   activeStaff.value.filter((row) => (row.name + row.team).includes(staffQuery.value.trim())),
 )
 let toastTimer: ReturnType<typeof setTimeout> | undefined
-const filters = reactive<ManagementFilters>({
-  query: '',
-  biz: '',
-  kind: '',
-  status: '',
-  person: '',
-  review: '',
-  team: '',
-  role: '',
-})
+const filters = reactive<ManagementFilters>(createManagementFilters())
 function setFilter(key: keyof ManagementFilters, value: string) {
   filters[key] = value
 }
-function resetFilters() {
-  filters.query = ''
-  filters.biz = ''
-  filters.kind = ''
-  filters.status = ''
-  filters.person = ''
-  filters.review = ''
-  filters.team = ''
-  filters.role = ''
-}
-const selectedClient = ref<Client>()
+function resetFilters() { resetManagementFilters(filters) }
+const selectedClientId = ref('')
+const selectedClient = computed<Client | undefined>({
+  get: () => clientStore.clients.find(row => row.id === selectedClientId.value && canOpenClient(row, directoryUser.value)),
+  set: client => { selectedClientId.value = client?.id ?? '' },
+})
 const {
   user: directoryUser,
   admin,
@@ -120,6 +106,7 @@ const rows = computed(() => ({
 watch(
   () => [route.query.client, data.directory.status] as const,
   ([id]) => {
+    if (typeof id !== 'string') return
     selectedClient.value = clientStore.clients.find(
       (row) => row.id === id && canOpenClient(row, directoryUser.value),
     )
@@ -237,6 +224,7 @@ onBeforeUnmount(() => clearTimeout(toastTimer))
       :total="directoryTab === 'mine' ? mine.length : clientStore.clients.length"
       @filter="setFilter"
       @reset="resetFilters"
+      @retry="reloadDirectory()"
       @select="selectClient"
       @work="openClientWork($event)" />
     <ManagementClientDrawer

@@ -1,24 +1,8 @@
 <script setup lang="ts">
-import { formatAmount } from "~/utils/formatAmount";
-defineOptions({ inheritAttrs: false });
-withDefaults(defineProps<{ modelValue?: string }>(), { modelValue: "" });
-const emit = defineEmits<{ "update:modelValue": [value: string] }>();
-const focused = ref(false);
-function update(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const value = input.value.replace(/[^\d-]/g, "").replace(/(?!^)-/g, "");
-  input.value = value;
-  emit("update:modelValue", value);
-}
+defineOptions({ inheritAttrs: false })
+withDefaults(defineProps<{ modelValue?: string }>(), { modelValue: '' })
+defineEmits<{ 'update:modelValue': [value: string] }>()
 </script>
 <template>
-  <input
-    v-bind="$attrs"
-    class="input numeric"
-    inputmode="numeric"
-    :value="focused ? modelValue : formatAmount(modelValue)"
-    @input="update"
-    @focus="focused = true"
-    @blur="focused = false"
-  />
+  <UiInput v-bind="$attrs" mode="amount" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" />
 </template>

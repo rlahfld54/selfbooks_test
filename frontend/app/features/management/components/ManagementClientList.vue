@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useClientStore } from '~/stores/clientStore'
 import ManagementBadge from '../ManagementBadge.vue'
 import { formatAmount } from '~/utils/formatAmount'
 import { formatBusinessNumber } from '~/utils/number-validation'
@@ -10,7 +9,7 @@ import type { Density } from '~/types/workspace'
 import type { Client } from '../data'
 import { clientTypes, clientStatuses, reviewStatuses } from '../options'
 import { assignmentRole } from '../assignments'
-const clientStore = useClientStore()
+
 const props = defineProps<{
   rows: Pick<ManagementRows, 'filteredClients' | 'clientStats'>
   filters: ManagementFilters
@@ -29,23 +28,19 @@ const props = defineProps<{
 const emit = defineEmits<{
   filter: [key: keyof ManagementFilters, value: string]
   reset: []
+  retry: []
   select: [client: Client]
   work: [client: Client]
 }>()
-const page = ref(1)
-const pageSize = 5
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(props.rows.filteredClients.length / pageSize)),
-)
-watch(
-  () => [props.mine, ...Object.values(props.filters)],
-  () => {
-    page.value = 1
-  },
-)
-watch(pageCount, (count) => {
-  page.value = Math.min(page.value, count)
-})
+const columns = computed(() => [
+  { key: 'name', label: '업체명' }, { key: 'biz', label: '사업자등록번호' },
+  { key: 'type', label: '구분' }, { key: 'ceo', label: props.mine ? '내 담당 역할' : '대표자명', sortable: !props.mine },
+  { key: 'primary', label: '주담당자' },
+  ...(!props.mine ? [{ key: 'secondary', label: '보조담당자' }] : []),
+  { key: 'status', label: '수임 상태' }, { key: 'company', label: props.mine ? '검토 상태' : '회사정보' },
+  ...(!props.mine ? [{ key: 'environment', label: '환경설정' }] : []),
+  { key: 'work', label: '업무 바로가기', sortable: false },
+])
 function updateFilter(key: keyof ManagementFilters, event: Event) {
   if (event instanceof InputEvent && event.isComposing) return
   emit('filter', key, (event.target as HTMLInputElement | HTMLSelectElement).value)
@@ -172,95 +167,43 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
       </span>
       <span data-ui-management-client-list class="muted-note">업체 행을 클릭하면 우측 상세정보가 열립니다.</span>
     </div>
-    <div data-ui-management-client-list class="table-scroll">
-      <table data-ui-management-client-list class="management-table" :class="{ compact: density === 'compact' }">
-        <caption data-ui-management-client-list class="sr-only">수임업체 목록</caption>
-        <thead data-ui-management-client-list>
-          <tr data-ui-management-client-list>
-            <th data-ui-management-client-list scope="col">업체명</th>
-            <th data-ui-management-client-list scope="col">사업자등록번호</th>
-            <th data-ui-management-client-list scope="col">구분</th>
-            <th data-ui-management-client-list scope="col">{{ mine ? '내 담당 역할' : '대표자명' }}</th>
-            <th data-ui-management-client-list scope="col">주담당자</th>
-            <th data-ui-management-client-list v-if="!mine" scope="col">보조담당자</th>
-            <th data-ui-management-client-list scope="col">수임 상태</th>
-            <th data-ui-management-client-list scope="col">{{ mine ? '검토 상태' : '회사정보' }}</th>
-            <th data-ui-management-client-list v-if="!mine" scope="col">환경설정</th>
-            <th data-ui-management-client-list scope="col">업무 바로가기</th>
-          </tr>
-        </thead>
-        <tbody data-ui-management-client-list>
-          <tr data-ui-management-client-list
-            v-for="client in loading || error
-              ? []
-              : clientStore.clients
-                  .filter((row) => rows.filteredClients.includes(row))
-                  .slice((page - 1) * pageSize, page * pageSize)"
-            :key="client.id"
-            :class="{ selected: selectedId === client.id }"
-            @click="emit('select', client)">
-            <td data-ui-management-client-list>
-              <button data-ui-management-client-list class="small-link table-name" @click.stop="emit('select', client)">
-                {{ client.name }}
-              </button>
-              <div data-ui-management-client-list class="table-sub">{{ client.id }}</div>
-            </td>
-            <td data-ui-management-client-list>{{ formatBusinessNumber(client.biz) || '정보 없음' }}</td>
-            <td data-ui-management-client-list><ManagementBadge data-ui-management-client-list :value="client.type" /></td>
-            <td data-ui-management-client-list>{{ mine ? assignmentRole(client, userId) : client.ceo || '정보 없음' }}</td>
-            <td data-ui-management-client-list>{{ client.primary || '미배정' }}</td>
-            <td data-ui-management-client-list v-if="!mine">{{ client.secondary.join(', ') || '—' }}</td>
-            <td data-ui-management-client-list><ManagementBadge data-ui-management-client-list :value="client.status" /></td>
-            <td data-ui-management-client-list>
-              <span data-ui-management-client-list v-if="mine">등록</span>
-              <ManagementBadge data-ui-management-client-list :value="client.company || '정보 없음'" />
-              <div data-ui-management-client-list v-if="mine" class="review-line">
-                환경
-                <ManagementBadge data-ui-management-client-list :value="client.environment || '정보 없음'" />
-              </div>
-            </td>
-            <td data-ui-management-client-list v-if="!mine"><ManagementBadge data-ui-management-client-list :value="client.environment" /></td>
-            <td data-ui-management-client-list>
-              <button data-ui-management-client-list
-                class="small-link"
-                :aria-label="client.name + ' 업무 열기'"
-                @click.stop="emit('work', client)">
-                업무 열기 →
-              </button>
-            </td>
-          </tr>
-          <tr data-ui-management-client-list v-if="loading">
-            <td data-ui-management-client-list :colspan="mine ? 8 : 10" role="status" class="empty">
-              수임업체를 불러오는 중입니다.
-            </td>
-          </tr>
-          <tr data-ui-management-client-list v-else-if="error">
-            <td data-ui-management-client-list :colspan="mine ? 8 : 10" class="empty" role="alert">
-              {{ error }} 상단 새로고침 버튼으로 다시 조회해 주세요.
-            </td>
-          </tr>
-          <tr data-ui-management-client-list v-else-if="!rows.filteredClients.length">
-            <td data-ui-management-client-list :colspan="mine ? 8 : 10" class="empty">
-              {{
-                total
-                  ? '검색 조건에 맞는 수임업체가 없습니다. 필터를 초기화해보세요.'
-                  : mine
-                    ? '배정된 담당 업체가 없습니다.'
-                    : '등록된 수임업체가 없습니다.'
-              }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <footer data-ui-management-client-list class="table-footer">
-      <span data-ui-management-client-list>{{ formatAmount(rows.filteredClients.length) }}개 업체 · 실제 조회</span>
-      <span data-ui-management-client-list class="muted-note">담당자 배정은 임시 적용</span>
-      <nav data-ui-management-client-list class="pagination" aria-label="업체 목록 페이지">
-        <button data-ui-management-client-list class="btn sm" :disabled="page <= 1" @click="page--">이전</button>
-        <span data-ui-management-client-list aria-live="polite">{{ page }} / {{ pageCount }}</span>
-        <button data-ui-management-client-list class="btn sm" :disabled="page >= pageCount" @click="page++">다음</button>
-      </nav>
-    </footer>
+    <DataTable
+      appearance="management" :columns="columns" :rows="rows.filteredClients"
+      :density="density" :selected="selectedId" :loading="loading" :error="error"
+      :show-controls="false" :selection-column="false" :sample="false" configurable-columns
+      caption="수임업체 목록" :page-size="5"
+      :empty-title="total ? '검색 조건에 맞는 수임업체가 없습니다.' : mine ? '배정된 담당 업체가 없습니다.' : '등록된 수임업체가 없습니다.'"
+      :empty-description="total ? '필터를 초기화해보세요.' : ''"
+      @select="emit('select', $event)" @retry="emit('retry')">
+      <template #cell-name="{ row }">
+        <button class="small-link table-name" @click.stop="emit('select', row)">{{ row.name }}</button>
+        <div class="table-sub">{{ row.id }}</div>
+      </template>
+      <template #cell-biz="{ row }">{{ formatBusinessNumber(row.biz) || '정보 없음' }}</template>
+      <template #cell-type="{ row }"><ManagementBadge :value="row.type" /></template>
+      <template #cell-ceo="{ row }">{{ mine ? assignmentRole(row, userId) : row.ceo || '정보 없음' }}</template>
+      <template #cell-primary="{ row }">{{ row.primary || '미배정' }}</template>
+      <template #cell-secondary="{ row }">{{ row.secondary.join(', ') || '—' }}</template>
+      <template #cell-status="{ row }"><ManagementBadge :value="row.status" /></template>
+      <template #cell-company="{ row }">
+        <span v-if="mine">등록</span><ManagementBadge :value="row.company || '정보 없음'" />
+        <div v-if="mine" data-ui-management-client-list class="review-line">환경 <ManagementBadge :value="row.environment || '정보 없음'" /></div>
+      </template>
+      <template #cell-environment="{ row }"><ManagementBadge :value="row.environment || '정보 없음'" /></template>
+      <template #cell-work="{ row }">
+        <button class="small-link" :aria-label="row.name + ' 업무 열기'" @click.stop="emit('work', row)">업무 열기 →</button>
+      </template>
+      <template #footer="{ page, pageCount, previous, next }">
+        <footer data-ui-management-client-list class="table-footer">
+          <span>{{ formatAmount(rows.filteredClients.length) }}개 업체 · 실제 조회</span>
+          <span class="muted-note">담당자 배정은 임시 적용</span>
+          <nav data-ui-management-client-list class="pagination" aria-label="업체 목록 페이지">
+            <button class="btn sm" :disabled="page <= 1 || loading" @click="previous">이전</button>
+            <span aria-live="polite">{{ page }} / {{ pageCount }}</span>
+            <button class="btn sm" :disabled="page >= pageCount || loading" @click="next">다음</button>
+          </nav>
+        </footer>
+      </template>
+    </DataTable>
   </section>
 </template>

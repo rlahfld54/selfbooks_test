@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/authStore'
 import { formatNumber } from '~/utils/number-validation'
 import { useWorkspaceContext } from '~/composables/useWorkspaceContext'
+import { createManagementFilters, resetManagementFilters } from '~/features/management/management'
 import { managementSession } from '~/features/management/session'
 import { usePermissionStore } from '~/stores/permissionStore'
 import { assignmentRole } from '~/features/management/assignments'
@@ -39,30 +40,16 @@ const filteredActiveStaff = computed(() =>
 )
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 const tab = ref('basic')
-const filters = reactive<ManagementFilters>({
-  query: '',
-  biz: '',
-  kind: '',
-  status: '',
-  person: '',
-  review: '',
-  team: '',
-  role: '',
-})
+const filters = reactive<ManagementFilters>(createManagementFilters())
 function setFilter(key: keyof ManagementFilters, value: string) {
   filters[key] = value
 }
-function resetFilters() {
-  filters.query = ''
-  filters.biz = ''
-  filters.kind = ''
-  filters.status = ''
-  filters.person = ''
-  filters.review = ''
-  filters.team = ''
-  filters.role = ''
-}
-const selectedStaff = ref<Staff>()
+function resetFilters() { resetManagementFilters(filters) }
+const selectedStaffId = ref('')
+const selectedStaff = computed<Staff | undefined>({
+  get: () => data.staff.find(row => row.id === selectedStaffId.value),
+  set: person => { selectedStaffId.value = person?.id ?? '' },
+})
 const branchId = ref('')
 const staff = computed(() =>
   data.staff.filter(
@@ -305,6 +292,7 @@ onBeforeUnmount(() => {
           :filters="filters"
           :density="density"
           @filter="setFilter"
+          @reset="resetFilters"
           @invite="open('직원 초대')"
           @select="selectedStaff = $event" />
         <ManagementPermissions v-else-if="tab === 'permissions'" />

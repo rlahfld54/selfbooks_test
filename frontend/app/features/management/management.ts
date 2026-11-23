@@ -1,4 +1,13 @@
 import type { Client, Staff } from './data'
+import type { ManagementFilters } from './view-types'
+
+export function createManagementFilters(): ManagementFilters {
+  return { query: '', biz: '', kind: '', status: '', person: '', review: '', team: '', role: '' }
+}
+
+export function resetManagementFilters(filters: ManagementFilters) {
+  Object.assign(filters, createManagementFilters())
+}
 export function filterClients(rows: Client[], query: string, biz: string, type: string, status: string, person: string, review: string) {
   const normalized = biz.replace(/\D/g, '')
   const text = query.trim().toLowerCase()

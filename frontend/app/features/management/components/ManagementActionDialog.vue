@@ -18,7 +18,12 @@ const props = defineProps<{
   filteredActiveStaff: Staff[]
   selectedStaff?: Staff
   message: string
+  busy?: boolean
 }>()
+const initial = ref('')
+const snapshot = () => JSON.stringify({ form: props.form, secondary: props.secondary })
+watch(() => props.modal, () => { initial.value = snapshot() }, { immediate: true })
+const dirty = computed(() => snapshot() !== initial.value)
 const emit = defineEmits<{
   close: []
   save: []
@@ -47,8 +52,8 @@ function toggleSecondary(name: string, event: Event) {
 </script>
 
 <template>
-  <ManagementDialog :label="title" @close="emit('close')">
-    <form id="management-form" @submit.prevent="emit('save')">
+  <ManagementDialog :label="title" :dirty="dirty" :busy="busy" @close="emit('close')">
+    <form id="management-form" @submit.prevent="!busy && emit('save')">
       <template v-if="modal === '수임업체 등록'">
         <div class="alert management-notice">
           기본정보를 먼저 등록한 뒤 기존 회사등록·환경등록 화면에서 검토하는 흐름입니다.
@@ -307,9 +312,9 @@ function toggleSecondary(name: string, event: Event) {
         {{ message }}
       </p>
     </form>
-    <template #footer>
-      <button class="btn" @click="emit('close')">취소</button>
-      <button class="btn primary" form="management-form">확인</button>
+    <template #footer="{ close }">
+      <button type="button" class="btn" :disabled="busy" @click="close">취소</button>
+      <button class="btn primary" form="management-form" :disabled="busy">{{ busy ? '처리 중…' : '확인' }}</button>
     </template>
   </ManagementDialog>
 </template>

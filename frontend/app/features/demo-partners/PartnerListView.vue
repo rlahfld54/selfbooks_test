@@ -142,10 +142,6 @@ function selectRow(row: Record<string, unknown>) {
       </UiButton>
     </PageToolbar>
     <p data-ui-partner-list-view v-if="notice" role="status" class="info-banner">{{ notice }}</p>
-    <p data-ui-partner-list-view v-if="error" role="alert" class="info-banner">
-      {{ error }}
-      <UiButton data-ui-partner-list-view @click="load">다시 시도</UiButton>
-    </p>
     <UiCard data-ui-partner-list-view :title="mode === 'partners' ? '거래처 목록' : '전표 조회 레이아웃 샘플'">
       <div data-ui-partner-list-view class="search-toolbar">
         <div data-ui-partner-list-view class="search-input">
@@ -155,11 +151,17 @@ function selectRow(row: Record<string, unknown>) {
             aria-label="거래처 검색"
             placeholder="업체명, 사업자등록번호 또는 코드를 검색하세요" />
         </div>
+        <UiButton :disabled="!session.query" @click="session.query = ''">초기화</UiButton>
         <span data-ui-partner-list-view class="muted">행을 선택하면 상세 정보가 열립니다.</span>
       </div>
       <DataTable data-ui-partner-list-view
         :columns="columns"
         :loading="loading"
+        :error="error"
+        configurable-columns
+        :empty-title="allRows.length ? '검색 조건에 맞는 거래처가 없습니다.' : '등록된 거래처가 없습니다.'"
+        :empty-description="allRows.length ? '검색어를 초기화해보세요.' : ''"
+        @retry="load"
         :sample="mode !== 'partners'"
         :page-size="mode === 'partners' ? 20 : 5"
         :rows="rows"

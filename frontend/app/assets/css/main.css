@@ -892,6 +892,7 @@ input[type='range'] {
 }
 .table-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -903,6 +904,54 @@ input[type='range'] {
   height: 30px;
   font-size: 11px;
   padding: 0 8px;
+}
+.table-column-picker {
+  position: relative;
+  margin-left: auto;
+}
+.table-column-picker > summary {
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface, #fff);
+}
+.table-column-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  max-height: 280px;
+  overflow: auto;
+  padding: 12px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px #17243b20;
+}
+.table-column-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.data-table-management > .table-controls {
+  margin: 0;
+  padding: 8px 12px;
+}
+.data-table-management > .pagination {
+  padding: 12px;
+}
+.data-table-management .sort-button {
+  text-align: left;
+  font: inherit;
+}
+.data-table-management .management-table tr.selected {
+  background: #eaf1ff;
+}
+.modal-description {
+  margin: 0 0 12px;
+  color: var(--secondary);
 }
 .table-scroll {
   overflow: auto;
@@ -3120,8 +3169,22 @@ textarea.input {
   }
 
   .management-dialog.modal[open] {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     max-width: calc(100vw - 40px);
+  }
+
+  .management-dialog.modal > .modal-body {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .management-dialog > .modal-head,
+  .management-dialog > .modal-foot,
+  .management-dialog > .drawer-head,
+  .management-dialog > .drawer-foot {
+    flex-shrink: 0;
   }
 
   .management-dialog.modal::backdrop {
@@ -6742,14 +6805,11 @@ th[data-ui-partner-import-dialog] { position: sticky; top: 0; background: var(--
   flex: 0 1 145px;
   min-width: 120px;
 }
-.table-scroll[data-ui-management-client-list] {
+.table-panel[data-ui-management-client-list] .data-table .table-scroll {
   overflow-x: auto;
 }
-.management-table[data-ui-management-client-list] {
+.table-panel[data-ui-management-client-list] .management-table {
   min-width: 1000px;
-}
-.management-table tr.selected[data-ui-management-client-list] {
-  background: #eaf1ff;
 }
 .pagination[data-ui-management-client-list] {
   display: flex;

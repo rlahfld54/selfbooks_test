@@ -19,8 +19,16 @@ defineProps<{
 const emit = defineEmits<{
   filter: [key: keyof ManagementFilters, value: string]
   invite: []
+  reset: []
   select: [staff: Staff]
 }>()
+const columns = [
+  { key: 'name', label: '이름' }, { key: 'login', label: '로그인 ID' },
+  { key: 'email', label: '이메일' }, { key: 'team', label: '부서/팀' },
+  { key: 'title', label: '직책' }, { key: 'role', label: '시스템 권한' },
+  { key: 'status', label: '계정 상태' }, { key: 'joined', label: '가입일' },
+  { key: 'actions', label: '관리', sortable: false },
+]
 function updateFilter(key: keyof ManagementFilters, event: Event) {
   if (event instanceof InputEvent && event.isComposing) return
   emit('filter', key, (event.target as HTMLInputElement | HTMLSelectElement).value)
@@ -73,55 +81,19 @@ function updateFilter(key: keyof ManagementFilters, event: Event) {
         <option value="">전체 상태</option>
         <option v-for="value in staffStatuses" :key="value">{{ value }}</option>
       </select>
+      <button type="button" class="btn sm" @click="emit('reset')">↻ 초기화</button>
       <span class="count-line">{{ formatAmount(rows.filteredStaff.length) }}명 표시</span>
     </div>
-    <div class="table-scroll">
-      <table class="management-table" :class="{ compact: density === 'compact' }">
-        <caption class="sr-only">
-          직원 목록
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">이름</th>
-            <th scope="col">로그인 ID</th>
-            <th scope="col">이메일</th>
-            <th scope="col">부서/팀</th>
-            <th scope="col">직책</th>
-            <th scope="col">시스템 권한</th>
-            <th scope="col">계정 상태</th>
-            <th scope="col">가입일</th>
-            <th scope="col">관리</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="employee in rows.filteredStaff"
-            :key="employee.id"
-            @click="emit('select', employee)"
-          >
-            <td class="table-name">{{ employee.name }}</td>
-            <td>{{ employee.login }}</td>
-            <td>{{ employee.email }}</td>
-            <td>{{ employee.team }}</td>
-            <td>{{ employee.title }}</td>
-            <td><ManagementBadge :value="employee.role" /></td>
-            <td><ManagementBadge :value="employee.status" /></td>
-            <td>{{ employee.joined }}</td>
-            <td>
-              <button
-                class="small-link"
-                :aria-label="employee.name + ' 상세 보기'"
-                @click.stop="emit('select', employee)"
-              >
-                상세 보기 →
-              </button>
-            </td>
-          </tr>
-          <tr v-if="!rows.filteredStaff.length">
-            <td colspan="9" class="empty">검색 조건에 해당하는 직원이 없습니다.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <DataTable appearance="management" :columns="columns" :rows="rows.filteredStaff" :density="density"
+      :show-controls="false" :selection-column="false" configurable-columns caption="직원 목록"
+      :empty-title="rows.staff.length ? '검색 조건에 해당하는 직원이 없습니다.' : '등록된 직원이 없습니다.'"
+      :empty-description="rows.staff.length ? '필터를 초기화해보세요.' : ''" @select="emit('select', $event)">
+      <template #cell-name="{ row }"><button class="small-link table-name" @click.stop="emit('select', row)">{{ row.name }}</button></template>
+      <template #cell-role="{ row }"><ManagementBadge :value="row.role" /></template>
+      <template #cell-status="{ row }"><ManagementBadge :value="row.status" /></template>
+      <template #cell-actions="{ row }">
+        <button class="small-link" :aria-label="row.name + ' 상세 보기'" @click.stop="emit('select', row)">상세 보기 →</button>
+      </template>
+    </DataTable>
   </div>
 </template>
