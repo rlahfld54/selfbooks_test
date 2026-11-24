@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import WorkspacePreview from '~/features/previews/WorkspacePreview.vue'
+import StatementsView from '~/features/statements/StatementsView.vue'
 definePageMeta({ workspaceTab: 'reports' })
 </script>
 
 <template>
-  <WorkspacePreview />
+  <StatementsView />
 </template>

@@ -89,3 +89,10 @@ POST/PUT 본문: `id`(신규 UUID, 재시도 시 동일 값), `version`(신규 0
 ## 2026-11-19 매입매출전표 업무 확장
 
 현재 DB 구조·저장 대상·추가 기능·검증·남은 범위는 [매입매출전표 확장 구현](sales-workbench.md)을 따른다. 이전 문서의 11/51 전용, 물리 삭제, 해솔문구 고정 회사 및 자동분개 미지원 설명은 이번 적용 범위에서 대체된다.
+
+## GET /api/ledger/balances (2026-11-24 재무제표)
+- 재무상태표 · 손익계산서 · 합계잔액시산표 집계. 쿼리: `from`, `to`(YYYY-MM-DD), `clientId`(선택, 없으면 매입매출전표와 같은 서버 지정 사업체).
+- 사무소 범위는 인증 정보로 정하고, `clientId`가 그 사무소 사업체가 아니면 404 CLIENT_NOT_FOUND.
+- 응답 data: { clientId, clientName, taxpayerKind, from, to, lines, rows: [{ code, name, engName, category, middle, nature, normalBalance, openDebit, openCredit, debit, credit }] }.
+- `openDebit/openCredit` = from 이전 전표 합계, `debit/credit` = from ~ to 전표 합계. 금액은 문자열(numeric). 계정은 fi_account 전체(0원 포함).
+- 조회 전용. 기간 오류 400 INVALID_REQUEST, 설정 누락 503 LEDGER_UNAVAILABLE.

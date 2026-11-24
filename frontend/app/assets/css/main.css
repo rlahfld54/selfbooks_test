@@ -6848,3 +6848,44 @@ th[data-ui-partner-import-dialog] { position: sticky; top: 0; background: var(--
 
 /* Runtime dimensions: values are supplied through CSS custom properties. */
 col[style] { width: var(--column-width); }
+
+/* 장부 및 재무제표 (재무상태표 · 손익계산서 · 합계잔액시산표) */
+.fs-screen { display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 0; padding: 14px 16px; font-size: 12px; }
+.fs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fs-tabs { display: flex; gap: 4px; }
+.fs-tabs button { padding: 7px 16px; border: 1px solid var(--border); border-radius: 6px 6px 0 0; background: #f5f7fa; color: var(--secondary); font-size: 13px; font-weight: 600; cursor: pointer; }
+.fs-tabs button[aria-selected=true] { background: #fff; color: var(--primary); border-color: var(--primary); }
+.fs-client { color: var(--secondary); font-size: 12px; }
+.fs-filter { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.fs-field { display: inline-flex; align-items: center; gap: 6px; color: var(--secondary); }
+.fs-field input { width: 72px; height: 28px; padding: 0 6px; border: 1px solid var(--border); border-radius: 4px; text-align: right; }
+.fs-field select { height: 28px; padding: 0 4px; border: 1px solid var(--border); border-radius: 4px; }
+.fs-check { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.fs-spacer { flex: 1; }
+.fs-badge { padding: 3px 10px; border: 1px solid #b7dfc6; border-radius: 4px; background: #eef8f2; color: #1f7a45; font-size: 11px; font-weight: 700; }
+.fs-badge.bad { border-color: #f2c4bf; background: #fdf0ee; color: #b42318; }
+.fs-kinds { display: flex; gap: 2px; border-bottom: 1px solid var(--border); }
+.fs-kinds button { padding: 6px 18px; border: 1px solid var(--border); border-bottom: 0; background: #f5f7fa; color: var(--secondary); font-size: 12px; cursor: pointer; }
+.fs-kinds button.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+.fs-kinds button:disabled { opacity: .5; cursor: not-allowed; }
+.fs-message { margin: 0; padding: 8px 12px; border-radius: 6px; background: #f6f9ff; color: var(--secondary); }
+.fs-message.error { background: #fff1f2; color: var(--danger); }
+.fs-sheet { flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--border); background: #fff; }
+.fs-table { width: 100%; min-width: 760px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.fs-table th { position: sticky; z-index: 2; padding: 6px 8px; border: 1px solid #d9dee6; background: #f3f5f8; color: var(--text); font-weight: 600; text-align: center; }
+.fs-table thead tr:first-child th { top: 0; }
+.fs-table thead tr:nth-child(2) th { top: 29px; }
+.fs-table .fs-subject { width: 30%; }
+.fs-table td { height: 26px; padding: 3px 8px; border: 1px solid #e3e7ee; }
+.fs-num { text-align: right; white-space: nowrap; }
+.fs-label { white-space: nowrap; }
+.fs-big td, .fs-sub td { background: #e4f1ec; font-weight: 700; }
+.fs-mid td { background: #f1f8f5; }
+.fs-total td { background: #d7ebe3; font-weight: 700; }
+.fs-note td { color: var(--secondary); }
+.fs-warn td { color: var(--danger); }
+.fs-indent-1 .fs-label { padding-left: 20px; }
+.fs-indent-2 .fs-label { padding-left: 34px; }
+.fs-indent-3 .fs-label { padding-left: 48px; }
+.fs-none { padding: 30px 10px !important; color: var(--secondary); text-align: center; }
+.fs-foot { margin: 0; color: var(--secondary); font-size: 11px; line-height: 1.7; }
