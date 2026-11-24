@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 
   // 개발 도구와 로컬 개발 서버
   devtools: {
-    enabled: true,
+    enabled: false,
   },
 
   devServer: {

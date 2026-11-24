@@ -13,13 +13,23 @@ import {
   type VoucherRow,
   type Column,
 } from './model'
-const props = defineProps<{ rows: VoucherRow[]; mode: Mode; selected: string; checked: string[] }>()
+const props = defineProps<{
+  rows: VoucherRow[]
+  mode: Mode
+  selected: string
+  checked: string[]
+  allChecked: boolean
+  someChecked: boolean
+}>()
+
 const emit = defineEmits<{
   select: [id: string, key: string]
   edit: [id: string, key: keyof VoucherRow, value: string]
   check: [id: string]
   add: []
+  'check-all': [checked: boolean]
 }>()
+
 const cols = computed(() => columns(props.mode))
 function column(name: Column['key']): Column {
   return cols.value.find((col) => col.key === name)!
@@ -206,7 +216,17 @@ async function closeClientSearch(code?: string) {
     <table class="voucher-grid" aria-label="전표 입력 그리드">
       <thead>
         <tr>
-          <th>선택</th>
+          <th class="voucher-select-header">
+            <label class="voucher-select-all">
+              <input
+                type="checkbox"
+                :checked="allChecked"
+                :indeterminate="someChecked"
+                aria-label="조회 결과 전체선택"
+                @change="emit('check-all', ($event.target as HTMLInputElement).checked)" />
+            </label>
+          </th>
+
           <template v-if="mode === 'general'">
             <th>년</th>
             <th>월</th>
@@ -215,9 +235,9 @@ async function closeClientSearch(code?: string) {
             <th>계정코드</th>
             <th>계정과목</th>
             <th>거래처코드</th>
-            <th>거래처명</th>
+            <th style="min-width: 100px">거래처명</th>
             <th>적요코드</th>
-            <th>적요명</th>
+            <th style="min-width: 200px">적요명</th>
             <th class="numeric">차변금액</th>
             <th class="numeric">대변금액</th>
             <th>자료수집</th>
@@ -708,3 +728,8 @@ async function closeClientSearch(code?: string) {
     </datalist>
   </div>
 </template>
+<style scoped>
+.voucher-grid th {
+  text-align: center;
+}
+</style>

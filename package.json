@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.3",
+    "ag-grid-vue3": "^36.3.0",
     "pinia": "^4.1.0"
   }
 }
