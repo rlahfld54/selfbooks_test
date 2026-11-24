@@ -19,6 +19,8 @@ import { AuthError, type AuthContext } from './services/auth.js'
 import { partnersRoutes } from './routes/partners.js'
 import { createPartnersRepository } from './services/partners-repository.js'
 import { collectionRoutes } from './routes/collection.js'
+import { ledgerRoutes } from './routes/ledger.js'
+import { createLedgerRepository } from './services/ledger-repository.js'
 import { createCollectionRepository } from './services/collection-repository.js'
 
 declare module 'fastify' { interface FastifyRequest { auth: AuthContext | null } }
@@ -86,6 +88,12 @@ export function buildApp(options: { frontendOrigin: string; passwordLogin?: Pass
         return createCollectionRepository(pool, options.fixtures!.officeId, request.auth!.id)
       } : undefined)
     const context = options.fixtures ? createSalesContext(options.fixtures) : undefined
+    // 재무제표 집계 — 매입매출전표와 같은 사업체(개발 · 서버에 정한 사무소 한정)
+    await ledgerRoutes(local, pool && context && options.salesDevelopment && process.env.NODE_ENV !== 'production'
+      ? (request) => {
+        if (request.auth!.officeId !== context.officeId) throw new AuthError(403, 'ACCESS_DENIED', '사무소 접근 권한을 확인하세요.')
+        return createLedgerRepository(pool, context.officeId, context.companyId)
+      } : undefined)
     await salesRoutes(local, pool && context && options.salesDevelopment && process.env.NODE_ENV !== 'production'
       ? (request) => {
         if (request.auth!.officeId !== context.officeId) throw new AuthError(403, 'ACCESS_DENIED', '사무소 접근 권한을 확인하세요.')

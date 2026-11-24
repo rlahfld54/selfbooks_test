@@ -42,6 +42,7 @@ const groups: { title: string; items: { id: TabId; symbol: string }[] }[] = [
       { id: 'collection', symbol: '⇩' },
       { id: 'voucher', symbol: '▥' },
       { id: 'sales-journal', symbol: '▥' },
+      { id: 'reports', symbol: '▤' },
       { id: 'mypage', symbol: '◉' },
       { id: 'clients', symbol: '▤' },
       { id: 'organization', symbol: '▧' },
